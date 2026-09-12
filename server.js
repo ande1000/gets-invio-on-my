@@ -10,7 +10,6 @@ const DB_FILE = path.join(__dirname, 'data.json');
 app.use(cors());
 app.use(express.json());
 
-// Cria o arquivo de dados se não existir
 if (!fs.existsSync(DB_FILE)) {
   fs.writeFileSync(DB_FILE, JSON.stringify([]));
 }
@@ -37,12 +36,34 @@ app.get('/status', (req, res) => {
 
 // POST - recebe os dados do formulário
 app.post('/enviar', (req, res) => {
-  const { nome, whatsapp, idade, interesse } = req.body;
+  const {
+    nome,
+    idade,
+    profissao,
+    signo,
+    estadoCivil,
+    temFilhos,
+    religiao,
+    temVinculo,
+    whatsapp,
+    instagram,
+    endereco,
+    moraOnde,
+    achouSite,
+  } = req.body;
 
-  if (!nome || !whatsapp || !idade || !interesse) {
+  // Campos obrigatórios
+  const obrigatorios = {
+    nome, idade, profissao, signo, estadoCivil, temFilhos,
+    religiao, temVinculo, whatsapp, endereco, moraOnde, achouSite
+  };
+
+  const faltando = Object.keys(obrigatorios).filter(k => !obrigatorios[k]);
+
+  if (faltando.length > 0) {
     return res.status(400).json({
       sucesso: false,
-      erro: 'Todos os campos são obrigatórios.',
+      erro: 'Campos obrigatórios faltando: ' + faltando.join(', '),
     });
   }
 
@@ -50,9 +71,18 @@ app.post('/enviar', (req, res) => {
   const novo = {
     id: Date.now(),
     nome,
-    whatsapp,
     idade,
-    interesse,
+    profissao,
+    signo,
+    estadoCivil,
+    temFilhos,
+    religiao,
+    temVinculo,
+    whatsapp,
+    instagram: instagram || '-',
+    endereco,
+    moraOnde,
+    achouSite,
     recebidoEm: new Date().toISOString(),
   };
 
