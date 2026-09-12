@@ -10,20 +10,13 @@
     body {
       font-family: -apple-system, Arial, sans-serif;
       background: linear-gradient(135deg, #667eea, #764ba2);
-      min-height: 100vh;
-      padding: 20px;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
+      min-height: 100vh; padding: 20px;
+      display: flex; justify-content: center; align-items: flex-start;
     }
     .container {
-      background: #fff;
-      padding: 28px 24px;
-      border-radius: 14px;
+      background: #fff; padding: 28px 24px; border-radius: 14px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-      width: 100%;
-      max-width: 460px;
-      margin: 20px 0;
+      width: 100%; max-width: 460px; margin: 20px 0;
     }
     h1 { font-size: 22px; color: #333; text-align: center; margin-bottom: 6px; }
     .sub { text-align: center; color: #888; font-size: 13px; margin-bottom: 22px; }
@@ -37,9 +30,8 @@
       margin-bottom: 5px; margin-top: 14px; font-weight: 600;
     }
     input, select, textarea {
-      width: 100%; padding: 11px;
-      border: 1px solid #ddd; border-radius: 8px;
-      font-size: 15px; font-family: inherit; background: #fff;
+      width: 100%; padding: 11px; border: 1px solid #ddd;
+      border-radius: 8px; font-size: 15px; font-family: inherit; background: #fff;
     }
     textarea { min-height: 70px; resize: vertical; }
     input:focus, select:focus, textarea:focus { outline: none; border-color: #667eea; }
@@ -50,68 +42,64 @@
     }
     button:hover { background: #5568d3; }
     button:disabled { background: #aaa; }
-    #resultado {
+    .erro {
       margin-top: 16px; padding: 12px; border-radius: 8px;
       font-size: 14px; display: none; text-align: center;
+      background: #ffe6e6; color: #a12d2d; border: 1px solid #e6b3b3;
     }
-    .ok { background: #e6ffe6; color: #2d7a2d; border: 1px solid #b3e6b3; }
-    .erro { background: #ffe6e6; color: #a12d2d; border: 1px solid #e6b3b3; }
 
-    /* Tela de sucesso (amarela) */
+    /* Tela amarela */
     #telaSucesso {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: #FFD400;
-      color: #000;
-      z-index: 9999;
-      justify-content: center;
-      align-items: center;
-      padding: 30px;
-      text-align: center;
-      animation: aparecer .3s ease;
+      display: none; position: fixed; inset: 0;
+      background: #FFD400; color: #000; z-index: 9999;
+      justify-content: center; align-items: center;
+      padding: 30px; text-align: center;
     }
-    @keyframes aparecer {
-      from { opacity: 0; }
-      to   { opacity: 1; }
+    #telaSucesso .icone { font-size: 70px; margin-bottom: 20px; animation: pular 1s infinite; }
+    #telaSucesso h2 { font-size: 34px; font-weight: 900; line-height: 1.2; margin-bottom: 15px; }
+    #telaSucesso p { font-size: 18px; font-weight: 600; }
+
+    /* Tela azul */
+    #telaAzul {
+      display: none; position: fixed; inset: 0;
+      background: #2563eb; color: #fff; z-index: 9999;
+      justify-content: center; align-items: center;
+      padding: 30px; text-align: center;
     }
-    #telaSucesso .conteudo {
-      max-width: 600px;
-    }
-    #telaSucesso .icone {
-      font-size: 70px;
-      margin-bottom: 20px;
-      animation: pular 1s infinite;
-    }
+    #telaAzul .icone { font-size: 70px; margin-bottom: 20px; animation: pular 1s infinite; }
+    #telaAzul h2 { font-size: 34px; font-weight: 900; line-height: 1.2; margin-bottom: 15px; }
+    #telaAzul p { font-size: 18px; font-weight: 600; }
+
     @keyframes pular {
       0%, 100% { transform: translateY(0); }
       50%      { transform: translateY(-12px); }
     }
-    #telaSucesso h2 {
-      font-size: 34px;
-      font-weight: 900;
-      line-height: 1.2;
-      letter-spacing: 1px;
-      margin-bottom: 15px;
-    }
-    #telaSucesso p {
-      font-size: 18px;
-      font-weight: 600;
-    }
+
+    #formulario2 { display: none; }
   </style>
 </head>
 <body>
 
-  <!-- Tela de sucesso -->
+  <!-- TELA AMARELA -->
   <div id="telaSucesso">
-    <div class="conteudo">
+    <div>
       <div class="icone">📨</div>
       <h2>AGORA AGUARDE<br>VAMOS ENTRAR EM CONTATO</h2>
-      <p>Obrigado por preencher o formulário! 💛</p>
+      <p>Aguarde, abrindo próxima etapa...</p>
     </div>
   </div>
 
-  <div class="container">
+  <!-- TELA AZUL -->
+  <div id="telaAzul">
+    <div>
+      <div class="icone">✅</div>
+      <h2>ENVIANDO COM SUCESSO<br>AGUARDE E MUITO OBRIGADO</h2>
+      <p>Você pode fechar esta página agora 💙</p>
+    </div>
+  </div>
+
+  <!-- FORMULÁRIO 1 -->
+  <div class="container" id="formulario1">
     <h1>📋 Formulário Pessoal</h1>
     <p class="sub">Preencha seus dados abaixo</p>
 
@@ -129,61 +117,41 @@
     <label for="signo">Signo *</label>
     <select id="signo">
       <option value="">Selecione...</option>
-      <option value="Áries">Áries</option>
-      <option value="Touro">Touro</option>
-      <option value="Gêmeos">Gêmeos</option>
-      <option value="Câncer">Câncer</option>
-      <option value="Leão">Leão</option>
-      <option value="Virgem">Virgem</option>
-      <option value="Libra">Libra</option>
-      <option value="Escorpião">Escorpião</option>
-      <option value="Sagitário">Sagitário</option>
-      <option value="Capricórnio">Capricórnio</option>
-      <option value="Aquário">Aquário</option>
-      <option value="Peixes">Peixes</option>
+      <option>Áries</option><option>Touro</option><option>Gêmeos</option>
+      <option>Câncer</option><option>Leão</option><option>Virgem</option>
+      <option>Libra</option><option>Escorpião</option><option>Sagitário</option>
+      <option>Capricórnio</option><option>Aquário</option><option>Peixes</option>
     </select>
 
     <label for="estadoCivil">Estado civil *</label>
     <select id="estadoCivil">
       <option value="">Selecione...</option>
-      <option value="Solteiro(a)">Solteiro(a)</option>
-      <option value="Namorando">Namorando</option>
-      <option value="Casado(a)">Casado(a)</option>
-      <option value="Divorciado(a)">Divorciado(a)</option>
-      <option value="Viúvo(a)">Viúvo(a)</option>
-      <option value="Prefiro não dizer">Prefiro não dizer</option>
+      <option>Solteiro(a)</option><option>Namorando</option>
+      <option>Casado(a)</option><option>Divorciado(a)</option>
+      <option>Viúvo(a)</option><option>Prefiro não dizer</option>
     </select>
 
     <label for="temFilhos">Tem filhos? *</label>
     <select id="temFilhos">
       <option value="">Selecione...</option>
-      <option value="Não tenho">Não tenho</option>
-      <option value="1 filho">1 filho</option>
-      <option value="2 filhos">2 filhos</option>
-      <option value="3 filhos">3 filhos</option>
-      <option value="4 ou mais">4 ou mais</option>
+      <option>Não tenho</option><option>1 filho</option>
+      <option>2 filhos</option><option>3 filhos</option><option>4 ou mais</option>
     </select>
 
     <label for="religiao">Qual sua religião? *</label>
     <select id="religiao">
       <option value="">Selecione...</option>
-      <option value="Católica">Católica</option>
-      <option value="Evangélica">Evangélica</option>
-      <option value="Espírita">Espírita</option>
-      <option value="Umbanda/Candomblé">Umbanda/Candomblé</option>
-      <option value="Judaica">Judaica</option>
-      <option value="Islâmica">Islâmica</option>
-      <option value="Budista">Budista</option>
-      <option value="Ateu">Ateu</option>
-      <option value="Prefiro não dizer">Prefiro não dizer</option>
-      <option value="Outra">Outra</option>
+      <option>Católica</option><option>Evangélica</option>
+      <option>Espírita</option><option>Umbanda/Candomblé</option>
+      <option>Judaica</option><option>Islâmica</option>
+      <option>Budista</option><option>Ateu</option>
+      <option>Prefiro não dizer</option><option>Outra</option>
     </select>
 
-    <label for="temVinculo">Tem vínculo com alguma igreja/comunidade? *</label>
+    <label for="temVinculo">Tem vínculo com igreja/comunidade? *</label>
     <select id="temVinculo">
       <option value="">Selecione...</option>
-      <option value="Sim">Sim</option>
-      <option value="Não">Não</option>
+      <option>Sim</option><option>Não</option>
     </select>
 
     <div class="secao">📍 Contato e localização</div>
@@ -206,42 +174,75 @@
     <textarea id="achouSite" placeholder="Escreva sua opinião..."></textarea>
 
     <button id="btn">Enviar</button>
-    <div id="resultado"></div>
+    <div id="resultado" class="erro"></div>
+  </div>
+
+  <!-- FORMULÁRIO 2 (ÚTIL) -->
+  <div class="container" id="formulario2">
+    <h1>📝 Formulário Útil</h1>
+    <p class="sub">Só mais algumas perguntas rápidas</p>
+
+    <label for="sexo">Qual seu sexo? *</label>
+    <select id="sexo">
+      <option value="">Selecione...</option>
+      <option>Masculino</option><option>Feminino</option><option>Outro</option>
+      <option>Prefiro não dizer</option>
+    </select>
+
+    <label for="calmo">Você é calmo(a)? *</label>
+    <select id="calmo">
+      <option value="">Selecione...</option>
+      <option>Sim</option><option>Não</option><option>Às vezes</option>
+    </select>
+
+    <label for="triste">O que te deixa triste? *</label>
+    <textarea id="triste" placeholder="Escreva aqui..."></textarea>
+
+    <label for="apelido">Seu apelido *</label>
+    <input id="apelido" type="text" placeholder="Como te chamam?" />
+
+    <label for="lazer">Qual seu lazer? *</label>
+    <input id="lazer" type="text" placeholder="Ex: Ler, correr, música..." />
+
+    <label for="naoFaria">O que você hoje não faria? *</label>
+    <textarea id="naoFaria" placeholder="Escreva aqui..."></textarea>
+
+    <button id="btn2">Enviar</button>
+    <div id="resultado2" class="erro"></div>
   </div>
 
   <script>
     const API_URL = 'https://gets-invio-on-api.onrender.com';
 
-    const btn = document.getElementById('btn');
-    const resultado = document.getElementById('resultado');
+    const form1 = document.getElementById('formulario1');
+    const form2 = document.getElementById('formulario2');
     const telaSucesso = document.getElementById('telaSucesso');
+    const telaAzul = document.getElementById('telaAzul');
+    const btn = document.getElementById('btn');
+    const btn2 = document.getElementById('btn2');
+    const resultado = document.getElementById('resultado');
+    const resultado2 = document.getElementById('resultado2');
+
+    let idCadastro1 = null;
 
     function pegar(id) { return document.getElementById(id).value.trim(); }
 
+    // -------- 1º FORMULÁRIO --------
     btn.addEventListener('click', async () => {
       const dadosForm = {
-        nome: pegar('nome'),
-        idade: pegar('idade'),
-        profissao: pegar('profissao'),
-        signo: pegar('signo'),
-        estadoCivil: pegar('estadoCivil'),
-        temFilhos: pegar('temFilhos'),
-        religiao: pegar('religiao'),
-        temVinculo: pegar('temVinculo'),
-        whatsapp: pegar('whatsapp'),
-        instagram: pegar('instagram'),
-        endereco: pegar('endereco'),
-        moraOnde: pegar('moraOnde'),
-        achouSite: pegar('achouSite'),
+        nome: pegar('nome'), idade: pegar('idade'), profissao: pegar('profissao'),
+        signo: pegar('signo'), estadoCivil: pegar('estadoCivil'),
+        temFilhos: pegar('temFilhos'), religiao: pegar('religiao'),
+        temVinculo: pegar('temVinculo'), whatsapp: pegar('whatsapp'),
+        instagram: pegar('instagram'), endereco: pegar('endereco'),
+        moraOnde: pegar('moraOnde'), achouSite: pegar('achouSite'),
       };
 
       resultado.style.display = 'none';
 
-      const obrigatorios = ['nome', 'idade', 'profissao', 'signo', 'estadoCivil', 'temFilhos', 'religiao', 'temVinculo', 'whatsapp', 'endereco', 'moraOnde', 'achouSite'];
-      const faltando = obrigatorios.filter(c => !dadosForm[c]);
-
+      const obrig = ['nome','idade','profissao','signo','estadoCivil','temFilhos','religiao','temVinculo','whatsapp','endereco','moraOnde','achouSite'];
+      const faltando = obrig.filter(c => !dadosForm[c]);
       if (faltando.length > 0) {
-        resultado.className = 'erro';
         resultado.textContent = '⚠️ Preencha todos os campos com *';
         resultado.style.display = 'block';
         return;
@@ -259,21 +260,70 @@
         const dados = await r.json();
 
         if (dados.sucesso) {
-          // Mostra a tela amarela de sucesso
+          idCadastro1 = dados.dados.id;
           telaSucesso.style.display = 'flex';
+
+          setTimeout(() => {
+            telaSucesso.style.display = 'none';
+            form1.style.display = 'none';
+            form2.style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }, 5000);
         } else {
-          resultado.className = 'erro';
           resultado.textContent = '❌ ' + (dados.erro || 'Erro.');
           resultado.style.display = 'block';
         }
       } catch (e) {
-        resultado.className = 'erro';
         resultado.textContent = '❌ Erro ao conectar. Tente novamente.';
         resultado.style.display = 'block';
       }
 
       btn.disabled = false;
       btn.textContent = 'Enviar';
+    });
+
+    // -------- 2º FORMULÁRIO --------
+    btn2.addEventListener('click', async () => {
+      const dados2 = {
+        refId: idCadastro1,
+        sexo: pegar('sexo'), calmo: pegar('calmo'), triste: pegar('triste'),
+        apelido: pegar('apelido'), lazer: pegar('lazer'), naoFaria: pegar('naoFaria'),
+      };
+
+      resultado2.style.display = 'none';
+
+      const obrig2 = ['sexo','calmo','triste','apelido','lazer','naoFaria'];
+      const faltando = obrig2.filter(c => !dados2[c]);
+      if (faltando.length > 0) {
+        resultado2.textContent = '⚠️ Preencha todos os campos.';
+        resultado2.style.display = 'block';
+        return;
+      }
+
+      btn2.disabled = true;
+      btn2.textContent = 'Enviando...';
+
+      try {
+        const r = await fetch(API_URL + '/enviar-util', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dados2)
+        });
+        const dados = await r.json();
+
+        if (dados.sucesso) {
+          telaAzul.style.display = 'flex';
+        } else {
+          resultado2.textContent = '❌ ' + (dados.erro || 'Erro.');
+          resultado2.style.display = 'block';
+        }
+      } catch (e) {
+        resultado2.textContent = '❌ Erro ao conectar. Tente novamente.';
+        resultado2.style.display = 'block';
+      }
+
+      btn2.disabled = false;
+      btn2.textContent = 'Enviar';
     });
   </script>
 </body>
