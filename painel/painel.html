@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Controle</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, Arial, sans-serif;
+      background: #f0f2f5; padding: 20px; color: #333;
+    }
+    .header {
+      display: flex; justify-content: space-between;
+      align-items: center; flex-wrap: wrap; gap: 12px;
+      margin-bottom: 20px;
+    }
+    h1 { font-size: 24px; }
+    .status { font-size: 13px; color: #666; }
+    .dot {
+      display: inline-block; width: 9px; height: 9px;
+      border-radius: 50%; background: #2ecc71; margin-right: 6px;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+    .cards { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+    .card {
+      background: #fff; padding: 18px; border-radius: 12px;
+      flex: 1; min-width: 150px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .card .num { font-size: 30px; font-weight: bold; color: #667eea; }
+    .card .lbl { font-size: 12px; color: #888; text-transform: uppercase; margin-top: 4px; }
+
+    .controles { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+    button {
+      padding: 9px 16px; border: none; border-radius: 8px;
+      font-size: 14px; cursor: pointer; font-weight: 600;
+    }
+    .btn-refresh { background: #667eea; color: #fff; }
+    .btn-del-all { background: #e74c3c; color: #fff; }
+    .btn-del { background: #e74c3c; color: #fff; padding: 5px 10px; font-size: 12px; }
+
+    table {
+      width: 100%; border-collapse: collapse; background: #fff;
+      border-radius: 12px; overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    th, td { padding: 12px; text-align: left; font-size: 14px; }
+    th { background: #667eea; color: #fff; font-size: 13px; text-transform: uppercase; }
+    tr:nth-child(even) td { background: #fafafa; }
+    tr:hover td { background: #f0f4ff; }
+
+    .vazio { text-align: center; padding: 40px; color: #999; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>🖥️ Painel de Controle</h1>
+    <div class="status"><span class="dot"></span>Atualiza a cada 5 segundos</div>
+  </div>
+
+  <div class="cards">
+    <div class="card">
+      <div class="num" id="total">0</div>
+      <div class="lbl">Total de cadastros</div>
+    </div>
+    <div class="card">
+      <div class="num" id="hoje">0</div>
+      <div class="lbl">Cadastros hoje</div>
+    </div>
+    <div class="card">
+      <div class="num" id="idade-media">-</div>
+      <div class="lbl">Idade média</div>
+    </div>
+  </div>
+
+  <div class="controles">
+    <button class="btn-refresh" onclick="carregar()">🔄 Atualizar agora</button>
+    <button class="btn-del-all" onclick="apagarTudo()">🗑️ Apagar todos</button>
+  </div>
+
+  <div id="tabela-area"></div>
+
+  <script>
+    // =====================================================
+    // ⚠️ TROQUE AQUI PELA URL QUE O RENDER GERAR
+    // =====================================================
+    const API_URL = 'https://SUA-API.onrender.com';
+
+    async function carregar() {
+      try {
+        const r = await fetch(API_URL + '/dados');
+        const { dados } = await r.json();
+
+        document.getElementById('total').textContent = dados.length;
+
+        const hoje = new Date().toDateString();
+        const doDia = dados.filter(d => new Date(d.recebidoEm).toDateString() === hoje);
+        document.getElementById('hoje').textContent = doDia.length;
+
+        if (dados.length > 0) {
+          const media = dados.reduce((s, d) => s + Number(d.idade || 0), 0) / dados.length;
+          document.getElementById('idade-media').textContent = media.toFixed(1);
+        } else {
+          document.getElementById('idade-media').textContent = '-';
+        }
+
+        renderizar(dados);
+      } catch (e) {
+        document.getElementById('tabela-area').innerHTML =
+          '<div class="vazio">❌ Não consegui carregar. O servidor tá rodando?</div>';
+      }
+    }
+
+    function renderizar(dados) {
+      if (dados.length === 0) {
+        document.getElementById('tabela-area').innerHTML =
+          '<div class="vazio">📭 Nenhum cadastro ainda.</div>';
+        return;
+      }
+
+      const linhas = dados.slice().reverse().map(d => `
+        <tr>
+          <td>${escapeHtml(d.nome)}</td>
+          <td>${escapeHtml(d.whatsapp || '-')}</td>
+          <td>${escapeHtml(String(d.idade || '-'))}</td>
+          <td>${escapeHtml(d.interesse || '-')}</td>
+          <td>${new Date(d.recebidoEm).toLocaleString('pt-BR')}</td>
+          <td><button class="btn-del" onclick="apagar(${d.id})">Excluir</button></td>
+        </tr>
+      `).join('');
+
+      document.getElementById('tabela-area').innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Nome</th><th>WhatsApp</th><th>Idade</th>
+              <th>Interesse</th><th>Recebido em</th><th>Ação</th>
+            </tr>
+          </thead>
+          <tbody>${linhas}</tbody>
+        </table>
+      `;
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+      })[c]);
+    }
+
+    async function apagar(id) {
+      if (!confirm('Apagar esse cadastro?')) return;
+      await fetch(API_URL + '/dados/' + id, { method: 'DELETE' });
+      carregar();
+    }
+
+    async function apagarTudo() {
+      if (!confirm('⚠️ Apagar TODOS os cadastros? Não tem volta!')) return;
+      await fetch(API_URL + '/dados', { method: 'DELETE' });
+      carregar();
+    }
+
+    carregar();
+    setInterval(carregar, 5000);
+  </script>
+</body>
+</html>

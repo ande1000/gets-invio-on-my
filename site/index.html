@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, Arial, sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: #fff;
+      padding: 28px 24px;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      width: 100%;
+      max-width: 420px;
+    }
+    h1 { font-size: 22px; color: #333; text-align: center; margin-bottom: 6px; }
+    .sub { text-align: center; color: #888; font-size: 13px; margin-bottom: 22px; }
+    label {
+      display: block; font-size: 13px; color: #444;
+      margin-bottom: 5px; margin-top: 14px; font-weight: 600;
+    }
+    input, select {
+      width: 100%; padding: 11px;
+      border: 1px solid #ddd; border-radius: 8px;
+      font-size: 15px; font-family: inherit; background: #fff;
+    }
+    input:focus, select:focus { outline: none; border-color: #667eea; }
+    button {
+      width: 100%; padding: 13px; background: #667eea; color: #fff;
+      border: none; border-radius: 8px; font-size: 16px;
+      font-weight: bold; cursor: pointer; margin-top: 22px;
+    }
+    button:hover { background: #5568d3; }
+    button:disabled { background: #aaa; }
+    #resultado {
+      margin-top: 16px; padding: 12px; border-radius: 8px;
+      font-size: 14px; display: none; text-align: center;
+    }
+    .ok { background: #e6ffe6; color: #2d7a2d; border: 1px solid #b3e6b3; }
+    .erro { background: #ffe6e6; color: #a12d2d; border: 1px solid #e6b3b3; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📋 Formulário de Cadastro</h1>
+    <p class="sub">Preencha seus dados abaixo</p>
+
+    <label for="nome">Nome completo</label>
+    <input id="nome" type="text" placeholder="Ex: João Silva" />
+
+    <label for="whatsapp">WhatsApp</label>
+    <input id="whatsapp" type="tel" placeholder="Ex: (11) 99999-9999" />
+
+    <label for="idade">Idade</label>
+    <input id="idade" type="number" placeholder="Ex: 25" min="1" max="120" />
+
+    <label for="interesse">Interesse</label>
+    <select id="interesse">
+      <option value="">Selecione...</option>
+      <option value="Produto A">Produto A</option>
+      <option value="Produto B">Produto B</option>
+      <option value="Serviço X">Serviço X</option>
+      <option value="Serviço Y">Serviço Y</option>
+      <option value="Outro">Outro</option>
+    </select>
+
+    <button id="btn">Enviar Cadastro</button>
+    <div id="resultado"></div>
+  </div>
+
+  <script>
+    // =====================================================
+    // ⚠️ TROQUE AQUI PELA URL QUE O RENDER GERAR
+    // =====================================================
+    const API_URL = 'https://SUA-API.onrender.com';
+
+    const btn = document.getElementById('btn');
+    const resultado = document.getElementById('resultado');
+
+    btn.addEventListener('click', async () => {
+      const nome = document.getElementById('nome').value.trim();
+      const whatsapp = document.getElementById('whatsapp').value.trim();
+      const idade = document.getElementById('idade').value.trim();
+      const interesse = document.getElementById('interesse').value;
+
+      resultado.style.display = 'none';
+
+      if (!nome || !whatsapp || !idade || !interesse) {
+        resultado.className = 'erro';
+        resultado.textContent = '⚠️ Preencha todos os campos.';
+        resultado.style.display = 'block';
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Enviando...';
+
+      try {
+        const r = await fetch(API_URL + '/enviar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ nome, whatsapp, idade, interesse })
+        });
+        const dados = await r.json();
+
+        if (dados.sucesso) {
+          resultado.className = 'ok';
+          resultado.textContent = '✅ Cadastro enviado com sucesso!';
+          document.getElementById('nome').value = '';
+          document.getElementById('whatsapp').value = '';
+          document.getElementById('idade').value = '';
+          document.getElementById('interesse').value = '';
+        } else {
+          resultado.className = 'erro';
+          resultado.textContent = '❌ ' + (dados.erro || 'Erro.');
+        }
+      } catch (e) {
+        resultado.className = 'erro';
+        resultado.textContent = '❌ Erro ao conectar. Tente novamente.';
+      }
+
+      resultado.style.display = 'block';
+      btn.disabled = false;
+      btn.textContent = 'Enviar Cadastro';
+    });
+  </script>
+</body>
+</html>
