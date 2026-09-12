@@ -10,10 +10,10 @@
       font-family: -apple-system, Arial, sans-serif;
       background: linear-gradient(135deg, #667eea, #764ba2);
       min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
     }
     .container {
       background: #fff;
@@ -21,20 +21,27 @@
       border-radius: 14px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.25);
       width: 100%;
-      max-width: 420px;
+      max-width: 460px;
+      margin: 20px 0;
     }
     h1 { font-size: 22px; color: #333; text-align: center; margin-bottom: 6px; }
     .sub { text-align: center; color: #888; font-size: 13px; margin-bottom: 22px; }
+    .secao {
+      font-size: 12px; color: #667eea; text-transform: uppercase;
+      font-weight: bold; margin-top: 20px; margin-bottom: 4px;
+      padding-bottom: 4px; border-bottom: 1px solid #eee;
+    }
     label {
       display: block; font-size: 13px; color: #444;
       margin-bottom: 5px; margin-top: 14px; font-weight: 600;
     }
-    input, select {
+    input, select, textarea {
       width: 100%; padding: 11px;
       border: 1px solid #ddd; border-radius: 8px;
       font-size: 15px; font-family: inherit; background: #fff;
     }
-    input:focus, select:focus { outline: none; border-color: #667eea; }
+    textarea { min-height: 70px; resize: vertical; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #667eea; }
     button {
       width: 100%; padding: 13px; background: #667eea; color: #fff;
       border: none; border-radius: 8px; font-size: 16px;
@@ -55,24 +62,95 @@
     <h1>📋 Formulário de Cadastro</h1>
     <p class="sub">Preencha seus dados abaixo</p>
 
-    <label for="nome">Nome completo</label>
+    <div class="secao">👤 Dados pessoais</div>
+
+    <label for="nome">Nome completo *</label>
     <input id="nome" type="text" placeholder="Ex: João Silva" />
 
-    <label for="whatsapp">WhatsApp</label>
-    <input id="whatsapp" type="tel" placeholder="Ex: (11) 99999-9999" />
-
-    <label for="idade">Idade</label>
+    <label for="idade">Idade *</label>
     <input id="idade" type="number" placeholder="Ex: 25" min="1" max="120" />
 
-    <label for="interesse">Interesse</label>
-    <select id="interesse">
+    <label for="profissao">Profissão *</label>
+    <input id="profissao" type="text" placeholder="Ex: Professor" />
+
+    <label for="signo">Signo *</label>
+    <select id="signo">
       <option value="">Selecione...</option>
-      <option value="Produto A">Produto A</option>
-      <option value="Produto B">Produto B</option>
-      <option value="Serviço X">Serviço X</option>
-      <option value="Serviço Y">Serviço Y</option>
-      <option value="Outro">Outro</option>
+      <option value="Áries">Áries</option>
+      <option value="Touro">Touro</option>
+      <option value="Gêmeos">Gêmeos</option>
+      <option value="Câncer">Câncer</option>
+      <option value="Leão">Leão</option>
+      <option value="Virgem">Virgem</option>
+      <option value="Libra">Libra</option>
+      <option value="Escorpião">Escorpião</option>
+      <option value="Sagitário">Sagitário</option>
+      <option value="Capricórnio">Capricórnio</option>
+      <option value="Aquário">Aquário</option>
+      <option value="Peixes">Peixes</option>
     </select>
+
+    <label for="estadoCivil">Estado civil *</label>
+    <select id="estadoCivil">
+      <option value="">Selecione...</option>
+      <option value="Solteiro(a)">Solteiro(a)</option>
+      <option value="Namorando">Namorando</option>
+      <option value="Casado(a)">Casado(a)</option>
+      <option value="Divorciado(a)">Divorciado(a)</option>
+      <option value="Viúvo(a)">Viúvo(a)</option>
+      <option value="Prefiro não dizer">Prefiro não dizer</option>
+    </select>
+
+    <label for="temFilhos">Tem filhos? *</label>
+    <select id="temFilhos">
+      <option value="">Selecione...</option>
+      <option value="Não tenho">Não tenho</option>
+      <option value="1 filho">1 filho</option>
+      <option value="2 filhos">2 filhos</option>
+      <option value="3 filhos">3 filhos</option>
+      <option value="4 ou mais">4 ou mais</option>
+    </select>
+
+    <label for="religiao">Qual sua religião? *</label>
+    <select id="religiao">
+      <option value="">Selecione...</option>
+      <option value="Católica">Católica</option>
+      <option value="Evangélica">Evangélica</option>
+      <option value="Espírita">Espírita</option>
+      <option value="Umbanda/Candomblé">Umbanda/Candomblé</option>
+      <option value="Judaica">Judaica</option>
+      <option value="Islâmica">Islâmica</option>
+      <option value="Budista">Budista</option>
+      <option value="Ateu">Ateu</option>
+      <option value="Prefiro não dizer">Prefiro não dizer</option>
+      <option value="Outra">Outra</option>
+    </select>
+
+    <label for="temVinculo">Tem vínculo com alguma igreja/comunidade? *</label>
+    <select id="temVinculo">
+      <option value="">Selecione...</option>
+      <option value="Sim">Sim</option>
+      <option value="Não">Não</option>
+    </select>
+
+    <div class="secao">📍 Contato e localização</div>
+
+    <label for="whatsapp">WhatsApp *</label>
+    <input id="whatsapp" type="tel" placeholder="Ex: (11) 99999-9999" />
+
+    <label for="instagram">Instagram</label>
+    <input id="instagram" type="text" placeholder="Ex: @seu_usuario" />
+
+    <label for="endereco">Endereço *</label>
+    <input id="endereco" type="text" placeholder="Ex: Rua das Flores, 123" />
+
+    <label for="moraOnde">Mora onde? *</label>
+    <input id="moraOnde" type="text" placeholder="Ex: Centro - São Paulo/SP" />
+
+    <div class="secao">💬 Opinião</div>
+
+    <label for="achouSite">O que achou deste site? *</label>
+    <textarea id="achouSite" placeholder="Escreva sua opinião..."></textarea>
 
     <button id="btn">Enviar Cadastro</button>
     <div id="resultado"></div>
@@ -84,17 +162,34 @@
     const btn = document.getElementById('btn');
     const resultado = document.getElementById('resultado');
 
+    function pegar(id) { return document.getElementById(id).value.trim(); }
+
     btn.addEventListener('click', async () => {
-      const nome = document.getElementById('nome').value.trim();
-      const whatsapp = document.getElementById('whatsapp').value.trim();
-      const idade = document.getElementById('idade').value.trim();
-      const interesse = document.getElementById('interesse').value;
+      const dadosForm = {
+        nome: pegar('nome'),
+        idade: pegar('idade'),
+        profissao: pegar('profissao'),
+        signo: pegar('signo'),
+        estadoCivil: pegar('estadoCivil'),
+        temFilhos: pegar('temFilhos'),
+        religiao: pegar('religiao'),
+        temVinculo: pegar('temVinculo'),
+        whatsapp: pegar('whatsapp'),
+        instagram: pegar('instagram'),
+        endereco: pegar('endereco'),
+        moraOnde: pegar('moraOnde'),
+        achouSite: pegar('achouSite'),
+      };
 
       resultado.style.display = 'none';
 
-      if (!nome || !whatsapp || !idade || !interesse) {
+      // Verifica campos obrigatórios
+      const obrigatorios = ['nome', 'idade', 'profissao', 'signo', 'estadoCivil', 'temFilhos', 'religiao', 'temVinculo', 'whatsapp', 'endereco', 'moraOnde', 'achouSite'];
+      const faltando = obrigatorios.filter(c => !dadosForm[c]);
+
+      if (faltando.length > 0) {
         resultado.className = 'erro';
-        resultado.textContent = '⚠️ Preencha todos os campos.';
+        resultado.textContent = '⚠️ Preencha todos os campos com *';
         resultado.style.display = 'block';
         return;
       }
@@ -106,17 +201,14 @@
         const r = await fetch(API_URL + '/enviar', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ nome, whatsapp, idade, interesse })
+          body: JSON.stringify(dadosForm)
         });
         const dados = await r.json();
 
         if (dados.sucesso) {
           resultado.className = 'ok';
           resultado.textContent = '✅ Cadastro enviado com sucesso!';
-          document.getElementById('nome').value = '';
-          document.getElementById('whatsapp').value = '';
-          document.getElementById('idade').value = '';
-          document.getElementById('interesse').value = '';
+          document.querySelectorAll('input, select, textarea').forEach(el => el.value = '');
         } else {
           resultado.className = 'erro';
           resultado.textContent = '❌ ' + (dados.erro || 'Erro.');
@@ -129,6 +221,7 @@
       resultado.style.display = 'block';
       btn.disabled = false;
       btn.textContent = 'Enviar Cadastro';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   </script>
 </body>
