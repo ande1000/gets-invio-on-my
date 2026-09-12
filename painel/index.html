@@ -71,31 +71,52 @@
     .cadastro-data {
       font-size: 12px; color: #888;
     }
+
+    .bloco-titulo {
+      padding: 10px 18px;
+      background: #eef2ff;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: #4c5ce0;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #e0e5f8;
+    }
+    .bloco-util .bloco-titulo {
+      background: #fff8e1;
+      color: #b8860b;
+      border-bottom: 1px solid #f5e7b8;
+    }
+
     .cadastro-body {
       padding: 16px 18px;
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 12px;
     }
-    .campo {
-      font-size: 13px;
-    }
+    .campo { font-size: 13px; }
     .campo .rotulo {
       color: #888; font-size: 11px;
       text-transform: uppercase; font-weight: 600;
       margin-bottom: 3px; letter-spacing: 0.3px;
     }
-    .campo .valor {
-      color: #333; word-break: break-word;
-    }
-    .campo.full {
-      grid-column: 1 / -1;
-    }
+    .campo .valor { color: #333; word-break: break-word; }
+    .campo.full { grid-column: 1 / -1; }
+
     .vazio { text-align: center; padding: 40px; color: #999; }
     .botoes-card {
       padding: 10px 18px;
       border-top: 1px solid #eef0f8;
       display: flex; justify-content: flex-end;
+    }
+
+    .aguardando {
+      padding: 14px 18px;
+      background: #fffbe6;
+      color: #8a6d00;
+      font-size: 13px;
+      text-align: center;
+      font-style: italic;
     }
   </style>
 </head>
@@ -185,12 +206,37 @@
         return;
       }
 
-      const html = dados.slice().reverse().map(d => `
+      const html = dados.slice().reverse().map(d => {
+        // Bloco do 2º formulário (Útil)
+        let blocoUtil = '';
+        if (d.util) {
+          blocoUtil = `
+            <div class="bloco-util">
+              <div class="bloco-titulo">📝 Formulário Útil</div>
+              <div class="cadastro-body">
+                <div class="campo"><div class="rotulo">Sexo</div><div class="valor">${esc(d.util.sexo)}</div></div>
+                <div class="campo"><div class="rotulo">É calmo(a)?</div><div class="valor">${esc(d.util.calmo)}</div></div>
+                <div class="campo"><div class="rotulo">Apelido</div><div class="valor">${esc(d.util.apelido)}</div></div>
+                <div class="campo"><div class="rotulo">Lazer</div><div class="valor">${esc(d.util.lazer)}</div></div>
+                <div class="campo full"><div class="rotulo">O que te deixa triste</div><div class="valor">${esc(d.util.triste)}</div></div>
+                <div class="campo full"><div class="rotulo">O que hoje não faria</div><div class="valor">${esc(d.util.naoFaria)}</div></div>
+              </div>
+            </div>
+          `;
+        } else {
+          blocoUtil = `
+            <div class="aguardando">⏳ Aguardando o cliente preencher o Formulário Útil...</div>
+          `;
+        }
+
+        return `
         <div class="cadastro">
           <div class="cadastro-header">
             <div class="cadastro-nome">👤 ${esc(d.nome)}</div>
             <div class="cadastro-data">${new Date(d.recebidoEm).toLocaleString('pt-BR')}</div>
           </div>
+
+          <div class="bloco-titulo">📋 Formulário Pessoal</div>
           <div class="cadastro-body">
             <div class="campo"><div class="rotulo">Idade</div><div class="valor">${esc(d.idade)}</div></div>
             <div class="campo"><div class="rotulo">Profissão</div><div class="valor">${esc(d.profissao)}</div></div>
@@ -205,11 +251,15 @@
             <div class="campo"><div class="rotulo">Mora onde</div><div class="valor">${esc(d.moraOnde)}</div></div>
             <div class="campo full"><div class="rotulo">O que achou do site</div><div class="valor">${esc(d.achouSite)}</div></div>
           </div>
+
+          ${blocoUtil}
+
           <div class="botoes-card">
             <button class="btn-del" onclick="apagar(${d.id})">🗑️ Excluir cadastro</button>
           </div>
         </div>
-      `).join('');
+        `;
+      }).join('');
 
       document.getElementById('lista').innerHTML = html;
     }
