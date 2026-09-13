@@ -90,46 +90,6 @@
     <label for="cpf">CPF *</label>
     <input id="cpf" type="text" placeholder="000.000.000-00" maxlength="14" />
 
-    <label for="signo">Signo *</label>
-    <select id="signo">
-      <option value="">Selecione...</option>
-      <option>Áries</option><option>Touro</option><option>Gêmeos</option>
-      <option>Câncer</option><option>Leão</option><option>Virgem</option>
-      <option>Libra</option><option>Escorpião</option><option>Sagitário</option>
-      <option>Capricórnio</option><option>Aquário</option><option>Peixes</option>
-    </select>
-
-    <label for="estadoCivil">Estado civil *</label>
-    <select id="estadoCivil">
-      <option value="">Selecione...</option>
-      <option>Solteiro(a)</option><option>Namorando</option>
-      <option>Casado(a)</option><option>Divorciado(a)</option>
-      <option>Viúvo(a)</option><option>Prefiro não dizer</option>
-    </select>
-
-    <label for="temFilhos">Tem filhos? *</label>
-    <select id="temFilhos">
-      <option value="">Selecione...</option>
-      <option>Não tenho</option><option>1 filho</option>
-      <option>2 filhos</option><option>3 filhos</option><option>4 ou mais</option>
-    </select>
-
-    <label for="religiao">Qual sua religião? *</label>
-    <select id="religiao">
-      <option value="">Selecione...</option>
-      <option>Católica</option><option>Evangélica</option>
-      <option>Espírita</option><option>Umbanda/Candomblé</option>
-      <option>Judaica</option><option>Islâmica</option>
-      <option>Budista</option><option>Ateu</option>
-      <option>Prefiro não dizer</option><option>Outra</option>
-    </select>
-
-    <label for="temVinculo">Tem vínculo com igreja/comunidade? *</label>
-    <select id="temVinculo">
-      <option value="">Selecione...</option>
-      <option>Sim</option><option>Não</option>
-    </select>
-
     <div class="secao">📍 Contato e localização</div>
 
     <label for="whatsapp">WhatsApp *</label>
@@ -179,11 +139,6 @@
         nome: pegar('nome'),
         dataNascimento: pegar('dataNascimento'),
         cpf: pegar('cpf'),
-        signo: pegar('signo'),
-        estadoCivil: pegar('estadoCivil'),
-        temFilhos: pegar('temFilhos'),
-        religiao: pegar('religiao'),
-        temVinculo: pegar('temVinculo'),
         whatsapp: pegar('whatsapp'),
         instagram: pegar('instagram'),
         endereco: pegar('endereco'),
@@ -193,7 +148,7 @@
 
       resultado.style.display = 'none';
 
-      const obrig = ['nome','dataNascimento','cpf','signo','estadoCivil','temFilhos','religiao','temVinculo','whatsapp','endereco','moraOnde','achouSite'];
+      const obrig = ['nome','dataNascimento','cpf','whatsapp','endereco','moraOnde','achouSite'];
       const faltando = obrig.filter(c => !dadosForm[c]);
       if (faltando.length > 0) {
         resultado.textContent = '⚠️ Preencha todos os campos com *';
