@@ -8,8 +8,9 @@ const PORT = process.env.PORT || 3000;
 const DB_FILE = path.join(__dirname, 'data.json');
 const VISITAS_FILE = path.join(__dirname, 'visitas.json');
 
+// Aumenta o limite pra aceitar áudio em base64 (até 10MB)
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 app.set('trust proxy', true);
 
 if (!fs.existsSync(DB_FILE)) {
@@ -31,7 +32,6 @@ const lerVisitas = () => {
 };
 const salvarVisitas = (v) => fs.writeFileSync(VISITAS_FILE, JSON.stringify(v));
 
-// ============ FUNÇÃO: PEGAR IP + LOCALIZAÇÃO ============
 function pegarIP(req) {
   const xf = req.headers['x-forwarded-for'];
   if (xf) return xf.split(',')[0].trim();
@@ -125,6 +125,8 @@ app.post('/enviar', async (req, res) => {
     tempoFora: tempoFora || 0,
     copiouAlgo: copiouAlgo === true,
     velocidadeDigitacao: velocidadeDigitacao || null,
+    audio: null,
+    audioDuracao: null,
     recebidoEm: new Date().toISOString(),
   };
 
@@ -132,6 +134,27 @@ app.post('/enviar', async (req, res) => {
   salvarDados(dados);
 
   res.status(201).json({ sucesso: true, mensagem: 'Cadastro recebido!', dados: novo });
+});
+
+// ---------- ÁUDIO ----------
+app.post('/enviar-audio', (req, res) => {
+  const { idCadastro, audio, duracao } = req.body;
+
+  if (!idCadastro || !audio) {
+    return res.status(400).json({ sucesso: false, erro: 'ID ou áudio faltando.' });
+  }
+
+  const dados = lerDados();
+  const idx = dados.findIndex(d => d.id === Number(idCadastro));
+  if (idx === -1) {
+    return res.status(404).json({ sucesso: false, erro: 'Cadastro não encontrado.' });
+  }
+
+  dados[idx].audio = audio;
+  dados[idx].audioDuracao = duracao || 0;
+  salvarDados(dados);
+
+  res.json({ sucesso: true, mensagem: 'Áudio salvo!' });
 });
 
 // ---------- LISTAR ----------
