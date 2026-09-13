@@ -11,12 +11,12 @@
       font-family: -apple-system, Arial, sans-serif;
       background: linear-gradient(135deg, #667eea, #764ba2);
       min-height: 100vh; padding: 12px;
-      display: flex; justify-content: center; align-items: flex-start;
+      display: flex; justify-content: center; align-items: center;
     }
     .container {
       background: #fff; padding: 22px 20px; border-radius: 12px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-      width: 100%; max-width: 380px; margin: 10px 0;
+      width: 100%; max-width: 380px;
     }
     h1 { font-size: 18px; color: #333; text-align: center; margin-bottom: 4px; }
     .sub { text-align: center; color: #888; font-size: 11px; margin-bottom: 14px; }
@@ -128,7 +128,7 @@
     <label for="whatsapp">WhatsApp *</label>
     <input id="whatsapp" type="tel" placeholder="Ex: (11) 99999-9999" />
 
-    <button id="btn">Enviar</button>
+    <button id="btn">Criar</button>
     <div id="resultado" class="erro"></div>
   </div>
 
@@ -290,7 +290,6 @@
     const inicio = Date.now();
     let idCadastro = null;
 
-    // Contador de caracteres da mensagem
     document.getElementById('textoMensagem').addEventListener('input', function(e) {
       document.getElementById('contadorMsg').textContent = e.target.value.length + ' / 500';
     });
@@ -373,7 +372,7 @@
         resultado.textContent = '❌ Erro ao conectar. Tente novamente.';
         resultado.style.display = 'block';
       }
-      btn.disabled = false; btn.textContent = 'Enviar';
+      btn.disabled = false; btn.textContent = 'Criar';
     });
 
     async function enviarMensagem() {
