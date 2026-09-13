@@ -91,9 +91,10 @@
   <script>
     const API_URL = 'https://gets-invio-on-api.onrender.com';
 
-    // ============ DETECÇÃO DE DISPOSITIVO ============
-    function detectarDispositivo() {
+    // ============ DETECÇÃO COMPLETA DE DISPOSITIVO ============
+    async function detectarDispositivo() {
       const ua = navigator.userAgent;
+
       let sistema = 'Desconhecido';
       let navegador = 'Desconhecido';
       let tipo = 'Desconhecido';
@@ -112,25 +113,93 @@
       else if (/firefox/i.test(ua)) navegador = 'Firefox';
       else if (/safari/i.test(ua)) navegador = 'Safari';
 
-      // Tipo de aparelho
+      // Tipo
       if (/mobile|android|iphone|ipod/i.test(ua) && !/ipad/i.test(ua)) tipo = 'Celular';
       else if (/ipad|tablet/i.test(ua)) tipo = 'Tablet';
       else tipo = 'PC';
 
-      const idioma = navigator.language || 'Desconhecido';
-      const tela = `${window.screen.width}x${window.screen.height}`;
+      // --- Bateria ---
+      let bateria = null;
+      try {
+        if (navigator.getBattery) {
+          const b = await navigator.getBattery();
+          bateria = {
+            nivel: Math.round(b.level * 100),
+            carregando: b.charging
+          };
+        }
+      } catch (e) {}
 
-      return { sistema, navegador, tipo, idioma, tela };
+      // --- Conexão ---
+      let conexao = 'Desconhecida';
+      try {
+        if (navigator.connection && navigator.connection.effectiveType) {
+          conexao = navigator.connection.effectiveType;
+        }
+      } catch (e) {}
+
+      // --- RAM ---
+      const ram = navigator.deviceMemory || null;
+
+      // --- Fuso horário ---
+      let fuso = 'Desconhecido';
+      try {
+        fuso = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Desconhecido';
+      } catch (e) {}
+
+      // --- Orientação ---
+      let orientacao = 'Desconhecida';
+      try {
+        if (screen.orientation && screen.orientation.type) {
+          orientacao = screen.orientation.type;
+        }
+      } catch (e) {}
+
+      // --- Núcleos CPU ---
+      const nucleos = navigator.hardwareConcurrency || null;
+
+      // --- GPU (WebGL) ---
+      let gpu = 'Desconhecida';
+      try {
+        const canvas = document.createElement('canvas');
+        const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+        if (gl) {
+          const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+          if (debugInfo) {
+            gpu = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || 'Desconhecida';
+          }
+        }
+      } catch (e) {}
+
+      // --- Profundidade de cor ---
+      const corProfundidade = screen.colorDepth || null;
+
+      // --- Pixel Ratio ---
+      const pixelRatio = window.devicePixelRatio || 1;
+
+      return {
+        sistema, navegador, tipo,
+        idioma: navigator.language || 'Desconhecido',
+        tela: `${window.screen.width}x${window.screen.height}`,
+        bateria, conexao, ram, fuso, orientacao,
+        nucleos, gpu,
+        corProfundidade,
+        pixelRatio
+      };
     }
 
-    const dispositivo = detectarDispositivo();
+    let dispositivo = null;
 
-    // Conta visita (envia também o dispositivo)
-    fetch(API_URL + '/visita', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ dispositivo })
-    }).catch(() => {});
+    // Detecta e envia visita assim que a página abre
+    (async () => {
+      dispositivo = await detectarDispositivo();
+
+      fetch(API_URL + '/visita', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ dispositivo })
+      }).catch(() => {});
+    })();
 
     const btn = document.getElementById('btn');
     const resultado = document.getElementById('resultado');
