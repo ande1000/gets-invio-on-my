@@ -9,11 +9,8 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Consolas', 'Courier New', monospace;
-      background: #000;
-      color: #00ff41;
-      padding: 20px;
-      min-height: 100vh;
-      text-shadow: 0 0 5px rgba(0,255,65,0.7);
+      background: #000; color: #00ff41; padding: 20px;
+      min-height: 100vh; text-shadow: 0 0 5px rgba(0,255,65,0.7);
     }
     .terminal-bar {
       background: #0a0a0a; border: 1px solid #00ff41;
@@ -40,6 +37,26 @@
     h1::after { content: '_'; animation: blink 1s infinite; }
     @keyframes blink { 0%,50%{opacity:1;} 51%,100%{opacity:0;} }
     .status { font-size: 13px; color: #00ff41; letter-spacing: 1px; }
+
+    /* Botão de som */
+    #btnSom {
+      padding: 8px 14px; border: 1px solid #ffc800;
+      background: transparent; color: #ffc800;
+      border-radius: 4px; font-size: 12px; cursor: pointer;
+      font-weight: 600; font-family: inherit; letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+    #btnSom:hover { background: #ffc800; color: #000; box-shadow: 0 0 15px #ffc800; }
+    #btnSom.ativo {
+      background: #ffc800; color: #000;
+      box-shadow: 0 0 15px #ffc800;
+      animation: pulseSom 2s infinite;
+    }
+    @keyframes pulseSom {
+      0%,100% { box-shadow: 0 0 15px #ffc800; }
+      50%     { box-shadow: 0 0 25px #ffc800, 0 0 35px #ffc800; }
+    }
+
     .dot {
       display: inline-block; width: 9px; height: 9px;
       border-radius: 50%; background: #00ff41; margin-right: 6px;
@@ -47,6 +64,7 @@
       animation: pulse 1.5s infinite;
     }
     @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
     .cards-top { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
     .card-top {
       background: #050505; border: 1px solid #00ff41;
@@ -54,6 +72,7 @@
       flex: 1; min-width: 150px;
       box-shadow: 0 0 15px rgba(0,255,65,0.2);
       position: relative; overflow: hidden;
+      transition: all 0.3s;
     }
     .card-top::before {
       content: ''; position: absolute; top: 0; left: 0;
@@ -62,8 +81,22 @@
       animation: scan 3s linear infinite;
     }
     @keyframes scan { 0%{transform:translateX(-100%);} 100%{transform:translateX(100%);} }
+
+    /* Efeito de "piscar" quando chega notificação */
+    .card-top.flash {
+      animation: flashCard 1s ease;
+    }
+    @keyframes flashCard {
+      0%   { background: #050505; box-shadow: 0 0 15px rgba(0,255,65,0.2); transform: scale(1); }
+      30%  { background: #00ff41; box-shadow: 0 0 40px #00ff41, 0 0 60px #00ff41; transform: scale(1.05); }
+      100% { background: #050505; box-shadow: 0 0 15px rgba(0,255,65,0.2); transform: scale(1); }
+    }
+    .card-top.flash .num,
+    .card-top.flash .lbl { color: #000; }
+
     .card-top .num { font-size: 32px; font-weight: bold; color: #00ff41; text-shadow: 0 0 10px #00ff41; }
     .card-top .lbl { font-size: 11px; color: #00aa2b; text-transform: uppercase; margin-top: 6px; letter-spacing: 1.5px; }
+
     .controles { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
     button {
       padding: 9px 16px; border: 1px solid #00ff41;
@@ -91,7 +124,17 @@
       background: #050505; border: 1px solid #00ff41;
       border-radius: 6px; overflow: hidden;
       box-shadow: 0 0 15px rgba(0,255,65,0.15);
+      transition: all 0.3s;
     }
+    .cadastro.novo {
+      animation: flashCadastro 2s ease;
+    }
+    @keyframes flashCadastro {
+      0%   { border-color: #00ff41; box-shadow: 0 0 15px rgba(0,255,65,0.15); }
+      20%  { border-color: #ffc800; box-shadow: 0 0 40px #ffc800, 0 0 60px rgba(255,200,0,0.5); }
+      100% { border-color: #00ff41; box-shadow: 0 0 15px rgba(0,255,65,0.15); }
+    }
+
     .cadastro-header {
       display: flex; justify-content: space-between;
       align-items: center; gap: 10px;
@@ -149,6 +192,39 @@
       padding: 10px 18px; border-top: 1px solid #00ff41;
       display: flex; justify-content: flex-end;
     }
+
+    /* Aviso de notificação (aparece no topo) */
+    #avisoTopo {
+      display: none;
+      position: fixed;
+      top: 20px; left: 50%;
+      transform: translateX(-50%);
+      padding: 15px 30px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      z-index: 9999;
+      text-transform: uppercase;
+      animation: slideDown 0.4s ease;
+      box-shadow: 0 0 30px currentColor;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translate(-50%, -30px); }
+      to   { opacity: 1; transform: translate(-50%, 0); }
+    }
+    #avisoTopo.aviso-clique {
+      background: #00ff41;
+      color: #000;
+      border: 2px solid #00ff41;
+    }
+    #avisoTopo.aviso-cadastro {
+      background: #ffc800;
+      color: #000;
+      border: 2px solid #ffc800;
+      font-size: 20px;
+    }
+
     ::-webkit-scrollbar { width: 10px; height: 10px; }
     ::-webkit-scrollbar-track { background: #000; }
     ::-webkit-scrollbar-thumb { background: #00aa2b; border-radius: 5px; }
@@ -156,6 +232,9 @@
   </style>
 </head>
 <body>
+
+  <!-- Aviso que aparece no topo -->
+  <div id="avisoTopo"></div>
 
   <div class="terminal-bar">
     <span class="dot-vermelho"></span>
@@ -166,23 +245,26 @@
 
   <div class="header">
     <h1>Painel Hacker</h1>
-    <div class="status"><span class="dot"></span>SYSTEM ONLINE // AUTO-REFRESH 5s</div>
+    <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+      <button id="btnSom" onclick="ativarSom()">[ 🔇 ATIVAR SOM ]</button>
+      <div class="status"><span class="dot"></span>SYSTEM ONLINE // AUTO-REFRESH 5s</div>
+    </div>
   </div>
 
   <div class="cards-top">
-    <div class="card-top">
+    <div class="card-top" id="cardVisitas">
       <div class="num" id="total-visitas">0</div>
       <div class="lbl">Cliques</div>
     </div>
-    <div class="card-top">
+    <div class="card-top" id="cardVisitasHoje">
       <div class="num" id="visitas-hoje">0</div>
       <div class="lbl">Cliques hoje</div>
     </div>
-    <div class="card-top">
+    <div class="card-top" id="cardTotal">
       <div class="num" id="total">0</div>
       <div class="lbl">Total de cadastros</div>
     </div>
-    <div class="card-top">
+    <div class="card-top" id="cardHoje">
       <div class="num" id="hoje">0</div>
       <div class="lbl">Cadastros hoje</div>
     </div>
@@ -201,10 +283,87 @@
     const API_URL = 'https://gets-invio-on-api.onrender.com';
     let todosDados = [];
 
+    // ============ SISTEMA DE SOM ============
+    let audioCtx = null;
+    let somAtivo = false;
+
+    function ativarSom() {
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        somAtivo = true;
+        document.getElementById('btnSom').textContent = '[ 🔊 SOM ATIVO ]';
+        document.getElementById('btnSom').classList.add('ativo');
+        // Toca um som de confirmação
+        tocarTom(880, 0.1);
+        setTimeout(() => tocarTom(1100, 0.15), 120);
+      } catch (e) {
+        alert('Seu navegador não suporta áudio!');
+      }
+    }
+
+    function tocarTom(freq, duracao, tipo = 'sine', volume = 0.3) {
+      if (!somAtivo || !audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = tipo;
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duracao);
+      osc.start();
+      osc.stop(audioCtx.currentTime + duracao);
+    }
+
+    // Som 1: Clique no site (dois bipes agudos curtos)
+    function somClique() {
+      tocarTom(1300, 0.1);
+      setTimeout(() => tocarTom(1600, 0.12), 130);
+    }
+
+    // Som 2: Novo cadastro (três bipes crescentes, tipo alarme)
+    function somCadastro() {
+      tocarTom(800, 0.15, 'triangle', 0.4);
+      setTimeout(() => tocarTom(1000, 0.15, 'triangle', 0.4), 180);
+      setTimeout(() => tocarTom(1300, 0.25, 'triangle', 0.4), 360);
+    }
+
+    // ============ AVISO NO TOPO ============
+    function mostrarAviso(texto, tipo) {
+      const el = document.getElementById('avisoTopo');
+      el.textContent = texto;
+      el.className = tipo === 'cadastro' ? 'aviso-cadastro' : 'aviso-clique';
+      el.style.display = 'block';
+      clearTimeout(el._timer);
+      el._timer = setTimeout(() => { el.style.display = 'none'; }, 4000);
+    }
+
+    // ============ FLASH NOS CARDS ============
+    function flashCard(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.classList.add('flash');
+      setTimeout(() => el.classList.remove('flash'), 1000);
+    }
+
+    // ============ DETECTA NOVOS ============
+    let ultimoTotalVisitas = null;
+    let ultimoTotalCadastros = null;
+
+    // ============ CARREGAR VISITAS ============
     async function carregarVisitas() {
       try {
         const r = await fetch(API_URL + '/visitas');
         const { total, hoje } = await r.json();
+
+        // Detecta novo clique
+        if (ultimoTotalVisitas !== null && total > ultimoTotalVisitas) {
+          somClique();
+          flashCard('cardVisitas');
+          mostrarAviso('👆 Novo clique no site!', 'clique');
+        }
+
+        ultimoTotalVisitas = total;
         document.getElementById('total-visitas').textContent = total;
         document.getElementById('visitas-hoje').textContent = hoje;
       } catch (e) {
@@ -213,15 +372,28 @@
       }
     }
 
+    // ============ CARREGAR CADASTROS ============
     async function carregar() {
       try {
         const r = await fetch(API_URL + '/dados');
         const { dados } = await r.json();
         todosDados = dados;
+
+        // Detecta novo cadastro
+        if (ultimoTotalCadastros !== null && dados.length > ultimoTotalCadastros) {
+          somCadastro();
+          flashCard('cardTotal');
+          flashCard('cardHoje');
+          mostrarAviso('🚨 Novo cadastro recebido!', 'cadastro');
+        }
+
+        ultimoTotalCadastros = dados.length;
+
         document.getElementById('total').textContent = dados.length;
         const hoje = new Date().toDateString();
         const doDia = dados.filter(d => new Date(d.recebidoEm).toDateString() === hoje);
         document.getElementById('hoje').textContent = doDia.length;
+
         renderizar(dados);
       } catch (e) {
         document.getElementById('lista').innerHTML =
