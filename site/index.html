@@ -91,7 +91,46 @@
   <script>
     const API_URL = 'https://gets-invio-on-api.onrender.com';
 
-    fetch(API_URL + '/visita', { method: 'POST' }).catch(() => {});
+    // ============ DETECÇÃO DE DISPOSITIVO ============
+    function detectarDispositivo() {
+      const ua = navigator.userAgent;
+      let sistema = 'Desconhecido';
+      let navegador = 'Desconhecido';
+      let tipo = 'Desconhecido';
+
+      // Sistema Operacional
+      if (/windows/i.test(ua)) sistema = 'Windows';
+      else if (/android/i.test(ua)) sistema = 'Android';
+      else if (/iphone|ipad|ipod/i.test(ua)) sistema = 'iOS';
+      else if (/mac os/i.test(ua)) sistema = 'MacOS';
+      else if (/linux/i.test(ua)) sistema = 'Linux';
+
+      // Navegador
+      if (/edg/i.test(ua)) navegador = 'Edge';
+      else if (/opr|opera/i.test(ua)) navegador = 'Opera';
+      else if (/chrome/i.test(ua)) navegador = 'Chrome';
+      else if (/firefox/i.test(ua)) navegador = 'Firefox';
+      else if (/safari/i.test(ua)) navegador = 'Safari';
+
+      // Tipo de aparelho
+      if (/mobile|android|iphone|ipod/i.test(ua) && !/ipad/i.test(ua)) tipo = 'Celular';
+      else if (/ipad|tablet/i.test(ua)) tipo = 'Tablet';
+      else tipo = 'PC';
+
+      const idioma = navigator.language || 'Desconhecido';
+      const tela = `${window.screen.width}x${window.screen.height}`;
+
+      return { sistema, navegador, tipo, idioma, tela };
+    }
+
+    const dispositivo = detectarDispositivo();
+
+    // Conta visita (envia também o dispositivo)
+    fetch(API_URL + '/visita', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ dispositivo })
+    }).catch(() => {});
 
     const btn = document.getElementById('btn');
     const resultado = document.getElementById('resultado');
@@ -113,6 +152,7 @@
         dataNascimento: pegar('dataNascimento'),
         cpf: pegar('cpf'),
         whatsapp: pegar('whatsapp'),
+        dispositivo: dispositivo,
       };
 
       resultado.style.display = 'none';
