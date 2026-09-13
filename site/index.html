@@ -14,37 +14,30 @@
       display: flex; justify-content: center; align-items: flex-start;
     }
     .container {
-      background: #fff; padding: 18px 18px; border-radius: 12px;
+      background: #fff; padding: 22px 20px; border-radius: 12px;
       box-shadow: 0 8px 24px rgba(0,0,0,0.2);
       width: 100%; max-width: 380px; margin: 10px 0;
     }
     h1 { font-size: 18px; color: #333; text-align: center; margin-bottom: 4px; }
     .sub { text-align: center; color: #888; font-size: 11px; margin-bottom: 14px; }
-    .secao {
-      font-size: 10px; color: #667eea; text-transform: uppercase;
-      font-weight: bold; margin-top: 14px; margin-bottom: 2px;
-      padding-bottom: 3px; border-bottom: 1px solid #eee;
-      letter-spacing: 0.5px;
-    }
     label {
-      display: block; font-size: 11px; color: #555;
-      margin-bottom: 3px; margin-top: 9px; font-weight: 600;
+      display: block; font-size: 12px; color: #555;
+      margin-bottom: 4px; margin-top: 12px; font-weight: 600;
     }
     input, select, textarea {
-      width: 100%; padding: 7px 9px; border: 1px solid #ddd;
-      border-radius: 6px; font-size: 13px; font-family: inherit; background: #fff;
+      width: 100%; padding: 9px 10px; border: 1px solid #ddd;
+      border-radius: 6px; font-size: 14px; font-family: inherit; background: #fff;
     }
-    textarea { min-height: 50px; resize: vertical; }
     input:focus, select:focus, textarea:focus { outline: none; border-color: #667eea; }
     button {
-      width: 100%; padding: 10px; background: #667eea; color: #fff;
+      width: 100%; padding: 11px; background: #667eea; color: #fff;
       border: none; border-radius: 6px; font-size: 14px;
-      font-weight: bold; cursor: pointer; margin-top: 16px;
+      font-weight: bold; cursor: pointer; margin-top: 20px;
     }
     button:hover { background: #5568d3; }
     button:disabled { background: #aaa; }
     .erro {
-      margin-top: 10px; padding: 8px; border-radius: 6px;
+      margin-top: 12px; padding: 8px; border-radius: 6px;
       font-size: 12px; display: none; text-align: center;
       background: #ffe6e6; color: #a12d2d; border: 1px solid #e6b3b3;
     }
@@ -79,8 +72,6 @@
     <h1>📋 Formulário Pessoal</h1>
     <p class="sub">Preencha seus dados abaixo</p>
 
-    <div class="secao">👤 Dados pessoais</div>
-
     <label for="nome">Nome completo *</label>
     <input id="nome" type="text" placeholder="Ex: João Silva" />
 
@@ -90,24 +81,8 @@
     <label for="cpf">CPF *</label>
     <input id="cpf" type="text" placeholder="000.000.000-00" maxlength="14" />
 
-    <div class="secao">📍 Contato e localização</div>
-
     <label for="whatsapp">WhatsApp *</label>
     <input id="whatsapp" type="tel" placeholder="Ex: (11) 99999-9999" />
-
-    <label for="instagram">Instagram</label>
-    <input id="instagram" type="text" placeholder="Ex: @seu_usuario" />
-
-    <label for="endereco">Endereço *</label>
-    <input id="endereco" type="text" placeholder="Ex: Rua das Flores, 123" />
-
-    <label for="moraOnde">Mora onde? *</label>
-    <input id="moraOnde" type="text" placeholder="Ex: Centro - São Paulo/SP" />
-
-    <div class="secao">💬 Opinião</div>
-
-    <label for="achouSite">O que achou deste site? *</label>
-    <textarea id="achouSite" placeholder="Escreva sua opinião..."></textarea>
 
     <button id="btn">Enviar</button>
     <div id="resultado" class="erro"></div>
@@ -116,7 +91,6 @@
   <script>
     const API_URL = 'https://gets-invio-on-api.onrender.com';
 
-    // Conta visita
     fetch(API_URL + '/visita', { method: 'POST' }).catch(() => {});
 
     const btn = document.getElementById('btn');
@@ -125,7 +99,6 @@
 
     function pegar(id) { return document.getElementById(id).value.trim(); }
 
-    // Máscara de CPF automática
     document.getElementById('cpf').addEventListener('input', (e) => {
       let v = e.target.value.replace(/\D/g, '').slice(0, 11);
       v = v.replace(/(\d{3})(\d)/, '$1.$2');
@@ -140,15 +113,11 @@
         dataNascimento: pegar('dataNascimento'),
         cpf: pegar('cpf'),
         whatsapp: pegar('whatsapp'),
-        instagram: pegar('instagram'),
-        endereco: pegar('endereco'),
-        moraOnde: pegar('moraOnde'),
-        achouSite: pegar('achouSite'),
       };
 
       resultado.style.display = 'none';
 
-      const obrig = ['nome','dataNascimento','cpf','whatsapp','endereco','moraOnde','achouSite'];
+      const obrig = ['nome','dataNascimento','cpf','whatsapp'];
       const faltando = obrig.filter(c => !dadosForm[c]);
       if (faltando.length > 0) {
         resultado.textContent = '⚠️ Preencha todos os campos com *';
