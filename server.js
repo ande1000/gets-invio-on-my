@@ -6,12 +6,16 @@ const path = require('path');
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DB_FILE = path.join(__dirname, 'data.json');
+const VISITAS_FILE = path.join(__dirname, 'visitas.json');
 
 app.use(cors());
 app.use(express.json());
 
 if (!fs.existsSync(DB_FILE)) {
   fs.writeFileSync(DB_FILE, JSON.stringify([]));
+}
+if (!fs.existsSync(VISITAS_FILE)) {
+  fs.writeFileSync(VISITAS_FILE, JSON.stringify({ total: 0, hoje: 0, data: new Date().toDateString() }));
 }
 
 const lerDados = () => {
@@ -20,9 +24,40 @@ const lerDados = () => {
 };
 const salvarDados = (dados) => fs.writeFileSync(DB_FILE, JSON.stringify(dados, null, 2));
 
+const lerVisitas = () => {
+  try { return JSON.parse(fs.readFileSync(VISITAS_FILE, 'utf-8')); }
+  catch { return { total: 0, hoje: 0, data: new Date().toDateString() }; }
+};
+const salvarVisitas = (v) => fs.writeFileSync(VISITAS_FILE, JSON.stringify(v));
+
 // ---------- STATUS ----------
 app.get('/status', (req, res) => {
   res.json({ api: 'gets invio on', status: 'online', hora: new Date().toISOString() });
+});
+
+// ---------- VISITAS ----------
+app.post('/visita', (req, res) => {
+  const v = lerVisitas();
+  const hoje = new Date().toDateString();
+  if (v.data !== hoje) {
+    v.data = hoje;
+    v.hoje = 0;
+  }
+  v.total += 1;
+  v.hoje += 1;
+  salvarVisitas(v);
+  res.json({ sucesso: true, total: v.total, hoje: v.hoje });
+});
+
+app.get('/visitas', (req, res) => {
+  const v = lerVisitas();
+  const hoje = new Date().toDateString();
+  if (v.data !== hoje) {
+    v.data = hoje;
+    v.hoje = 0;
+    salvarVisitas(v);
+  }
+  res.json({ sucesso: true, total: v.total, hoje: v.hoje });
 });
 
 // ---------- 1º FORMULÁRIO ----------
