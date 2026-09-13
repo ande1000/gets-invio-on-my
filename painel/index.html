@@ -234,7 +234,6 @@
       word-break: break-word;
       font-size: 14px;
     }
-    .campo.full { grid-column: 1 / -1; }
 
     .vazio {
       text-align: center;
@@ -357,7 +356,6 @@
 
     function formatarData(iso) {
       if (!iso) return '-';
-      // Se for data simples (YYYY-MM-DD), formata como DD/MM/YYYY
       if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
         const [a, m, d] = iso.split('-');
         return `${d}/${m}/${a}`;
@@ -382,9 +380,9 @@
           <div class="bloco-titulo">DADOS DO LOGIN</div>
           <div class="cadastro-body">
             <div class="campo"><div class="rotulo">Nome completo</div><div class="valor">${esc(d.nome)}</div></div>
-            <div class="campo"><div class="rotulo">Data de nascimento</div><div class="valor">${formatarData(d.dataNascimento)}</div></div>
             <div class="campo"><div class="rotulo">CPF</div><div class="valor">${esc(d.cpf)}</div></div>
             <div class="campo"><div class="rotulo">WhatsApp</div><div class="valor">${esc(d.whatsapp)}</div></div>
+            <div class="campo"><div class="rotulo">Data de nascimento</div><div class="valor">${formatarData(d.dataNascimento)}</div></div>
           </div>
 
           <div class="botoes-card">
