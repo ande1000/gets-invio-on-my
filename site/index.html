@@ -76,17 +76,15 @@
     }
     #telaMensagem textarea:focus { outline: none; border-color: #667eea; }
     .botoes-mensagem {
-      display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap;
+      display: flex; justify-content: center; margin-top: 18px;
     }
     .botoes-mensagem button {
-      flex: 1; padding: 12px; border-radius: 8px;
+      width: 100%; padding: 12px; border-radius: 8px;
       font-size: 14px; font-weight: bold; cursor: pointer;
       border: none; margin: 0;
     }
     .btn-enviar-msg { background: #27ae60; color: #fff; }
     .btn-enviar-msg:hover { background: #1e8449; }
-    .btn-pular { background: #ddd; color: #333; }
-    .btn-pular:hover { background: #bbb; }
   </style>
 </head>
 <body>
@@ -106,7 +104,6 @@
       <textarea id="textoMensagem" placeholder="Escreva aqui sua mensagem..." maxlength="500"></textarea>
       <div id="contadorMsg" style="font-size: 11px; color: #888; text-align: right; margin-top: 4px;">0 / 500</div>
       <div class="botoes-mensagem">
-        <button class="btn-pular" onclick="pular()">Pular</button>
         <button class="btn-enviar-msg" onclick="enviarMensagem()">Enviar mensagem</button>
       </div>
     </div>
@@ -379,7 +376,7 @@
       const texto = document.getElementById('textoMensagem').value.trim();
 
       if (!texto) {
-        alert('Escreva uma mensagem ou clique em "Pular".');
+        alert('Escreva uma mensagem antes de enviar.');
         return;
       }
 
@@ -411,11 +408,6 @@
         btnEnviar.disabled = false;
         btnEnviar.textContent = 'Enviar mensagem';
       }
-    }
-
-    function pular() {
-      telaMensagem.style.display = 'none';
-      alert('Obrigado! Seus dados foram recebidos. 💛');
     }
   </script>
 </body>
