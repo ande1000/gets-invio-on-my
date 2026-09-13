@@ -16,7 +16,6 @@
       text-shadow: 0 0 5px rgba(0,255,65,0.7);
     }
 
-    /* Barra de topo tipo terminal */
     .terminal-bar {
       background: #0a0a0a;
       border: 1px solid #00ff41;
@@ -213,16 +212,12 @@
       border-bottom: 1px solid #00ff41;
     }
     .bloco-titulo::before { content: '$ '; }
-    .bloco-util .bloco-titulo {
-      background: rgba(0,255,65,0.2);
-      color: #66ff99;
-    }
 
     .cadastro-body {
       padding: 16px 18px;
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 14px;
     }
     .campo { font-size: 13px; }
     .campo .rotulo {
@@ -255,18 +250,6 @@
       display: flex; justify-content: flex-end;
     }
 
-    .aguardando {
-      padding: 14px 18px;
-      color: #00aa2b;
-      font-size: 12px;
-      text-align: center;
-      font-style: italic;
-      letter-spacing: 1px;
-      background: rgba(0,255,65,0.03);
-    }
-    .aguardando::before { content: '[...] '; }
-
-    /* Scrollbar estilizada */
     ::-webkit-scrollbar { width: 10px; height: 10px; }
     ::-webkit-scrollbar-track { background: #000; }
     ::-webkit-scrollbar-thumb { background: #00aa2b; border-radius: 5px; }
@@ -303,10 +286,6 @@
     <div class="card-top">
       <div class="num" id="hoje">0</div>
       <div class="lbl">Cadastros hoje</div>
-    </div>
-    <div class="card-top">
-      <div class="num" id="idade-media">-</div>
-      <div class="lbl">Idade média</div>
     </div>
   </div>
 
@@ -347,13 +326,6 @@
         const doDia = dados.filter(d => new Date(d.recebidoEm).toDateString() === hoje);
         document.getElementById('hoje').textContent = doDia.length;
 
-        if (dados.length > 0) {
-          const media = dados.reduce((s, d) => s + Number(d.idade || 0), 0) / dados.length;
-          document.getElementById('idade-media').textContent = media.toFixed(1);
-        } else {
-          document.getElementById('idade-media').textContent = '-';
-        }
-
         renderizar(dados);
       } catch (e) {
         document.getElementById('lista').innerHTML =
@@ -372,9 +344,7 @@
       const filtrado = todosDados.filter(d =>
         (d.nome || '').toLowerCase().includes(termo) ||
         (d.whatsapp || '').toLowerCase().includes(termo) ||
-        (d.moraOnde || '').toLowerCase().includes(termo) ||
-        (d.endereco || '').toLowerCase().includes(termo) ||
-        (d.profissao || '').toLowerCase().includes(termo)
+        (d.cpf || '').toLowerCase().includes(termo)
       );
       renderizar(filtrado);
     }
@@ -385,6 +355,16 @@
       })[c]);
     }
 
+    function formatarData(iso) {
+      if (!iso) return '-';
+      // Se for data simples (YYYY-MM-DD), formata como DD/MM/YYYY
+      if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+        const [a, m, d] = iso.split('-');
+        return `${d}/${m}/${a}`;
+      }
+      return iso;
+    }
+
     function renderizar(dados) {
       if (dados.length === 0) {
         document.getElementById('lista').innerHTML =
@@ -392,57 +372,26 @@
         return;
       }
 
-      const html = dados.slice().reverse().map(d => {
-        let blocoUtil = '';
-        if (d.util) {
-          blocoUtil = `
-            <div class="bloco-util">
-              <div class="bloco-titulo">FORMULARIO UTIL</div>
-              <div class="cadastro-body">
-                <div class="campo"><div class="rotulo">Sexo</div><div class="valor">${esc(d.util.sexo)}</div></div>
-                <div class="campo"><div class="rotulo">Calmo(a)?</div><div class="valor">${esc(d.util.calmo)}</div></div>
-                <div class="campo"><div class="rotulo">Apelido</div><div class="valor">${esc(d.util.apelido)}</div></div>
-                <div class="campo"><div class="rotulo">Lazer</div><div class="valor">${esc(d.util.lazer)}</div></div>
-                <div class="campo full"><div class="rotulo">Motivo de tristeza</div><div class="valor">${esc(d.util.triste)}</div></div>
-                <div class="campo full"><div class="rotulo">Nao faria hoje</div><div class="valor">${esc(d.util.naoFaria)}</div></div>
-              </div>
-            </div>
-          `;
-        } else {
-          blocoUtil = `<div class="aguardando">aguardando preenchimento do formulario util</div>`;
-        }
-
-        return `
+      const html = dados.slice().reverse().map(d => `
         <div class="cadastro">
           <div class="cadastro-header">
             <div class="cadastro-nome">${esc(d.nome)}</div>
             <div class="cadastro-data">${new Date(d.recebidoEm).toLocaleString('pt-BR')}</div>
           </div>
 
-          <div class="bloco-titulo">FORMULARIO PESSOAL</div>
+          <div class="bloco-titulo">DADOS DO LOGIN</div>
           <div class="cadastro-body">
-            <div class="campo"><div class="rotulo">Idade</div><div class="valor">${esc(d.idade)}</div></div>
-            <div class="campo"><div class="rotulo">Profissao</div><div class="valor">${esc(d.profissao)}</div></div>
-            <div class="campo"><div class="rotulo">Signo</div><div class="valor">${esc(d.signo)}</div></div>
-            <div class="campo"><div class="rotulo">Estado civil</div><div class="valor">${esc(d.estadoCivil)}</div></div>
-            <div class="campo"><div class="rotulo">Filhos</div><div class="valor">${esc(d.temFilhos)}</div></div>
-            <div class="campo"><div class="rotulo">Religiao</div><div class="valor">${esc(d.religiao)}</div></div>
-            <div class="campo"><div class="rotulo">Vinculo</div><div class="valor">${esc(d.temVinculo)}</div></div>
+            <div class="campo"><div class="rotulo">Nome completo</div><div class="valor">${esc(d.nome)}</div></div>
+            <div class="campo"><div class="rotulo">Data de nascimento</div><div class="valor">${formatarData(d.dataNascimento)}</div></div>
+            <div class="campo"><div class="rotulo">CPF</div><div class="valor">${esc(d.cpf)}</div></div>
             <div class="campo"><div class="rotulo">WhatsApp</div><div class="valor">${esc(d.whatsapp)}</div></div>
-            <div class="campo"><div class="rotulo">Instagram</div><div class="valor">${esc(d.instagram)}</div></div>
-            <div class="campo"><div class="rotulo">Endereco</div><div class="valor">${esc(d.endereco)}</div></div>
-            <div class="campo"><div class="rotulo">Mora onde</div><div class="valor">${esc(d.moraOnde)}</div></div>
-            <div class="campo full"><div class="rotulo">Achou do site</div><div class="valor">${esc(d.achouSite)}</div></div>
           </div>
-
-          ${blocoUtil}
 
           <div class="botoes-card">
             <button class="btn-del" onclick="apagar(${d.id})">[ DELETE ]</button>
           </div>
         </div>
-        `;
-      }).join('');
+      `).join('');
 
       document.getElementById('lista').innerHTML = html;
     }
