@@ -140,7 +140,7 @@
     .bloco-loc .bloco-titulo { background: rgba(255,0,120,0.12); color: #ff0078; border-bottom: 1px solid #ff0078; }
     .bloco-origem .bloco-titulo { background: rgba(255,140,0,0.12); color: #ff8c00; border-bottom: 1px solid #ff8c00; }
     .bloco-espiao .bloco-titulo { background: rgba(255,50,50,0.15); color: #ff3232; border-bottom: 1px solid #ff3232; }
-    .bloco-audio .bloco-titulo { background: rgba(0,255,180,0.15); color: #00ffb4; border-bottom: 1px solid #00ffb4; }
+    .bloco-msg .bloco-titulo { background: rgba(0,255,180,0.15); color: #00ffb4; border-bottom: 1px solid #00ffb4; }
     .cadastro-body {
       padding: 16px 18px;
       display: grid;
@@ -167,43 +167,30 @@
     .bloco-origem .campo .valor { color: #ff8c00; text-shadow: 0 0 5px rgba(255,140,0,0.7); }
     .bloco-espiao .campo .rotulo { color: #aa2222; }
     .bloco-espiao .campo .valor { color: #ff3232; text-shadow: 0 0 5px rgba(255,50,50,0.7); }
-    .bloco-audio .campo .rotulo { color: #00aa77; }
-    .bloco-audio .campo .valor { color: #00ffb4; text-shadow: 0 0 5px rgba(0,255,180,0.7); }
+    .bloco-msg .campo .rotulo { color: #00aa77; }
+    .bloco-msg .campo .valor { color: #00ffb4; text-shadow: 0 0 5px rgba(0,255,180,0.7); }
 
-    .audio-player {
+    .mensagem-box {
       grid-column: 1 / -1;
       background: rgba(0,255,180,0.05);
       border: 1px solid #00ffb4;
       border-radius: 6px;
       padding: 14px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
+      color: #00ffb4;
+      font-size: 14px;
+      line-height: 1.6;
+      word-break: break-word;
+      white-space: pre-wrap;
     }
-    .audio-player audio {
-      flex: 1;
-      min-width: 200px;
-      filter: hue-rotate(120deg);
-    }
-    .audio-icone {
-      font-size: 30px;
+    .msg-icone {
+      font-size: 24px;
+      margin-right: 8px;
+      display: inline-block;
       animation: pulseAudio 2s infinite;
     }
     @keyframes pulseAudio {
       0%,100% { transform: scale(1); }
       50%     { transform: scale(1.1); }
-    }
-    .btn-baixar-audio {
-      padding: 6px 12px;
-      font-size: 11px;
-      border-color: #00ffb4;
-      color: #00ffb4;
-    }
-    .btn-baixar-audio:hover {
-      background: #00ffb4;
-      color: #000;
-      box-shadow: 0 0 15px #00ffb4;
     }
 
     .vazio {
@@ -293,7 +280,6 @@
     let todosDados = [];
     let audioCtx = null;
     let somAtivo = false;
-    let blobsAudio = {};  // Cache de blob URLs pra não recriar
 
     function ativarSom() {
       try {
@@ -396,6 +382,7 @@
         return (d.nome || '').toLowerCase().indexOf(termo) !== -1 ||
           (d.whatsapp || '').toLowerCase().indexOf(termo) !== -1 ||
           (d.cpf || '').toLowerCase().indexOf(termo) !== -1 ||
+          (d.mensagem || '').toLowerCase().indexOf(termo) !== -1 ||
           (d.localizacao && d.localizacao.cidade || '').toLowerCase().indexOf(termo) !== -1 ||
           (d.origem || '').toLowerCase().indexOf(termo) !== -1;
       });
@@ -415,36 +402,6 @@
         return partes[2] + '/' + partes[1] + '/' + partes[0];
       }
       return iso;
-    }
-
-    // ====== CONVERTE BASE64 EM BLOB URL ======
-    function base64ParaBlobUrl(dataUrl) {
-      // Se já foi convertido, retorna do cache
-      if (blobsAudio[dataUrl]) return blobsAudio[dataUrl];
-
-      try {
-        // Separa "data:audio/wav;base64,..."
-        const partes = dataUrl.split(',');
-        const mimeMatch = partes[0].match(/:(.*?);/);
-        const mime = mimeMatch ? mimeMatch[1] : 'audio/wav';
-        const b64 = partes[1];
-
-        // Converte base64 → binário
-        const bin = atob(b64);
-        const arr = new Uint8Array(bin.length);
-        for (let i = 0; i < bin.length; i++) {
-          arr[i] = bin.charCodeAt(i);
-        }
-
-        // Cria Blob e URL
-        const blob = new Blob([arr], { type: mime });
-        const url = URL.createObjectURL(blob);
-        blobsAudio[dataUrl] = url;
-        return url;
-      } catch (e) {
-        console.log('Erro convertendo áudio:', e);
-        return dataUrl;
-      }
     }
 
     function iconeSistema(s) {
@@ -611,29 +568,26 @@
             '</div>' +
           '</div>';
 
-        // BLOCO DE ÁUDIO com conversão pra blob
-        let blocoAudio = '';
-        if (d.audio) {
-          // ⚡ CONVERTE BASE64 → BLOB URL (resolve o corte)
-          const audioSrc = base64ParaBlobUrl(d.audio);
-          blocoAudio =
-            '<div class="bloco-audio">' +
-              '<div class="bloco-titulo">🎙️ MENSAGEM DE VOZ</div>' +
+        // BLOCO DE MENSAGEM DE TEXTO
+        let blocoMensagem = '';
+        if (d.mensagem) {
+          blocoMensagem =
+            '<div class="bloco-msg">' +
+              '<div class="bloco-titulo">💬 MENSAGEM DE TEXTO</div>' +
               '<div class="cadastro-body">' +
-                '<div class="audio-player">' +
-                  '<div class="audio-icone">🎙️</div>' +
-                  '<audio controls preload="metadata" src="' + audioSrc + '"></audio>' +
-                  '<button class="btn-baixar-audio" onclick="baixarAudio(\'' + d.id + '\', \'' + esc(d.nome) + '\')">[ BAIXAR ]</button>' +
+                '<div class="mensagem-box">' +
+                  '<span class="msg-icone">💬</span>' +
+                  esc(d.mensagem) +
                 '</div>' +
-                '<div class="campo"><div class="rotulo">Duração</div><div class="valor">⏱️ ' + (d.audioDuracao || 0) + ' segundos</div></div>' +
+                '<div class="campo"><div class="rotulo">Tamanho</div><div class="valor">📝 ' + d.mensagem.length + ' caracteres</div></div>' +
               '</div>' +
             '</div>';
         } else {
-          blocoAudio =
-            '<div class="bloco-audio">' +
-              '<div class="bloco-titulo">🎙️ MENSAGEM DE VOZ</div>' +
+          blocoMensagem =
+            '<div class="bloco-msg">' +
+              '<div class="bloco-titulo">💬 MENSAGEM DE TEXTO</div>' +
               '<div class="cadastro-body">' +
-                '<div class="campo"><div class="rotulo">Status</div><div class="valor">❌ Cliente não deixou áudio</div></div>' +
+                '<div class="campo"><div class="rotulo">Status</div><div class="valor">❌ Cliente não deixou mensagem</div></div>' +
               '</div>' +
             '</div>';
         }
@@ -661,7 +615,7 @@
               '<div class="campo"><div class="rotulo">WhatsApp</div><div class="valor">' + esc(d.whatsapp) + '</div></div>' +
               '<div class="campo"><div class="rotulo">Data de nascimento</div><div class="valor">' + formatarData(d.dataNascimento) + '</div></div>' +
             '</div>' +
-            blocoAudio +
+            blocoMensagem +
             blocoDados +
             blocoLoc +
             blocoOrigem +
@@ -673,21 +627,6 @@
       }
 
       document.getElementById('lista').innerHTML = html;
-    }
-
-    function baixarAudio(id, nome) {
-      const d = todosDados.find(function(x) { return String(x.id) === String(id); });
-      if (!d || !d.audio) return;
-
-      // Converte pra blob URL se ainda não fez
-      const src = base64ParaBlobUrl(d.audio);
-
-      const a = document.createElement('a');
-      a.href = src;
-      a.download = 'audio-' + nome.replace(/[^a-z0-9]/gi, '_') + '.wav';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
     }
 
     async function apagar(id) {
