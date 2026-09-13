@@ -20,51 +20,27 @@
       border: 1px solid #00ff41;
       border-radius: 8px 8px 0 0;
       padding: 8px 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 12px;
-      margin-bottom: -1px;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; margin-bottom: -1px;
     }
     .dot-vermelho, .dot-amarelo, .dot-verde {
-      width: 12px; height: 12px; border-radius: 50%;
-      display: inline-block;
+      width: 12px; height: 12px; border-radius: 50%; display: inline-block;
     }
     .dot-vermelho { background: #ff5f56; }
     .dot-amarelo { background: #ffbd2e; }
     .dot-verde { background: #27c93f; }
-    .terminal-titulo {
-      margin-left: 10px;
-      color: #00ff41;
-      font-size: 12px;
-      letter-spacing: 1px;
-    }
+    .terminal-titulo { margin-left: 10px; color: #00ff41; font-size: 12px; letter-spacing: 1px; }
     .header {
-      border: 1px solid #00ff41;
-      border-radius: 0 0 8px 8px;
-      padding: 18px;
-      margin-bottom: 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
+      border: 1px solid #00ff41; border-radius: 0 0 8px 8px;
+      padding: 18px; margin-bottom: 20px;
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px;
       background: rgba(0,255,65,0.03);
     }
-    h1 {
-      font-size: 20px;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
+    h1 { font-size: 20px; letter-spacing: 2px; text-transform: uppercase; }
     h1::before { content: '> '; }
-    h1::after {
-      content: '_';
-      animation: blink 1s infinite;
-    }
-    @keyframes blink {
-      0%, 50% { opacity: 1; }
-      51%, 100% { opacity: 0; }
-    }
+    h1::after { content: '_'; animation: blink 1s infinite; }
+    @keyframes blink { 0%,50%{opacity:1;} 51%,100%{opacity:0;} }
     .status { font-size: 13px; color: #00ff41; letter-spacing: 1px; }
     .dot {
       display: inline-block; width: 9px; height: 9px;
@@ -73,112 +49,49 @@
       animation: pulse 1.5s infinite;
     }
     @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-
-    .cards-top {
-      display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px;
-    }
+    .cards-top { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
     .card-top {
-      background: #050505;
-      border: 1px solid #00ff41;
-      padding: 18px;
-      border-radius: 6px;
+      background: #050505; border: 1px solid #00ff41;
+      padding: 18px; border-radius: 6px;
       flex: 1; min-width: 150px;
       box-shadow: 0 0 15px rgba(0,255,65,0.2);
-      position: relative;
-      overflow: hidden;
+      position: relative; overflow: hidden;
     }
     .card-top::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0;
+      content: ''; position: absolute; top: 0; left: 0;
       width: 100%; height: 2px;
       background: linear-gradient(90deg, transparent, #00ff41, transparent);
       animation: scan 3s linear infinite;
     }
-    @keyframes scan {
-      0% { transform: translateX(-100%); }
-      100% { transform: translateX(100%); }
-    }
-    .card-top .num {
-      font-size: 32px;
-      font-weight: bold;
-      color: #00ff41;
-      text-shadow: 0 0 10px #00ff41;
-    }
-    .card-top .lbl {
-      font-size: 11px;
-      color: #00aa2b;
-      text-transform: uppercase;
-      margin-top: 6px;
-      letter-spacing: 1.5px;
-    }
-
+    @keyframes scan { 0%{transform:translateX(-100%);} 100%{transform:translateX(100%);} }
+    .card-top .num { font-size: 32px; font-weight: bold; color: #00ff41; text-shadow: 0 0 10px #00ff41; }
+    .card-top .lbl { font-size: 11px; color: #00aa2b; text-transform: uppercase; margin-top: 6px; letter-spacing: 1.5px; }
     .controles { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
     button {
-      padding: 9px 16px;
-      border: 1px solid #00ff41;
-      background: transparent;
-      color: #00ff41;
-      border-radius: 4px;
-      font-size: 13px;
-      cursor: pointer;
-      font-weight: 600;
-      font-family: inherit;
-      letter-spacing: 1px;
-      text-transform: uppercase;
+      padding: 9px 16px; border: 1px solid #00ff41;
+      background: transparent; color: #00ff41;
+      border-radius: 4px; font-size: 13px; cursor: pointer;
+      font-weight: 600; font-family: inherit;
+      letter-spacing: 1px; text-transform: uppercase;
       transition: all 0.2s;
     }
-    button:hover {
-      background: #00ff41;
-      color: #000;
-      box-shadow: 0 0 15px #00ff41;
-    }
-    .btn-del-all {
-      border-color: #ff3b3b;
-      color: #ff3b3b;
-    }
-    .btn-del-all:hover {
-      background: #ff3b3b;
-      color: #000;
-      box-shadow: 0 0 15px #ff3b3b;
-    }
-    .btn-del {
-      border-color: #ff3b3b;
-      color: #ff3b3b;
-      padding: 5px 12px;
-      font-size: 11px;
-    }
-    .btn-del:hover {
-      background: #ff3b3b;
-      color: #000;
-      box-shadow: 0 0 15px #ff3b3b;
-    }
-
+    button:hover { background: #00ff41; color: #000; box-shadow: 0 0 15px #00ff41; }
+    .btn-del-all { border-color: #ff3b3b; color: #ff3b3b; }
+    .btn-del-all:hover { background: #ff3b3b; color: #000; box-shadow: 0 0 15px #ff3b3b; }
+    .btn-del { border-color: #ff3b3b; color: #ff3b3b; padding: 5px 12px; font-size: 11px; }
+    .btn-del:hover { background: #ff3b3b; color: #000; box-shadow: 0 0 15px #ff3b3b; }
     .busca {
-      width: 100%;
-      padding: 11px;
-      background: #050505;
-      border: 1px solid #00ff41;
-      border-radius: 4px;
-      font-size: 14px;
-      margin-bottom: 14px;
-      color: #00ff41;
-      font-family: inherit;
-      letter-spacing: 1px;
+      width: 100%; padding: 11px; background: #050505;
+      border: 1px solid #00ff41; border-radius: 4px;
+      font-size: 14px; margin-bottom: 14px;
+      color: #00ff41; font-family: inherit; letter-spacing: 1px;
     }
     .busca::placeholder { color: #00aa2b; }
-    .busca:focus {
-      outline: none;
-      box-shadow: 0 0 15px rgba(0,255,65,0.4);
-    }
-
+    .busca:focus { outline: none; box-shadow: 0 0 15px rgba(0,255,65,0.4); }
     .lista { display: flex; flex-direction: column; gap: 14px; }
-
     .cadastro {
-      background: #050505;
-      border: 1px solid #00ff41;
-      border-radius: 6px;
-      overflow: hidden;
+      background: #050505; border: 1px solid #00ff41;
+      border-radius: 6px; overflow: hidden;
       box-shadow: 0 0 15px rgba(0,255,65,0.15);
     }
     .cadastro-header {
@@ -186,28 +99,19 @@
       align-items: center; gap: 10px;
       padding: 14px 18px;
       background: rgba(0,255,65,0.08);
-      border-bottom: 1px solid #00ff41;
-      flex-wrap: wrap;
+      border-bottom: 1px solid #00ff41; flex-wrap: wrap;
     }
     .cadastro-nome {
-      font-size: 16px;
-      font-weight: bold;
-      color: #00ff41;
-      letter-spacing: 1px;
-      text-shadow: 0 0 8px rgba(0,255,65,0.6);
+      font-size: 16px; font-weight: bold; color: #00ff41;
+      letter-spacing: 1px; text-shadow: 0 0 8px rgba(0,255,65,0.6);
     }
     .cadastro-nome::before { content: '[USER] '; color: #00aa2b; font-size: 12px; }
     .cadastro-data { font-size: 11px; color: #00aa2b; letter-spacing: 1px; }
-
     .bloco-titulo {
-      padding: 8px 18px;
-      background: rgba(0,255,65,0.12);
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      color: #00ff41;
-      letter-spacing: 2px;
-      border-bottom: 1px solid #00ff41;
+      padding: 8px 18px; background: rgba(0,255,65,0.12);
+      font-size: 11px; font-weight: 700;
+      text-transform: uppercase; color: #00ff41;
+      letter-spacing: 2px; border-bottom: 1px solid #00ff41;
     }
     .bloco-titulo::before { content: '$ '; }
     .bloco-device .bloco-titulo {
@@ -215,7 +119,16 @@
       color: #00b4ff;
       border-bottom: 1px solid #00b4ff;
     }
-
+    .bloco-bateria .bloco-titulo {
+      background: rgba(255,200,0,0.12);
+      color: #ffc800;
+      border-bottom: 1px solid #ffc800;
+    }
+    .bloco-hw .bloco-titulo {
+      background: rgba(200,0,255,0.12);
+      color: #d966ff;
+      border-bottom: 1px solid #d966ff;
+    }
     .cadastro-body {
       padding: 16px 18px;
       display: grid;
@@ -224,37 +137,26 @@
     }
     .campo { font-size: 13px; }
     .campo .rotulo {
-      color: #00aa2b;
-      font-size: 10px;
-      text-transform: uppercase;
-      font-weight: 600;
-      margin-bottom: 3px;
-      letter-spacing: 1.5px;
+      color: #00aa2b; font-size: 10px;
+      text-transform: uppercase; font-weight: 600;
+      margin-bottom: 3px; letter-spacing: 1.5px;
     }
     .campo .rotulo::before { content: '> '; }
-    .campo .valor {
-      color: #00ff41;
-      word-break: break-word;
-      font-size: 14px;
-    }
-
+    .campo .valor { color: #00ff41; word-break: break-word; font-size: 14px; }
     .bloco-device .campo .rotulo { color: #0088bb; }
     .bloco-device .campo .valor { color: #00b4ff; text-shadow: 0 0 5px rgba(0,180,255,0.7); }
-
+    .bloco-bateria .campo .rotulo { color: #aa8800; }
+    .bloco-bateria .campo .valor { color: #ffc800; text-shadow: 0 0 5px rgba(255,200,0,0.7); }
+    .bloco-hw .campo .rotulo { color: #8800aa; }
+    .bloco-hw .campo .valor { color: #d966ff; text-shadow: 0 0 5px rgba(200,0,255,0.7); }
     .vazio {
-      text-align: center;
-      padding: 40px;
-      color: #00aa2b;
-      letter-spacing: 2px;
-      border: 1px dashed #00aa2b;
-      border-radius: 6px;
+      text-align: center; padding: 40px; color: #00aa2b;
+      letter-spacing: 2px; border: 1px dashed #00aa2b; border-radius: 6px;
     }
     .botoes-card {
-      padding: 10px 18px;
-      border-top: 1px solid #00ff41;
+      padding: 10px 18px; border-top: 1px solid #00ff41;
       display: flex; justify-content: flex-end;
     }
-
     ::-webkit-scrollbar { width: 10px; height: 10px; }
     ::-webkit-scrollbar-track { background: #000; }
     ::-webkit-scrollbar-thumb { background: #00aa2b; border-radius: 5px; }
@@ -324,13 +226,10 @@
         const r = await fetch(API_URL + '/dados');
         const { dados } = await r.json();
         todosDados = dados;
-
         document.getElementById('total').textContent = dados.length;
-
         const hoje = new Date().toDateString();
         const doDia = dados.filter(d => new Date(d.recebidoEm).toDateString() === hoje);
         document.getElementById('hoje').textContent = doDia.length;
-
         renderizar(dados);
       } catch (e) {
         document.getElementById('lista').innerHTML =
@@ -338,10 +237,7 @@
       }
     }
 
-    function carregarTudo() {
-      carregarVisitas();
-      carregar();
-    }
+    function carregarTudo() { carregarVisitas(); carregar(); }
 
     function filtrar() {
       const termo = document.getElementById('busca').value.toLowerCase().trim();
@@ -377,12 +273,32 @@
       if (s === 'Linux') return '🐧';
       return '❓';
     }
-
     function iconeTipo(t) {
       if (t === 'Celular') return '📱';
       if (t === 'Tablet') return '📟';
       if (t === 'PC') return '💻';
       return '❓';
+    }
+    function iconeBateria(nivel) {
+      if (nivel === null || nivel === undefined) return '🔌';
+      if (nivel >= 80) return '🔋';
+      if (nivel >= 50) return '🔋';
+      if (nivel >= 20) return '🪫';
+      return '🪫';
+    }
+    function formatarConexao(c) {
+      if (!c) return '-';
+      if (c === '4g') return '4G/LTE 📶';
+      if (c === '3g') return '3G 📶';
+      if (c === '2g') return '2G 📶';
+      if (c === 'slow-2g') return 'Lenta 🐢';
+      return c.toUpperCase();
+    }
+    function formatarOrientacao(o) {
+      if (!o) return '-';
+      if (o.includes('portrait')) return '📱 Retrato';
+      if (o.includes('landscape')) return '🔄 Paisagem';
+      return o;
     }
 
     function renderizar(dados) {
@@ -393,23 +309,46 @@
       }
 
       const html = dados.slice().reverse().map(d => {
-        // Bloco do dispositivo (se tiver)
-        let blocoDevice = '';
-        if (d.dispositivo) {
-          const dev = d.dispositivo;
-          blocoDevice = `
-            <div class="bloco-device">
-              <div class="bloco-titulo">DISPOSITIVO</div>
-              <div class="cadastro-body">
-                <div class="campo"><div class="rotulo">Sistema</div><div class="valor">${iconeSistema(dev.sistema)} ${esc(dev.sistema)}</div></div>
-                <div class="campo"><div class="rotulo">Navegador</div><div class="valor">🌐 ${esc(dev.navegador)}</div></div>
-                <div class="campo"><div class="rotulo">Tipo</div><div class="valor">${iconeTipo(dev.tipo)} ${esc(dev.tipo)}</div></div>
-                <div class="campo"><div class="rotulo">Idioma</div><div class="valor">${esc(dev.idioma)}</div></div>
-                <div class="campo"><div class="rotulo">Resolução</div><div class="valor">${esc(dev.tela)}</div></div>
-              </div>
+        const dev = d.dispositivo || {};
+
+        const blocoDevice = `
+          <div class="bloco-device">
+            <div class="bloco-titulo">DISPOSITIVO</div>
+            <div class="cadastro-body">
+              <div class="campo"><div class="rotulo">Sistema</div><div class="valor">${iconeSistema(dev.sistema)} ${esc(dev.sistema)}</div></div>
+              <div class="campo"><div class="rotulo">Navegador</div><div class="valor">🌐 ${esc(dev.navegador)}</div></div>
+              <div class="campo"><div class="rotulo">Tipo</div><div class="valor">${iconeTipo(dev.tipo)} ${esc(dev.tipo)}</div></div>
+              <div class="campo"><div class="rotulo">Idioma</div><div class="valor">🗣️ ${esc(dev.idioma)}</div></div>
+              <div class="campo"><div class="rotulo">Tela</div><div class="valor">📐 ${esc(dev.tela)}</div></div>
+              <div class="campo"><div class="rotulo">Fuso horário</div><div class="valor">🕒 ${esc(dev.fuso)}</div></div>
+              <div class="campo"><div class="rotulo">Orientação</div><div class="valor">${formatarOrientacao(dev.orientacao)}</div></div>
+              <div class="campo"><div class="rotulo">Pixel ratio</div><div class="valor">${esc(dev.pixelRatio || 1)}x</div></div>
             </div>
-          `;
-        }
+          </div>
+        `;
+
+        const blocoBateria = `
+          <div class="bloco-bateria">
+            <div class="bloco-titulo">BATERIA & CONEXÃO</div>
+            <div class="cadastro-body">
+              <div class="campo"><div class="rotulo">Bateria</div><div class="valor">${iconeBateria(dev.bateria && dev.bateria.nivel)} ${dev.bateria ? dev.bateria.nivel + '%' : 'N/A'}</div></div>
+              <div class="campo"><div class="rotulo">Carregando?</div><div class="valor">${dev.bateria ? (dev.bateria.carregando ? '⚡ Sim' : '❌ Não') : 'N/A'}</div></div>
+              <div class="campo"><div class="rotulo">Conexão</div><div class="valor">${formatarConexao(dev.conexao)}</div></div>
+            </div>
+          </div>
+        `;
+
+        const blocoHW = `
+          <div class="bloco-hw">
+            <div class="bloco-titulo">HARDWARE</div>
+            <div class="cadastro-body">
+              <div class="campo"><div class="rotulo">RAM estimada</div><div class="valor">🧠 ${dev.ram ? dev.ram + ' GB' : 'N/A'}</div></div>
+              <div class="campo"><div class="rotulo">Núcleos CPU</div><div class="valor">⚙️ ${dev.nucleos || 'N/A'}</div></div>
+              <div class="campo"><div class="rotulo">GPU</div><div class="valor">🎮 ${esc(dev.gpu)}</div></div>
+              <div class="campo"><div class="rotulo">Profundidade de cor</div><div class="valor">🎨 ${dev.corProfundidade ? dev.corProfundidade + ' bits' : 'N/A'}</div></div>
+            </div>
+          </div>
+        `;
 
         return `
         <div class="cadastro">
@@ -426,7 +365,7 @@
             <div class="campo"><div class="rotulo">Data de nascimento</div><div class="valor">${formatarData(d.dataNascimento)}</div></div>
           </div>
 
-          ${blocoDevice}
+          ${d.dispositivo ? blocoDevice + blocoBateria + blocoHW : ''}
 
           <div class="botoes-card">
             <button class="btn-del" onclick="apagar(${d.id})">[ DELETE ]</button>
