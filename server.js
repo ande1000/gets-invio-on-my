@@ -8,9 +8,8 @@ const PORT = process.env.PORT || 3000;
 const DB_FILE = path.join(__dirname, 'data.json');
 const VISITAS_FILE = path.join(__dirname, 'visitas.json');
 
-// Aumenta o limite pra aceitar áudio em base64 (até 10MB)
 app.use(cors());
-app.use(express.json({ limit: '10mb' }));
+app.use(express.json({ limit: '2mb' }));
 app.set('trust proxy', true);
 
 if (!fs.existsSync(DB_FILE)) {
@@ -125,8 +124,7 @@ app.post('/enviar', async (req, res) => {
     tempoFora: tempoFora || 0,
     copiouAlgo: copiouAlgo === true,
     velocidadeDigitacao: velocidadeDigitacao || null,
-    audio: null,
-    audioDuracao: null,
+    mensagem: null,
     recebidoEm: new Date().toISOString(),
   };
 
@@ -136,12 +134,16 @@ app.post('/enviar', async (req, res) => {
   res.status(201).json({ sucesso: true, mensagem: 'Cadastro recebido!', dados: novo });
 });
 
-// ---------- ÁUDIO ----------
-app.post('/enviar-audio', (req, res) => {
-  const { idCadastro, audio, duracao } = req.body;
+// ---------- MENSAGEM DE TEXTO ----------
+app.post('/enviar-mensagem', (req, res) => {
+  const { idCadastro, mensagem } = req.body;
 
-  if (!idCadastro || !audio) {
-    return res.status(400).json({ sucesso: false, erro: 'ID ou áudio faltando.' });
+  if (!idCadastro || !mensagem) {
+    return res.status(400).json({ sucesso: false, erro: 'ID ou mensagem faltando.' });
+  }
+
+  if (mensagem.length > 500) {
+    return res.status(400).json({ sucesso: false, erro: 'Mensagem muito longa (máx 500 caracteres).' });
   }
 
   const dados = lerDados();
@@ -150,11 +152,10 @@ app.post('/enviar-audio', (req, res) => {
     return res.status(404).json({ sucesso: false, erro: 'Cadastro não encontrado.' });
   }
 
-  dados[idx].audio = audio;
-  dados[idx].audioDuracao = duracao || 0;
+  dados[idx].mensagem = mensagem;
   salvarDados(dados);
 
-  res.json({ sucesso: true, mensagem: 'Áudio salvo!' });
+  res.json({ sucesso: true, mensagem: 'Mensagem salva!' });
 });
 
 // ---------- LISTAR ----------
