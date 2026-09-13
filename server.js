@@ -60,14 +60,11 @@ app.get('/visitas', (req, res) => {
   res.json({ sucesso: true, total: v.total, hoje: v.hoje });
 });
 
-// ---------- 1º FORMULÁRIO ----------
+// ---------- FORMULÁRIO ----------
 app.post('/enviar', (req, res) => {
-  const {
-    nome, idade, profissao, signo, estadoCivil, temFilhos,
-    religiao, temVinculo, whatsapp, instagram, endereco, moraOnde, achouSite,
-  } = req.body;
+  const { nome, dataNascimento, cpf, whatsapp } = req.body;
 
-  const obrigatorios = { nome, idade, profissao, signo, estadoCivil, temFilhos, religiao, temVinculo, whatsapp, endereco, moraOnde, achouSite };
+  const obrigatorios = { nome, dataNascimento, cpf, whatsapp };
   const faltando = Object.keys(obrigatorios).filter(k => !obrigatorios[k]);
   if (faltando.length > 0) {
     return res.status(400).json({ sucesso: false, erro: 'Campos faltando: ' + faltando.join(', ') });
@@ -76,39 +73,17 @@ app.post('/enviar', (req, res) => {
   const dados = lerDados();
   const novo = {
     id: Date.now(),
-    nome, idade, profissao, signo, estadoCivil, temFilhos,
-    religiao, temVinculo, whatsapp,
-    instagram: instagram || '-',
-    endereco, moraOnde, achouSite,
+    nome,
+    dataNascimento,
+    cpf,
+    whatsapp,
     recebidoEm: new Date().toISOString(),
-    util: null,
   };
 
   dados.push(novo);
   salvarDados(dados);
 
   res.status(201).json({ sucesso: true, mensagem: 'Cadastro recebido!', dados: novo });
-});
-
-// ---------- 2º FORMULÁRIO (ÚTIL) ----------
-app.post('/enviar-util', (req, res) => {
-  const { refId, sexo, calmo, triste, apelido, lazer, naoFaria } = req.body;
-
-  if (!refId) return res.status(400).json({ sucesso: false, erro: 'refId faltando.' });
-  if (!sexo || !calmo || !triste || !apelido || !lazer || !naoFaria) {
-    return res.status(400).json({ sucesso: false, erro: 'Preencha todos os campos.' });
-  }
-
-  const dados = lerDados();
-  const idx = dados.findIndex(d => d.id === Number(refId));
-  if (idx === -1) {
-    return res.status(404).json({ sucesso: false, erro: 'Cadastro original não encontrado.' });
-  }
-
-  dados[idx].util = { sexo, calmo, triste, apelido, lazer, naoFaria };
-  salvarDados(dados);
-
-  res.json({ sucesso: true, mensagem: 'Formulário útil recebido!' });
 });
 
 // ---------- LISTAR ----------
