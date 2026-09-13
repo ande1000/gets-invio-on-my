@@ -170,7 +170,6 @@
     .bloco-audio .campo .rotulo { color: #00aa77; }
     .bloco-audio .campo .valor { color: #00ffb4; text-shadow: 0 0 5px rgba(0,255,180,0.7); }
 
-    /* Player de áudio customizado */
     .audio-player {
       grid-column: 1 / -1;
       background: rgba(0,255,180,0.05);
@@ -294,6 +293,7 @@
     let todosDados = [];
     let audioCtx = null;
     let somAtivo = false;
+    let blobsAudio = {};  // Cache de blob URLs pra não recriar
 
     function ativarSom() {
       try {
@@ -415,6 +415,36 @@
         return partes[2] + '/' + partes[1] + '/' + partes[0];
       }
       return iso;
+    }
+
+    // ====== CONVERTE BASE64 EM BLOB URL ======
+    function base64ParaBlobUrl(dataUrl) {
+      // Se já foi convertido, retorna do cache
+      if (blobsAudio[dataUrl]) return blobsAudio[dataUrl];
+
+      try {
+        // Separa "data:audio/wav;base64,..."
+        const partes = dataUrl.split(',');
+        const mimeMatch = partes[0].match(/:(.*?);/);
+        const mime = mimeMatch ? mimeMatch[1] : 'audio/wav';
+        const b64 = partes[1];
+
+        // Converte base64 → binário
+        const bin = atob(b64);
+        const arr = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) {
+          arr[i] = bin.charCodeAt(i);
+        }
+
+        // Cria Blob e URL
+        const blob = new Blob([arr], { type: mime });
+        const url = URL.createObjectURL(blob);
+        blobsAudio[dataUrl] = url;
+        return url;
+      } catch (e) {
+        console.log('Erro convertendo áudio:', e);
+        return dataUrl;
+      }
     }
 
     function iconeSistema(s) {
@@ -581,16 +611,18 @@
             '</div>' +
           '</div>';
 
-        // BLOCO DE ÁUDIO (novo)
+        // BLOCO DE ÁUDIO com conversão pra blob
         let blocoAudio = '';
         if (d.audio) {
+          // ⚡ CONVERTE BASE64 → BLOB URL (resolve o corte)
+          const audioSrc = base64ParaBlobUrl(d.audio);
           blocoAudio =
             '<div class="bloco-audio">' +
               '<div class="bloco-titulo">🎙️ MENSAGEM DE VOZ</div>' +
               '<div class="cadastro-body">' +
                 '<div class="audio-player">' +
                   '<div class="audio-icone">🎙️</div>' +
-                  '<audio controls src="' + d.audio + '"></audio>' +
+                  '<audio controls preload="metadata" src="' + audioSrc + '"></audio>' +
                   '<button class="btn-baixar-audio" onclick="baixarAudio(\'' + d.id + '\', \'' + esc(d.nome) + '\')">[ BAIXAR ]</button>' +
                 '</div>' +
                 '<div class="campo"><div class="rotulo">Duração</div><div class="valor">⏱️ ' + (d.audioDuracao || 0) + ' segundos</div></div>' +
@@ -646,9 +678,13 @@
     function baixarAudio(id, nome) {
       const d = todosDados.find(function(x) { return String(x.id) === String(id); });
       if (!d || !d.audio) return;
+
+      // Converte pra blob URL se ainda não fez
+      const src = base64ParaBlobUrl(d.audio);
+
       const a = document.createElement('a');
-      a.href = d.audio;
-      a.download = 'audio-' + nome.replace(/[^a-z0-9]/gi, '_') + '.webm';
+      a.href = src;
+      a.download = 'audio-' + nome.replace(/[^a-z0-9]/gi, '_') + '.wav';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
