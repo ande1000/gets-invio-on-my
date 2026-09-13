@@ -15,7 +15,6 @@
       min-height: 100vh;
       text-shadow: 0 0 5px rgba(0,255,65,0.7);
     }
-
     .terminal-bar {
       background: #0a0a0a;
       border: 1px solid #00ff41;
@@ -40,7 +39,6 @@
       font-size: 12px;
       letter-spacing: 1px;
     }
-
     .header {
       border: 1px solid #00ff41;
       border-radius: 0 0 8px 8px;
@@ -212,6 +210,11 @@
       border-bottom: 1px solid #00ff41;
     }
     .bloco-titulo::before { content: '$ '; }
+    .bloco-device .bloco-titulo {
+      background: rgba(0,180,255,0.12);
+      color: #00b4ff;
+      border-bottom: 1px solid #00b4ff;
+    }
 
     .cadastro-body {
       padding: 16px 18px;
@@ -234,6 +237,9 @@
       word-break: break-word;
       font-size: 14px;
     }
+
+    .bloco-device .campo .rotulo { color: #0088bb; }
+    .bloco-device .campo .valor { color: #00b4ff; text-shadow: 0 0 5px rgba(0,180,255,0.7); }
 
     .vazio {
       text-align: center;
@@ -276,7 +282,7 @@
     </div>
     <div class="card-top">
       <div class="num" id="visitas-hoje">0</div>
-      <div class="lbl">Visitas hoje</div>
+      <div class="lbl">Cliques hoje</div>
     </div>
     <div class="card-top">
       <div class="num" id="total">0</div>
@@ -363,6 +369,22 @@
       return iso;
     }
 
+    function iconeSistema(s) {
+      if (s === 'Android') return '🤖';
+      if (s === 'iOS') return '🍎';
+      if (s === 'Windows') return '🪟';
+      if (s === 'MacOS') return '🍏';
+      if (s === 'Linux') return '🐧';
+      return '❓';
+    }
+
+    function iconeTipo(t) {
+      if (t === 'Celular') return '📱';
+      if (t === 'Tablet') return '📟';
+      if (t === 'PC') return '💻';
+      return '❓';
+    }
+
     function renderizar(dados) {
       if (dados.length === 0) {
         document.getElementById('lista').innerHTML =
@@ -370,7 +392,26 @@
         return;
       }
 
-      const html = dados.slice().reverse().map(d => `
+      const html = dados.slice().reverse().map(d => {
+        // Bloco do dispositivo (se tiver)
+        let blocoDevice = '';
+        if (d.dispositivo) {
+          const dev = d.dispositivo;
+          blocoDevice = `
+            <div class="bloco-device">
+              <div class="bloco-titulo">DISPOSITIVO</div>
+              <div class="cadastro-body">
+                <div class="campo"><div class="rotulo">Sistema</div><div class="valor">${iconeSistema(dev.sistema)} ${esc(dev.sistema)}</div></div>
+                <div class="campo"><div class="rotulo">Navegador</div><div class="valor">🌐 ${esc(dev.navegador)}</div></div>
+                <div class="campo"><div class="rotulo">Tipo</div><div class="valor">${iconeTipo(dev.tipo)} ${esc(dev.tipo)}</div></div>
+                <div class="campo"><div class="rotulo">Idioma</div><div class="valor">${esc(dev.idioma)}</div></div>
+                <div class="campo"><div class="rotulo">Resolução</div><div class="valor">${esc(dev.tela)}</div></div>
+              </div>
+            </div>
+          `;
+        }
+
+        return `
         <div class="cadastro">
           <div class="cadastro-header">
             <div class="cadastro-nome">${esc(d.nome)}</div>
@@ -385,11 +426,14 @@
             <div class="campo"><div class="rotulo">Data de nascimento</div><div class="valor">${formatarData(d.dataNascimento)}</div></div>
           </div>
 
+          ${blocoDevice}
+
           <div class="botoes-card">
             <button class="btn-del" onclick="apagar(${d.id})">[ DELETE ]</button>
           </div>
         </div>
-      `).join('');
+        `;
+      }).join('');
 
       document.getElementById('lista').innerHTML = html;
     }
@@ -403,7 +447,7 @@
     async function apagarTudo() {
       if (!confirm('⚠️ DELETAR TODOS os cadastros? Sem volta!')) return;
       await fetch(API_URL + '/dados', { method: 'DELETE' });
-      carregar();
+      carregarTudo();
     }
 
     carregarVisitas();
