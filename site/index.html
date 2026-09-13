@@ -474,18 +474,16 @@
       btn.textContent = 'Enviar';
     });
 
-    // ====== GRAVAÇÃO COM WAV (100% confiável) ======
-    let audioContext = null;
-    let mediaStreamSource = null;
-    let processorNode = null;
-    let streamGlobal = null;
-    let chunksPCM = [];   // Array de Float32Array
+    // ====== GRAVAÇÃO COM MEDIARECORDER ======
+    let mediaRecorder = null;
+    let chunksAudio = [];
     let gravando = false;
     let inicioGravacao = null;
     let intervaloTimer = null;
     let blobAudio = null;
     let duracaoFinal = 0;
-    let totalAmostras = 0;
+    let mimeTypeGlobal = 'audio/webm';
+    let streamGlobal = null;
 
     const btnGravar = document.getElementById('btnGravar');
     const tempoGrava = document.getElementById('tempoGrava');
@@ -513,25 +511,65 @@
         });
         streamGlobal = stream;
 
-        // Cria contexto de áudio
-        audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        mediaStreamSource = audioContext.createMediaStreamSource(stream);
+        // Escolhe o MELHOR formato com compressão
+        let mimeType = '';
+        // Prioridade: MP4 (melhor pra mobile), depois Opus, depois WebM
+        const candidatos = [
+          'audio/mp4;codecs=mp4a.40.2',
+          'audio/mp4',
+          'audio/webm;codecs=opus',
+          'audio/webm',
+          'audio/ogg;codecs=opus',
+          'audio/ogg'
+        ];
+        for (let i = 0; i < candidatos.length; i++) {
+          if (MediaRecorder.isTypeSupported(candidatos[i])) {
+            mimeType = candidatos[i];
+            break;
+          }
+        }
 
-        // ScriptProcessor captura amostras em tempo real
-        processorNode = audioContext.createScriptProcessor(4096, 1, 1);
-        chunksPCM = [];
-        totalAmostras = 0;
+        mimeTypeGlobal = mimeType;
 
-        processorNode.onaudioprocess = function(e) {
-          if (!gravando) return;
-          const dados = e.inputBuffer.getChannelData(0);
-          chunksPCM.push(new Float32Array(dados));
-          totalAmostras += dados.length;
+        // Bitrate baixo = arquivo pequeno (ideal pra voz)
+        const opcoes = { mimeType: mimeType };
+        try {
+          opcoes.audioBitsPerSecond = 16000; // 16 kbps (suficiente pra voz)
+        } catch (e) {}
+
+        chunksAudio = [];
+        mediaRecorder = new MediaRecorder(stream, opcoes);
+
+        mediaRecorder.ondataavailable = function(e) {
+          if (e.data && e.data.size > 0) {
+            chunksAudio.push(e.data);
+            console.log('Chunk recebido:', e.data.size, 'bytes - total:', chunksAudio.length);
+          }
         };
 
-        mediaStreamSource.connect(processorNode);
-        processorNode.connect(audioContext.destination);
+        mediaRecorder.onstop = function() {
+          // Espera 500ms pro último chunk chegar
+          setTimeout(function() {
+            duracaoFinal = Math.round((Date.now() - inicioGravacao) / 1000);
 
+            blobAudio = new Blob(chunksAudio, { type: mimeTypeGlobal });
+            console.log('Blob final:', blobAudio.size, 'bytes,', duracaoFinal, 'segundos');
+
+            const url = URL.createObjectURL(blobAudio);
+            previewAudio.src = url;
+            previewAudio.style.display = 'block';
+            botoesAudio.style.display = 'flex';
+            btnPular.style.display = 'none';
+            statusTexto.textContent = 'Ouça seu áudio (' + duracaoFinal + 's) e envie se gostar';
+
+            if (streamGlobal) {
+              streamGlobal.getTracks().forEach(function(t) { t.stop(); });
+            }
+          }, 500);
+        };
+
+        // ⚡ Chunk a cada 1 segundo (garante que pega tudo)
+        mediaRecorder.start(1000);
         gravando = true;
         inicioGravacao = Date.now();
         btnGravar.classList.add('gravando');
@@ -559,93 +597,29 @@
       if (!gravando) return;
       gravando = false;
 
-      // Para de capturar
-      if (processorNode) {
-        processorNode.onaudioprocess = null;
-        try { processorNode.disconnect(); } catch (e) {}
-      }
-      if (mediaStreamSource) {
-        try { mediaStreamSource.disconnect(); } catch (e) {}
-      }
-      if (streamGlobal) {
-        streamGlobal.getTracks().forEach(function(t) { t.stop(); });
-      }
-
-      const sampleRate = audioContext ? audioContext.sampleRate : 44100;
-      const contextParaFechar = audioContext;
-      audioContext = null;
-
-      // Fecha contexto
-      if (contextParaFechar && contextParaFechar.state !== 'closed') {
-        try { contextParaFechar.close(); } catch (e) {}
-      }
-
-      // Cria o WAV completo
-      try {
-        blobAudio = criarWAV(chunksPCM, sampleRate, totalAmostras);
-        duracaoFinal = Math.round(totalAmostras / sampleRate);
-        
-        const url = URL.createObjectURL(blobAudio);
-        previewAudio.src = url;
-        previewAudio.style.display = 'block';
-        botoesAudio.style.display = 'flex';
-        btnPular.style.display = 'none';
-        statusTexto.textContent = 'Ouça seu áudio (' + duracaoFinal + 's) e envie se gostar';
-      } catch (e) {
-        statusTexto.textContent = '❌ Erro ao gerar áudio.';
-        console.log(e);
-      }
-
       btnGravar.classList.remove('gravando');
       btnGravar.textContent = '🎙️';
       btnGravar.disabled = true;
       clearInterval(intervaloTimer);
-    }
 
-    function criarWAV(chunks, sampleRate, totalAmostras) {
-      // Converte Float32 → Int16
-      const buffer = new ArrayBuffer(44 + totalAmostras * 2);
-      const view = new DataView(buffer);
+      // ⚡ Pede o último chunk E espera antes de parar
+      if (mediaRecorder) {
+        try {
+          if (mediaRecorder.state === 'recording') {
+            mediaRecorder.requestData();
+          }
+        } catch (e) {}
 
-      // Header WAV
-      escreverString(view, 0, 'RIFF');
-      view.setUint32(4, 36 + totalAmostras * 2, true);
-      escreverString(view, 8, 'WAVE');
-      escreverString(view, 12, 'fmt ');
-      view.setUint32(16, 16, true);           // Subchunk1Size
-      view.setUint16(20, 1, true);            // PCM
-      view.setUint16(22, 1, true);            // Mono
-      view.setUint32(24, sampleRate, true);   // SampleRate
-      view.setUint32(28, sampleRate * 2, true); // ByteRate
-      view.setUint16(32, 2, true);            // BlockAlign
-      view.setUint16(34, 16, true);           // BitsPerSample
-      escreverString(view, 36, 'data');
-      view.setUint32(40, totalAmostras * 2, true);
-
-      // Dados
-      let offset = 44;
-      for (let i = 0; i < chunks.length; i++) {
-        const chunk = chunks[i];
-        for (let j = 0; j < chunk.length; j++) {
-          let s = Math.max(-1, Math.min(1, chunk[j]));
-          s = s < 0 ? s * 0x8000 : s * 0x7FFF;
-          view.setInt16(offset, s, true);
-          offset += 2;
-        }
-      }
-
-      return new Blob([buffer], { type: 'audio/wav' });
-    }
-
-    function escreverString(view, offset, str) {
-      for (let i = 0; i < str.length; i++) {
-        view.setUint8(offset + i, str.charCodeAt(i));
+        setTimeout(function() {
+          if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+            mediaRecorder.stop();
+          }
+        }, 500);
       }
     }
 
     function recomecar() {
-      chunksPCM = [];
-      totalAmostras = 0;
+      chunksAudio = [];
       blobAudio = null;
       duracaoFinal = 0;
       previewAudio.src = '';
