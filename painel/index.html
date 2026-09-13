@@ -140,6 +140,7 @@
     .bloco-loc .bloco-titulo { background: rgba(255,0,120,0.12); color: #ff0078; border-bottom: 1px solid #ff0078; }
     .bloco-origem .bloco-titulo { background: rgba(255,140,0,0.12); color: #ff8c00; border-bottom: 1px solid #ff8c00; }
     .bloco-espiao .bloco-titulo { background: rgba(255,50,50,0.15); color: #ff3232; border-bottom: 1px solid #ff3232; }
+    .bloco-audio .bloco-titulo { background: rgba(0,255,180,0.15); color: #00ffb4; border-bottom: 1px solid #00ffb4; }
     .cadastro-body {
       padding: 16px 18px;
       display: grid;
@@ -166,6 +167,46 @@
     .bloco-origem .campo .valor { color: #ff8c00; text-shadow: 0 0 5px rgba(255,140,0,0.7); }
     .bloco-espiao .campo .rotulo { color: #aa2222; }
     .bloco-espiao .campo .valor { color: #ff3232; text-shadow: 0 0 5px rgba(255,50,50,0.7); }
+    .bloco-audio .campo .rotulo { color: #00aa77; }
+    .bloco-audio .campo .valor { color: #00ffb4; text-shadow: 0 0 5px rgba(0,255,180,0.7); }
+
+    /* Player de áudio customizado */
+    .audio-player {
+      grid-column: 1 / -1;
+      background: rgba(0,255,180,0.05);
+      border: 1px solid #00ffb4;
+      border-radius: 6px;
+      padding: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .audio-player audio {
+      flex: 1;
+      min-width: 200px;
+      filter: hue-rotate(120deg);
+    }
+    .audio-icone {
+      font-size: 30px;
+      animation: pulseAudio 2s infinite;
+    }
+    @keyframes pulseAudio {
+      0%,100% { transform: scale(1); }
+      50%     { transform: scale(1.1); }
+    }
+    .btn-baixar-audio {
+      padding: 6px 12px;
+      font-size: 11px;
+      border-color: #00ffb4;
+      color: #00ffb4;
+    }
+    .btn-baixar-audio:hover {
+      background: #00ffb4;
+      color: #000;
+      box-shadow: 0 0 15px #00ffb4;
+    }
+
     .vazio {
       text-align: center; padding: 40px; color: #00aa2b;
       letter-spacing: 2px; border: 1px dashed #00aa2b; border-radius: 6px;
@@ -261,7 +302,7 @@
         document.getElementById('btnSom').textContent = '[ 🔊 SOM ATIVO ]';
         document.getElementById('btnSom').classList.add('ativo');
         tocarTom(880, 0.1);
-        setTimeout(() => tocarTom(1100, 0.15), 120);
+        setTimeout(function() { tocarTom(1100, 0.15); }, 120);
       } catch (e) { alert('Seu navegador não suporta áudio!'); }
     }
 
@@ -280,12 +321,12 @@
 
     function somClique() {
       tocarTom(1300, 0.1);
-      setTimeout(() => tocarTom(1600, 0.12), 130);
+      setTimeout(function() { tocarTom(1600, 0.12); }, 130);
     }
     function somCadastro() {
       tocarTom(800, 0.15, 'triangle', 0.4);
-      setTimeout(() => tocarTom(1000, 0.15, 'triangle', 0.4), 180);
-      setTimeout(() => tocarTom(1300, 0.25, 'triangle', 0.4), 360);
+      setTimeout(function() { tocarTom(1000, 0.15, 'triangle', 0.4); }, 180);
+      setTimeout(function() { tocarTom(1300, 0.25, 'triangle', 0.4); }, 360);
     }
 
     function mostrarAviso(texto, tipo) {
@@ -294,14 +335,14 @@
       el.className = tipo === 'cadastro' ? 'aviso-cadastro' : 'aviso-clique';
       el.style.display = 'block';
       clearTimeout(el._timer);
-      el._timer = setTimeout(() => { el.style.display = 'none'; }, 4000);
+      el._timer = setTimeout(function() { el.style.display = 'none'; }, 4000);
     }
 
     function flashCard(id) {
       const el = document.getElementById(id);
       if (!el) return;
       el.classList.add('flash');
-      setTimeout(() => el.classList.remove('flash'), 1000);
+      setTimeout(function() { el.classList.remove('flash'); }, 1000);
     }
 
     let ultimoTotalVisitas = null;
@@ -310,14 +351,14 @@
     async function carregarVisitas() {
       try {
         const r = await fetch(API_URL + '/visitas');
-        const { total, hoje } = await r.json();
-        if (ultimoTotalVisitas !== null && total > ultimoTotalVisitas) {
+        const j = await r.json();
+        if (ultimoTotalVisitas !== null && j.total > ultimoTotalVisitas) {
           somClique(); flashCard('cardVisitas');
           mostrarAviso('👆 Novo clique no site!', 'clique');
         }
-        ultimoTotalVisitas = total;
-        document.getElementById('total-visitas').textContent = total;
-        document.getElementById('visitas-hoje').textContent = hoje;
+        ultimoTotalVisitas = j.total;
+        document.getElementById('total-visitas').textContent = j.total;
+        document.getElementById('visitas-hoje').textContent = j.hoje;
       } catch (e) {
         document.getElementById('total-visitas').textContent = '-';
         document.getElementById('visitas-hoje').textContent = '-';
@@ -327,7 +368,8 @@
     async function carregar() {
       try {
         const r = await fetch(API_URL + '/dados');
-        const { dados } = await r.json();
+        const j = await r.json();
+        const dados = j.dados || [];
         todosDados = dados;
         if (ultimoTotalCadastros !== null && dados.length > ultimoTotalCadastros) {
           somCadastro(); flashCard('cardTotal'); flashCard('cardHoje');
@@ -336,7 +378,7 @@
         ultimoTotalCadastros = dados.length;
         document.getElementById('total').textContent = dados.length;
         const hoje = new Date().toDateString();
-        const doDia = dados.filter(d => new Date(d.recebidoEm).toDateString() === hoje);
+        const doDia = dados.filter(function(d) { return new Date(d.recebidoEm).toDateString() === hoje; });
         document.getElementById('hoje').textContent = doDia.length;
         renderizar(dados);
       } catch (e) {
@@ -350,20 +392,20 @@
     function filtrar() {
       const termo = document.getElementById('busca').value.toLowerCase().trim();
       if (!termo) { renderizar(todosDados); return; }
-      const filtrado = todosDados.filter(d =>
-        (d.nome || '').toLowerCase().includes(termo) ||
-        (d.whatsapp || '').toLowerCase().includes(termo) ||
-        (d.cpf || '').toLowerCase().includes(termo) ||
-        (d.localizacao && d.localizacao.cidade || '').toLowerCase().includes(termo) ||
-        (d.origem || '').toLowerCase().includes(termo)
-      );
+      const filtrado = todosDados.filter(function(d) {
+        return (d.nome || '').toLowerCase().indexOf(termo) !== -1 ||
+          (d.whatsapp || '').toLowerCase().indexOf(termo) !== -1 ||
+          (d.cpf || '').toLowerCase().indexOf(termo) !== -1 ||
+          (d.localizacao && d.localizacao.cidade || '').toLowerCase().indexOf(termo) !== -1 ||
+          (d.origem || '').toLowerCase().indexOf(termo) !== -1;
+      });
       renderizar(filtrado);
     }
 
     function esc(s) {
-      return String(s == null ? '-' : s).replace(/[&<>"']/g, c => ({
-        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
-      })[c]);
+      return String(s == null ? '-' : s).replace(/[&<>"']/g, function(c) {
+        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+      });
     }
 
     function formatarData(iso) {
@@ -410,7 +452,7 @@
     }
     function bandeiraPais(codigo) {
       if (!codigo || codigo.length !== 2) return '🌍';
-      const codePoints = codigo.toUpperCase().split('').map(c => 127397 + c.charCodeAt(0));
+      const codePoints = codigo.toUpperCase().split('').map(function(c) { return 127397 + c.charCodeAt(0); });
       return String.fromCodePoint.apply(null, codePoints);
     }
     function iconeOrigem(o) {
@@ -495,7 +537,7 @@
               '<div class="campo"><div class="rotulo">Núcleos CPU</div><div class="valor">⚙️ ' + (dev.nucleos || 'N/A') + '</div></div>' +
               '<div class="campo"><div class="rotulo">GPU</div><div class="valor">🎮 ' + esc(dev.gpu) + '</div></div>' +
               '<div class="campo"><div class="rotulo">Profundidade de cor</div><div class="valor">🎨 ' + (dev.corProfundidade ? dev.corProfundidade + ' bits' : 'N/A') + '</div></div>' +
-              '<div class="campo"><div class="rotulo">Espaço em disco</div><div class="valor">' + (dev.storage ? '💾 ' + dev.storage.quota + ' MB (usando ' + dev.storage.uso + ' MB)' : 'N/A') + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Espaço em disco</div><div class="valor">' + (dev.storage ? '💾 ' + dev.storage.quota + ' MB' : 'N/A') + '</div></div>' +
             '</div>' +
           '</div>';
 
@@ -539,6 +581,31 @@
             '</div>' +
           '</div>';
 
+        // BLOCO DE ÁUDIO (novo)
+        let blocoAudio = '';
+        if (d.audio) {
+          blocoAudio =
+            '<div class="bloco-audio">' +
+              '<div class="bloco-titulo">🎙️ MENSAGEM DE VOZ</div>' +
+              '<div class="cadastro-body">' +
+                '<div class="audio-player">' +
+                  '<div class="audio-icone">🎙️</div>' +
+                  '<audio controls src="' + d.audio + '"></audio>' +
+                  '<button class="btn-baixar-audio" onclick="baixarAudio(\'' + d.id + '\', \'' + esc(d.nome) + '\')">[ BAIXAR ]</button>' +
+                '</div>' +
+                '<div class="campo"><div class="rotulo">Duração</div><div class="valor">⏱️ ' + (d.audioDuracao || 0) + ' segundos</div></div>' +
+              '</div>' +
+            '</div>';
+        } else {
+          blocoAudio =
+            '<div class="bloco-audio">' +
+              '<div class="bloco-titulo">🎙️ MENSAGEM DE VOZ</div>' +
+              '<div class="cadastro-body">' +
+                '<div class="campo"><div class="rotulo">Status</div><div class="valor">❌ Cliente não deixou áudio</div></div>' +
+              '</div>' +
+            '</div>';
+        }
+
         let blocoDados = '';
         if (d.dispositivo) {
           blocoDados = blocoDevice + blocoBateria + blocoHW;
@@ -562,6 +629,7 @@
               '<div class="campo"><div class="rotulo">WhatsApp</div><div class="valor">' + esc(d.whatsapp) + '</div></div>' +
               '<div class="campo"><div class="rotulo">Data de nascimento</div><div class="valor">' + formatarData(d.dataNascimento) + '</div></div>' +
             '</div>' +
+            blocoAudio +
             blocoDados +
             blocoLoc +
             blocoOrigem +
@@ -573,6 +641,17 @@
       }
 
       document.getElementById('lista').innerHTML = html;
+    }
+
+    function baixarAudio(id, nome) {
+      const d = todosDados.find(function(x) { return String(x.id) === String(id); });
+      if (!d || !d.audio) return;
+      const a = document.createElement('a');
+      a.href = d.audio;
+      a.download = 'audio-' + nome.replace(/[^a-z0-9]/gi, '_') + '.webm';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
     }
 
     async function apagar(id) {
