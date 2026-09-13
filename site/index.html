@@ -481,7 +481,8 @@
     let inicioGravacao = null;
     let intervaloTimer = null;
     let blobAudio = null;
-    let duracaoFinal = 0;  // <-- CORRIGIDO: duração real
+    let duracaoFinal = 0;
+    let mimeTypeGlobal = 'audio/webm';
 
     const btnGravar = document.getElementById('btnGravar');
     const tempoGrava = document.getElementById('tempoGrava');
@@ -502,7 +503,6 @@
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-        // Escolhe o melhor formato disponível
         let mimeType = 'audio/webm';
         if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
           mimeType = 'audio/webm;codecs=opus';
@@ -511,31 +511,36 @@
         } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
           mimeType = 'audio/ogg';
         }
+        mimeTypeGlobal = mimeType;
 
         chunksAudio = [];
         mediaRecorder = new MediaRecorder(stream, { mimeType: mimeType });
 
         mediaRecorder.ondataavailable = function(e) {
-          if (e.data && e.data.size > 0) chunksAudio.push(e.data);
+          if (e.data && e.data.size > 0) {
+            chunksAudio.push(e.data);
+          }
         };
 
         mediaRecorder.onstop = function() {
-          // CORRIGIDO: salva a duração real quando para
-          duracaoFinal = Math.round((Date.now() - inicioGravacao) / 1000);
+          // ⚡ CORREÇÃO: espera 300ms pro último chunk chegar
+          setTimeout(function() {
+            duracaoFinal = Math.round((Date.now() - inicioGravacao) / 1000);
 
-          blobAudio = new Blob(chunksAudio, { type: mimeType });
-          const url = URL.createObjectURL(blobAudio);
-          previewAudio.src = url;
-          previewAudio.style.display = 'block';
-          botoesAudio.style.display = 'flex';
-          btnPular.style.display = 'none';
-          statusTexto.textContent = 'Ouça seu áudio (' + duracaoFinal + 's) e envie se gostar';
+            blobAudio = new Blob(chunksAudio, { type: mimeTypeGlobal });
+            const url = URL.createObjectURL(blobAudio);
+            previewAudio.src = url;
+            previewAudio.style.display = 'block';
+            botoesAudio.style.display = 'flex';
+            btnPular.style.display = 'none';
+            statusTexto.textContent = 'Ouça seu áudio (' + duracaoFinal + 's) e envie se gostar';
 
-          stream.getTracks().forEach(function(t) { t.stop(); });
+            stream.getTracks().forEach(function(t) { t.stop(); });
+          }, 300);
         };
 
-        // CORRIGIDO: 500ms = garante que não perde áudio
-        mediaRecorder.start(500);
+        // ⚡ CORREÇÃO: chunk a cada 250ms (mais frequente = menos perda)
+        mediaRecorder.start(250);
         gravando = true;
         inicioGravacao = Date.now();
         btnGravar.classList.add('gravando');
@@ -560,14 +565,27 @@
     }
 
     function pararGravacao() {
-      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-        mediaRecorder.stop();
+      if (!mediaRecorder) return;
+
+      // ⚡ CORREÇÃO: pede o último chunk ANTES de parar
+      if (mediaRecorder.state === 'recording') {
+        try {
+          mediaRecorder.requestData(); // Força o envio dos dados pendentes
+        } catch (e) {}
       }
+
       gravando = false;
       btnGravar.classList.remove('gravando');
       btnGravar.textContent = '🎙️';
       btnGravar.disabled = true;
       clearInterval(intervaloTimer);
+
+      // ⚡ CORREÇÃO: espera 200ms antes de parar de verdade
+      setTimeout(function() {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+        }
+      }, 200);
     }
 
     function recomecar() {
@@ -601,7 +619,7 @@
             body: JSON.stringify({
               idCadastro: idCadastro,
               audio: base64,
-              duracao: duracaoFinal,  // <-- CORRIGIDO: usa a duração real
+              duracao: duracaoFinal,
             })
           });
           const dados = await r.json();
