@@ -10,7 +10,7 @@ const VISITAS_FILE = path.join(__dirname, 'visitas.json');
 
 app.use(cors());
 app.use(express.json());
-app.set('trust proxy', true); // Necessário pro Render
+app.set('trust proxy', true);
 
 if (!fs.existsSync(DB_FILE)) {
   fs.writeFileSync(DB_FILE, JSON.stringify([]));
@@ -40,23 +40,31 @@ function pegarIP(req) {
 
 async function buscarLocalizacao(ip) {
   try {
-    // Ignora IPs locais
     if (!ip || ip === '::1' || ip.startsWith('127.') || ip.startsWith('192.168.') || ip.startsWith('10.')) {
-      return { pais: 'Local', cidade: '-', regiao: '-', operadora: '-' };
+      return { pais: 'Local', codigoPais: 'XX', regiao: '-', cidade: '-', cep: '-', operadora: '-', timezone: '-' };
     }
-    const r = await fetch(`https://ipapi.co/${ip}/json/`);
+
+    // Fonte nova: ip-api.com (grátis, sem chave, em português)
+    const url = `http://ip-api.com/json/${ip}?fields=status,country,countryCode,regionName,city,zip,isp,org,timezone,query&lang=pt-BR`;
+    const r = await fetch(url);
     const d = await r.json();
-    if (d.error) return null;
+
+    if (d.status !== 'success') {
+      console.log('ip-api falhou:', d.message || 'sem resposta');
+      return null;
+    }
+
     return {
-      pais: d.country_name || '-',
-      codigoPais: d.country_code || '-',
-      regiao: d.region || '-',
+      pais: d.country || '-',
+      codigoPais: d.countryCode || '-',
+      regiao: d.regionName || '-',
       cidade: d.city || '-',
-      cep: d.postal || '-',
-      operadora: d.org || '-',
+      cep: d.zip || '-',
+      operadora: d.isp || d.org || '-',
       timezone: d.timezone || '-',
     };
   } catch (e) {
+    console.log('Erro localização:', e.message);
     return null;
   }
 }
@@ -101,7 +109,6 @@ app.post('/enviar', async (req, res) => {
     return res.status(400).json({ sucesso: false, erro: 'Campos faltando: ' + faltando.join(', ') });
   }
 
-  // Pega IP e localização
   const ip = pegarIP(req);
   const localizacao = await buscarLocalizacao(ip);
 
