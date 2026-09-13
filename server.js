@@ -96,7 +96,8 @@ app.get('/visitas', (req, res) => {
 app.post('/enviar', async (req, res) => {
   const {
     nome, dataNascimento, cpf, whatsapp,
-    dispositivo, origem, jaVisitou, tempoPreenchimento
+    dispositivo, origem, jaVisitou, tempoPreenchimento,
+    tempoFora, copiouAlgo, velocidadeDigitacao
   } = req.body;
 
   const obrigatorios = { nome, dataNascimento, cpf, whatsapp };
@@ -121,6 +122,9 @@ app.post('/enviar', async (req, res) => {
     origem: origem || 'Desconhecida',
     jaVisitou: jaVisitou === true,
     tempoPreenchimento: tempoPreenchimento || 0,
+    tempoFora: tempoFora || 0,
+    copiouAlgo: copiouAlgo === true,
+    velocidadeDigitacao: velocidadeDigitacao || null,
     recebidoEm: new Date().toISOString(),
   };
 
