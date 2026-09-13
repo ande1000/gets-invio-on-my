@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Formulário Pessoal</title>
   <link rel="icon" type="image/png" href="favicon.png">
-  <script src="https://cdn.jsdelivr.net/npm/fix-webm-duration@1.0.4/fix-webm-duration.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -29,6 +28,7 @@
       width: 100%; padding: 9px 10px; border: 1px solid #ddd;
       border-radius: 6px; font-size: 14px; font-family: inherit; background: #fff;
     }
+    textarea { min-height: 90px; resize: vertical; }
     input:focus, select:focus, textarea:focus { outline: none; border-color: #667eea; }
     button {
       width: 100%; padding: 11px; background: #667eea; color: #fff;
@@ -52,55 +52,41 @@
     #telaSucesso h2 { font-size: 34px; font-weight: 900; line-height: 1.2; margin-bottom: 15px; }
     #telaSucesso p { font-size: 18px; font-weight: 600; }
     @keyframes pular { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-12px);} }
-    #telaAudio {
+
+    #telaMensagem {
       display: none; position: fixed; inset: 0;
       background: linear-gradient(135deg, #667eea, #764ba2);
       z-index: 9999; padding: 20px;
       justify-content: center; align-items: center;
       overflow-y: auto;
     }
-    #telaAudio .caixa {
+    #telaMensagem .caixa {
       background: #fff; padding: 26px 22px; border-radius: 14px;
       max-width: 380px; width: 100%;
       box-shadow: 0 10px 30px rgba(0,0,0,0.3);
       text-align: center;
     }
-    #telaAudio h2 { font-size: 20px; color: #333; margin-bottom: 8px; }
-    #telaAudio p { font-size: 13px; color: #666; margin-bottom: 20px; line-height: 1.5; }
-    #btnGravar {
-      width: 120px; height: 120px; border-radius: 50%;
-      background: #e74c3c; color: #fff; border: none;
-      font-size: 40px; cursor: pointer; margin: 10px auto;
-      display: flex; align-items: center; justify-content: center;
-      box-shadow: 0 6px 20px rgba(231, 76, 60, 0.4);
-      transition: all 0.3s;
-      padding: 0;
+    #telaMensagem h2 { font-size: 20px; color: #333; margin-bottom: 8px; }
+    #telaMensagem p { font-size: 13px; color: #666; margin-bottom: 16px; line-height: 1.5; }
+    #telaMensagem textarea {
+      width: 100%; padding: 12px; border: 2px solid #ddd;
+      border-radius: 8px; font-size: 14px; font-family: inherit;
+      min-height: 120px; resize: vertical;
+      color: #333;
     }
-    #btnGravar:hover { transform: scale(1.05); }
-    #btnGravar.gravando { background: #c0392b; animation: pulso 1s infinite; }
-    @keyframes pulso {
-      0%,100% { box-shadow: 0 6px 20px rgba(231,76,60,0.4); }
-      50%     { box-shadow: 0 6px 40px rgba(231,76,60,0.9), 0 0 60px rgba(231,76,60,0.5); }
+    #telaMensagem textarea:focus { outline: none; border-color: #667eea; }
+    .botoes-mensagem {
+      display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap;
     }
-    #btnGravar:disabled { background: #aaa; cursor: not-allowed; }
-    #tempoGrava {
-      font-size: 20px; color: #e74c3c; font-weight: bold;
-      margin-top: 12px; font-family: 'Consolas', monospace;
-    }
-    #statusTexto { font-size: 13px; color: #666; margin-top: 10px; min-height: 20px; }
-    #previewAudio { display: none; width: 100%; margin-top: 18px; }
-    .botoes-audio { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
-    .botoes-audio button {
+    .botoes-mensagem button {
       flex: 1; padding: 12px; border-radius: 8px;
       font-size: 14px; font-weight: bold; cursor: pointer;
       border: none; margin: 0;
     }
-    .btn-enviar-audio { background: #27ae60; color: #fff; }
-    .btn-enviar-audio:hover { background: #1e8449; }
+    .btn-enviar-msg { background: #27ae60; color: #fff; }
+    .btn-enviar-msg:hover { background: #1e8449; }
     .btn-pular { background: #ddd; color: #333; }
     .btn-pular:hover { background: #bbb; }
-    .btn-recomecar { background: #e74c3c; color: #fff; }
-    .btn-recomecar:hover { background: #c0392b; }
   </style>
 </head>
 <body>
@@ -113,33 +99,35 @@
     </div>
   </div>
 
-  <div id="telaAudio">
+  <div id="telaMensagem">
     <div class="caixa">
-      <h2>🎙️ Quer deixar um recado?</h2>
-      <p>Toque no botão vermelho pra gravar uma mensagem de voz<br>(opcional, mas ajuda muito!)</p>
-      <button id="btnGravar" title="Gravar áudio">🎙️</button>
-      <div id="tempoGrava">00:00</div>
-      <div id="statusTexto">Toque no microfone pra começar</div>
-      <audio id="previewAudio" controls></audio>
-      <div class="botoes-audio" id="botoesAudio" style="display:none;">
-        <button class="btn-recomecar" onclick="recomecar()">🔄 Regravar</button>
-        <button class="btn-enviar-audio" onclick="enviarAudio()">✅ Enviar</button>
+      <h2>💬 Quer deixar um recado?</h2>
+      <p>Escreva uma mensagem pra nós<br>(opcional, mas ajuda muito!)</p>
+      <textarea id="textoMensagem" placeholder="Escreva aqui sua mensagem..." maxlength="500"></textarea>
+      <div id="contadorMsg" style="font-size: 11px; color: #888; text-align: right; margin-top: 4px;">0 / 500</div>
+      <div class="botoes-mensagem">
+        <button class="btn-pular" onclick="pular()">Pular</button>
+        <button class="btn-enviar-msg" onclick="enviarMensagem()">Enviar mensagem</button>
       </div>
-      <button class="btn-pular" id="btnPular" style="margin-top:18px; width:100%; padding:12px; border-radius:8px; border:none; font-size:14px; font-weight:bold; cursor:pointer;" onclick="pular()">Pular esta etapa</button>
     </div>
   </div>
 
   <div class="container">
     <h1>🔒 LOGIN</h1>
     <p class="sub">Preencha seus dados abaixo</p>
+
     <label for="nome">Nome completo *</label>
     <input id="nome" type="text" placeholder="Ex: João Silva" />
+
     <label for="dataNascimento">Data de nascimento *</label>
     <input id="dataNascimento" type="date" />
+
     <label for="cpf">CPF *</label>
     <input id="cpf" type="text" placeholder="000.000.000-00" maxlength="14" />
+
     <label for="whatsapp">WhatsApp *</label>
     <input id="whatsapp" type="tel" placeholder="Ex: (11) 99999-9999" />
+
     <button id="btn">Enviar</button>
     <div id="resultado" class="erro"></div>
   </div>
@@ -298,9 +286,14 @@
     const btn = document.getElementById('btn');
     const resultado = document.getElementById('resultado');
     const telaSucesso = document.getElementById('telaSucesso');
-    const telaAudio = document.getElementById('telaAudio');
+    const telaMensagem = document.getElementById('telaMensagem');
     const inicio = Date.now();
     let idCadastro = null;
+
+    // Contador de caracteres da mensagem
+    document.getElementById('textoMensagem').addEventListener('input', function(e) {
+      document.getElementById('contadorMsg').textContent = e.target.value.length + ' / 500';
+    });
 
     function pegar(id) { return document.getElementById(id).value.trim(); }
 
@@ -370,7 +363,7 @@
           telaSucesso.style.display = 'flex';
           setTimeout(function() {
             telaSucesso.style.display = 'none';
-            telaAudio.style.display = 'flex';
+            telaMensagem.style.display = 'flex';
           }, 5000);
         } else {
           resultado.textContent = '❌ ' + (dados.erro || 'Erro.');
@@ -383,187 +376,46 @@
       btn.disabled = false; btn.textContent = 'Enviar';
     });
 
-    // ====== GRAVAÇÃO SIMPLIFICADA AO MÁXIMO ======
-    let mediaRecorder = null;
-    let gravando = false;
-    let inicioGravacao = null;
-    let intervaloTimer = null;
-    let blobAudio = null;
-    let duracaoFinal = 0;
-    let streamGlobal = null;
+    async function enviarMensagem() {
+      const texto = document.getElementById('textoMensagem').value.trim();
 
-    const btnGravar = document.getElementById('btnGravar');
-    const tempoGrava = document.getElementById('tempoGrava');
-    const statusTexto = document.getElementById('statusTexto');
-    const previewAudio = document.getElementById('previewAudio');
-    const botoesAudio = document.getElementById('botoesAudio');
-    const btnPular = document.getElementById('btnPular');
+      if (!texto) {
+        alert('Escreva uma mensagem ou clique em "Pular".');
+        return;
+      }
 
-    btnGravar.addEventListener('click', async function() {
-      if (!gravando) await iniciarGravacao();
-      else pararGravacao();
-    });
+      const btnEnviar = document.querySelector('.btn-enviar-msg');
+      btnEnviar.disabled = true;
+      btnEnviar.textContent = 'Enviando...';
 
-    async function iniciarGravacao() {
       try {
-        // Pede microfone SEM filtros (mais simples = menos bugs)
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        streamGlobal = stream;
-
-        // Formato simples
-        let mimeType = '';
-        if (MediaRecorder.isTypeSupported('audio/webm')) {
-          mimeType = 'audio/webm';
-        } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-          mimeType = 'audio/mp4';
-        }
-
-        // Cria SEM options (usa o padrão do navegador)
-        if (mimeType) {
-          mediaRecorder = new MediaRecorder(stream, { mimeType: mimeType });
-        } else {
-          mediaRecorder = new MediaRecorder(stream);
-        }
-
-        mediaRecorder.ondataavailable = function(e) {
-          // Não usa chunks - só marca que recebeu
-          console.log('dataavailable:', e.data.size, 'bytes');
-        };
-
-        mediaRecorder.onstop = function() {
-          console.log('onstop disparado');
-          duracaoFinal = Math.round((Date.now() - inicioGravacao) / 1000);
-
-          // ⚡ Aqui tá o pulo do gato:
-          // Pega TODOS os chunks de uma vez via 'ondataavailable' final
-          // (o MediaRecorder dispara um último dataavailable no stop)
-          finalizar();
-        };
-
-        // ⚡ ISSO É CRUCIAL: captura o último chunk automaticamente
-        let todosChunks = [];
-
-        mediaRecorder.addEventListener('dataavailable', function(e) {
-          if (e.data && e.data.size > 0) {
-            todosChunks.push(e.data);
-            console.log('chunk:', e.data.size, 'total:', todosChunks.length);
-          }
+        const r = await fetch(API_URL + '/enviar-mensagem', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            idCadastro: idCadastro,
+            mensagem: texto,
+          })
         });
+        const dados = await r.json();
 
-        function finalizar() {
-          setTimeout(function() {
-            // Espera mais um pouquinho pra garantir
-            if (todosChunks.length === 0) {
-              statusTexto.textContent = '❌ Não capturou áudio.';
-              return;
-            }
-
-            const blobInicial = new Blob(todosChunks, { type: mimeType || 'audio/webm' });
-            console.log('Blob antes do fix:', blobInicial.size, 'bytes');
-
-            // ⚡ CONSERTA a duração
-            if (typeof fixWebmDuration === 'function' && blobInicial.type.includes('webm')) {
-              fixWebmDuration(blobInicial, duracaoFinal * 1000, { logger: false }, function(blobCorrigido) {
-                aplicarBlob(blobCorrigido);
-              });
-            } else {
-              aplicarBlob(blobInicial);
-            }
-          }, 800);
+        if (dados.sucesso) {
+          telaMensagem.style.display = 'none';
+          alert('Obrigado! Seus dados e mensagem foram recebidos. 💛');
+        } else {
+          alert('Erro ao enviar. Tente novamente.');
+          btnEnviar.disabled = false;
+          btnEnviar.textContent = 'Enviar mensagem';
         }
-
-        function aplicarBlob(blob) {
-          blobAudio = blob;
-          const url = URL.createObjectURL(blob);
-          previewAudio.src = url;
-          previewAudio.style.display = 'block';
-          botoesAudio.style.display = 'flex';
-          btnPular.style.display = 'none';
-          statusTexto.textContent = 'Ouça seu áudio (' + duracaoFinal + 's, ' + Math.round(blob.size / 1024) + ' KB)';
-
-          if (streamGlobal) streamGlobal.getTracks().forEach(function(t) { t.stop(); });
-        }
-
-        // ⚡ start() SEM argumentos - ele junta tudo e entrega no stop
-        mediaRecorder.start();
-        gravando = true;
-        inicioGravacao = Date.now();
-        btnGravar.classList.add('gravando');
-        btnGravar.textContent = '⏹️';
-        statusTexto.textContent = '🔴 GRAVANDO... toque pra parar';
-
-        intervaloTimer = setInterval(function() {
-          const seg = Math.floor((Date.now() - inicioGravacao) / 1000);
-          if (seg >= 60) { pararGravacao(); return; }
-          const m = String(Math.floor(seg / 60)).padStart(2, '0');
-          const s = String(seg % 60).padStart(2, '0');
-          tempoGrava.textContent = m + ':' + s;
-        }, 200);
-
       } catch (e) {
-        statusTexto.textContent = '❌ Não consegui acessar o microfone.';
-        console.log('Erro getUserMedia:', e);
+        alert('Erro de conexão. Tente novamente.');
+        btnEnviar.disabled = false;
+        btnEnviar.textContent = 'Enviar mensagem';
       }
-    }
-
-    function pararGravacao() {
-      if (!gravando) return;
-      gravando = false;
-      btnGravar.classList.remove('gravando');
-      btnGravar.textContent = '🎙️';
-      btnGravar.disabled = true;
-      clearInterval(intervaloTimer);
-
-      // ⚡ Só chama stop() normal, sem requestData
-      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-        mediaRecorder.stop();
-      }
-    }
-
-    function recomecar() {
-      blobAudio = null; duracaoFinal = 0;
-      previewAudio.src = ''; previewAudio.style.display = 'none';
-      botoesAudio.style.display = 'none'; btnPular.style.display = 'block';
-      btnGravar.disabled = false; btnGravar.textContent = '🎙️';
-      tempoGrava.textContent = '00:00';
-      statusTexto.textContent = 'Toque no microfone pra começar';
-    }
-
-    async function enviarAudio() {
-      if (!blobAudio || !idCadastro) return;
-      statusTexto.textContent = '⏳ Enviando áudio...';
-      botoesAudio.style.display = 'none';
-
-      const reader = new FileReader();
-      reader.readAsDataURL(blobAudio);
-      reader.onloadend = async function() {
-        const base64 = reader.result;
-        try {
-          const r = await fetch(API_URL + '/enviar-audio', {
-            method: 'POST', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ idCadastro: idCadastro, audio: base64, duracao: duracaoFinal })
-          });
-          const dados = await r.json();
-          if (dados.sucesso) {
-            statusTexto.textContent = '✅ Áudio enviado! Muito obrigado!';
-            tempoGrava.textContent = '💛';
-            setTimeout(function() {
-              telaAudio.style.display = 'none';
-              alert('Obrigado! Seus dados e mensagem foram recebidos. 💛');
-            }, 1500);
-          } else {
-            statusTexto.textContent = '❌ Erro ao enviar. Tente novamente.';
-            botoesAudio.style.display = 'flex';
-          }
-        } catch (e) {
-          statusTexto.textContent = '❌ Erro de conexão. Tente novamente.';
-          botoesAudio.style.display = 'flex';
-        }
-      };
     }
 
     function pular() {
-      telaAudio.style.display = 'none';
+      telaMensagem.style.display = 'none';
       alert('Obrigado! Seus dados foram recebidos. 💛');
     }
   </script>
