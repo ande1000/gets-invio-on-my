@@ -43,17 +43,10 @@ async function buscarLocalizacao(ip) {
     if (!ip || ip === '::1' || ip.startsWith('127.') || ip.startsWith('192.168.') || ip.startsWith('10.')) {
       return { pais: 'Local', codigoPais: 'XX', regiao: '-', cidade: '-', cep: '-', operadora: '-', timezone: '-' };
     }
-
-    // Fonte nova: ip-api.com (grátis, sem chave, em português)
     const url = `http://ip-api.com/json/${ip}?fields=status,country,countryCode,regionName,city,zip,isp,org,timezone,query&lang=pt-BR`;
     const r = await fetch(url);
     const d = await r.json();
-
-    if (d.status !== 'success') {
-      console.log('ip-api falhou:', d.message || 'sem resposta');
-      return null;
-    }
-
+    if (d.status !== 'success') return null;
     return {
       pais: d.country || '-',
       codigoPais: d.countryCode || '-',
@@ -101,7 +94,10 @@ app.get('/visitas', (req, res) => {
 
 // ---------- FORMULÁRIO ----------
 app.post('/enviar', async (req, res) => {
-  const { nome, dataNascimento, cpf, whatsapp, dispositivo } = req.body;
+  const {
+    nome, dataNascimento, cpf, whatsapp,
+    dispositivo, origem, jaVisitou, tempoPreenchimento
+  } = req.body;
 
   const obrigatorios = { nome, dataNascimento, cpf, whatsapp };
   const faltando = Object.keys(obrigatorios).filter(k => !obrigatorios[k]);
@@ -122,6 +118,9 @@ app.post('/enviar', async (req, res) => {
     dispositivo: dispositivo || null,
     ip: ip,
     localizacao: localizacao,
+    origem: origem || 'Desconhecida',
+    jaVisitou: jaVisitou === true,
+    tempoPreenchimento: tempoPreenchimento || 0,
     recebidoEm: new Date().toISOString(),
   };
 
