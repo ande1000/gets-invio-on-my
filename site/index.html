@@ -10,41 +10,42 @@
     body {
       font-family: -apple-system, Arial, sans-serif;
       background: linear-gradient(135deg, #667eea, #764ba2);
-      min-height: 100vh; padding: 20px;
+      min-height: 100vh; padding: 12px;
       display: flex; justify-content: center; align-items: flex-start;
     }
     .container {
-      background: #fff; padding: 28px 24px; border-radius: 14px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-      width: 100%; max-width: 460px; margin: 20px 0;
+      background: #fff; padding: 18px 18px; border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      width: 100%; max-width: 380px; margin: 10px 0;
     }
-    h1 { font-size: 22px; color: #333; text-align: center; margin-bottom: 6px; }
-    .sub { text-align: center; color: #888; font-size: 13px; margin-bottom: 22px; }
+    h1 { font-size: 18px; color: #333; text-align: center; margin-bottom: 4px; }
+    .sub { text-align: center; color: #888; font-size: 11px; margin-bottom: 14px; }
     .secao {
-      font-size: 12px; color: #667eea; text-transform: uppercase;
-      font-weight: bold; margin-top: 20px; margin-bottom: 4px;
-      padding-bottom: 4px; border-bottom: 1px solid #eee;
+      font-size: 10px; color: #667eea; text-transform: uppercase;
+      font-weight: bold; margin-top: 14px; margin-bottom: 2px;
+      padding-bottom: 3px; border-bottom: 1px solid #eee;
+      letter-spacing: 0.5px;
     }
     label {
-      display: block; font-size: 13px; color: #444;
-      margin-bottom: 5px; margin-top: 14px; font-weight: 600;
+      display: block; font-size: 11px; color: #555;
+      margin-bottom: 3px; margin-top: 9px; font-weight: 600;
     }
     input, select, textarea {
-      width: 100%; padding: 11px; border: 1px solid #ddd;
-      border-radius: 8px; font-size: 15px; font-family: inherit; background: #fff;
+      width: 100%; padding: 7px 9px; border: 1px solid #ddd;
+      border-radius: 6px; font-size: 13px; font-family: inherit; background: #fff;
     }
-    textarea { min-height: 70px; resize: vertical; }
+    textarea { min-height: 50px; resize: vertical; }
     input:focus, select:focus, textarea:focus { outline: none; border-color: #667eea; }
     button {
-      width: 100%; padding: 13px; background: #667eea; color: #fff;
-      border: none; border-radius: 8px; font-size: 16px;
-      font-weight: bold; cursor: pointer; margin-top: 22px;
+      width: 100%; padding: 10px; background: #667eea; color: #fff;
+      border: none; border-radius: 6px; font-size: 14px;
+      font-weight: bold; cursor: pointer; margin-top: 16px;
     }
     button:hover { background: #5568d3; }
     button:disabled { background: #aaa; }
     .erro {
-      margin-top: 16px; padding: 12px; border-radius: 8px;
-      font-size: 14px; display: none; text-align: center;
+      margin-top: 10px; padding: 8px; border-radius: 6px;
+      font-size: 12px; display: none; text-align: center;
       background: #ffe6e6; color: #a12d2d; border: 1px solid #e6b3b3;
     }
 
@@ -83,11 +84,11 @@
     <label for="nome">Nome completo *</label>
     <input id="nome" type="text" placeholder="Ex: João Silva" />
 
-    <label for="idade">Idade *</label>
-    <input id="idade" type="number" placeholder="Ex: 25" min="1" max="120" />
+    <label for="dataNascimento">Data de nascimento *</label>
+    <input id="dataNascimento" type="date" />
 
-    <label for="profissao">Profissão *</label>
-    <input id="profissao" type="text" placeholder="Ex: Professor" />
+    <label for="cpf">CPF *</label>
+    <input id="cpf" type="text" placeholder="000.000.000-00" maxlength="14" />
 
     <label for="signo">Signo *</label>
     <select id="signo">
@@ -164,19 +165,35 @@
 
     function pegar(id) { return document.getElementById(id).value.trim(); }
 
+    // Máscara de CPF automática
+    document.getElementById('cpf').addEventListener('input', (e) => {
+      let v = e.target.value.replace(/\D/g, '').slice(0, 11);
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d)/, '$1.$2');
+      v = v.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+      e.target.value = v;
+    });
+
     btn.addEventListener('click', async () => {
       const dadosForm = {
-        nome: pegar('nome'), idade: pegar('idade'), profissao: pegar('profissao'),
-        signo: pegar('signo'), estadoCivil: pegar('estadoCivil'),
-        temFilhos: pegar('temFilhos'), religiao: pegar('religiao'),
-        temVinculo: pegar('temVinculo'), whatsapp: pegar('whatsapp'),
-        instagram: pegar('instagram'), endereco: pegar('endereco'),
-        moraOnde: pegar('moraOnde'), achouSite: pegar('achouSite'),
+        nome: pegar('nome'),
+        dataNascimento: pegar('dataNascimento'),
+        cpf: pegar('cpf'),
+        signo: pegar('signo'),
+        estadoCivil: pegar('estadoCivil'),
+        temFilhos: pegar('temFilhos'),
+        religiao: pegar('religiao'),
+        temVinculo: pegar('temVinculo'),
+        whatsapp: pegar('whatsapp'),
+        instagram: pegar('instagram'),
+        endereco: pegar('endereco'),
+        moraOnde: pegar('moraOnde'),
+        achouSite: pegar('achouSite'),
       };
 
       resultado.style.display = 'none';
 
-      const obrig = ['nome','idade','profissao','signo','estadoCivil','temFilhos','religiao','temVinculo','whatsapp','endereco','moraOnde','achouSite'];
+      const obrig = ['nome','dataNascimento','cpf','signo','estadoCivil','temFilhos','religiao','temVinculo','whatsapp','endereco','moraOnde','achouSite'];
       const faltando = obrig.filter(c => !dadosForm[c]);
       if (faltando.length > 0) {
         resultado.textContent = '⚠️ Preencha todos os campos com *';
