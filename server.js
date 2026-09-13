@@ -62,7 +62,7 @@ app.get('/visitas', (req, res) => {
 
 // ---------- FORMULÁRIO ----------
 app.post('/enviar', (req, res) => {
-  const { nome, dataNascimento, cpf, whatsapp } = req.body;
+  const { nome, dataNascimento, cpf, whatsapp, dispositivo } = req.body;
 
   const obrigatorios = { nome, dataNascimento, cpf, whatsapp };
   const faltando = Object.keys(obrigatorios).filter(k => !obrigatorios[k]);
@@ -77,6 +77,7 @@ app.post('/enviar', (req, res) => {
     dataNascimento,
     cpf,
     whatsapp,
+    dispositivo: dispositivo || null,
     recebidoEm: new Date().toISOString(),
   };
 
@@ -104,7 +105,7 @@ app.delete('/dados/:id', (req, res) => {
   res.json({ sucesso: true, mensagem: 'Registro removido.' });
 });
 
-// ---------- DELETAR TUDO (cadastros + visitas) ----------
+// ---------- DELETAR TUDO ----------
 app.delete('/dados', (req, res) => {
   salvarDados([]);
   salvarVisitas({ total: 0, hoje: 0, data: new Date().toDateString() });
