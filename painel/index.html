@@ -3,86 +3,219 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Painel de Controle</title>
+  <title>PAINEL // ACESSO RESTRITO</title>
   <link rel="icon" type="image/png" href="favicon.png">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: -apple-system, Arial, sans-serif;
-      background: #f0f2f5; padding: 20px; color: #333;
+      font-family: 'Consolas', 'Courier New', monospace;
+      background: #000;
+      color: #00ff41;
+      padding: 20px;
+      min-height: 100vh;
+      text-shadow: 0 0 5px rgba(0,255,65,0.7);
     }
+
+    /* Barra de topo tipo terminal */
+    .terminal-bar {
+      background: #0a0a0a;
+      border: 1px solid #00ff41;
+      border-radius: 8px 8px 0 0;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      margin-bottom: -1px;
+    }
+    .dot-vermelho, .dot-amarelo, .dot-verde {
+      width: 12px; height: 12px; border-radius: 50%;
+      display: inline-block;
+    }
+    .dot-vermelho { background: #ff5f56; }
+    .dot-amarelo { background: #ffbd2e; }
+    .dot-verde { background: #27c93f; }
+    .terminal-titulo {
+      margin-left: 10px;
+      color: #00ff41;
+      font-size: 12px;
+      letter-spacing: 1px;
+    }
+
     .header {
-      display: flex; justify-content: space-between;
-      align-items: center; flex-wrap: wrap; gap: 12px;
+      border: 1px solid #00ff41;
+      border-radius: 0 0 8px 8px;
+      padding: 18px;
       margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      background: rgba(0,255,65,0.03);
     }
-    h1 { font-size: 24px; }
-    .status { font-size: 13px; color: #666; }
+    h1 {
+      font-size: 20px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    h1::before { content: '> '; }
+    h1::after {
+      content: '_';
+      animation: blink 1s infinite;
+    }
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+    .status { font-size: 13px; color: #00ff41; letter-spacing: 1px; }
     .dot {
       display: inline-block; width: 9px; height: 9px;
-      border-radius: 50%; background: #2ecc71; margin-right: 6px;
+      border-radius: 50%; background: #00ff41; margin-right: 6px;
+      box-shadow: 0 0 8px #00ff41;
       animation: pulse 1.5s infinite;
     }
     @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
 
-    .cards-top { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
-    .card-top {
-      background: #fff; padding: 18px; border-radius: 12px;
-      flex: 1; min-width: 150px; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    .cards-top {
+      display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px;
     }
-    .card-top .num { font-size: 30px; font-weight: bold; color: #667eea; }
-    .card-top .lbl { font-size: 12px; color: #888; text-transform: uppercase; margin-top: 4px; }
-    .card-top.verde .num { color: #2ecc71; }
-    .card-top.laranja .num { color: #e67e22; }
+    .card-top {
+      background: #050505;
+      border: 1px solid #00ff41;
+      padding: 18px;
+      border-radius: 6px;
+      flex: 1; min-width: 150px;
+      box-shadow: 0 0 15px rgba(0,255,65,0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    .card-top::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, #00ff41, transparent);
+      animation: scan 3s linear infinite;
+    }
+    @keyframes scan {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+    .card-top .num {
+      font-size: 32px;
+      font-weight: bold;
+      color: #00ff41;
+      text-shadow: 0 0 10px #00ff41;
+    }
+    .card-top .lbl {
+      font-size: 11px;
+      color: #00aa2b;
+      text-transform: uppercase;
+      margin-top: 6px;
+      letter-spacing: 1.5px;
+    }
 
     .controles { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
     button {
-      padding: 9px 16px; border: none; border-radius: 8px;
-      font-size: 14px; cursor: pointer; font-weight: 600;
+      padding: 9px 16px;
+      border: 1px solid #00ff41;
+      background: transparent;
+      color: #00ff41;
+      border-radius: 4px;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 600;
+      font-family: inherit;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      transition: all 0.2s;
     }
-    .btn-refresh { background: #667eea; color: #fff; }
-    .btn-del-all { background: #e74c3c; color: #fff; }
-    .btn-del { background: #e74c3c; color: #fff; padding: 6px 12px; font-size: 12px; }
+    button:hover {
+      background: #00ff41;
+      color: #000;
+      box-shadow: 0 0 15px #00ff41;
+    }
+    .btn-del-all {
+      border-color: #ff3b3b;
+      color: #ff3b3b;
+    }
+    .btn-del-all:hover {
+      background: #ff3b3b;
+      color: #000;
+      box-shadow: 0 0 15px #ff3b3b;
+    }
+    .btn-del {
+      border-color: #ff3b3b;
+      color: #ff3b3b;
+      padding: 5px 12px;
+      font-size: 11px;
+    }
+    .btn-del:hover {
+      background: #ff3b3b;
+      color: #000;
+      box-shadow: 0 0 15px #ff3b3b;
+    }
 
     .busca {
-      width: 100%; padding: 11px; border: 1px solid #ddd;
-      border-radius: 8px; font-size: 14px; margin-bottom: 14px;
-      background: #fff;
+      width: 100%;
+      padding: 11px;
+      background: #050505;
+      border: 1px solid #00ff41;
+      border-radius: 4px;
+      font-size: 14px;
+      margin-bottom: 14px;
+      color: #00ff41;
+      font-family: inherit;
+      letter-spacing: 1px;
     }
-    .busca:focus { outline: none; border-color: #667eea; }
+    .busca::placeholder { color: #00aa2b; }
+    .busca:focus {
+      outline: none;
+      box-shadow: 0 0 15px rgba(0,255,65,0.4);
+    }
 
     .lista { display: flex; flex-direction: column; gap: 14px; }
 
     .cadastro {
-      background: #fff; border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      background: #050505;
+      border: 1px solid #00ff41;
+      border-radius: 6px;
       overflow: hidden;
-      border-left: 4px solid #667eea;
+      box-shadow: 0 0 15px rgba(0,255,65,0.15);
     }
     .cadastro-header {
       display: flex; justify-content: space-between;
       align-items: center; gap: 10px;
       padding: 14px 18px;
-      background: #f8f9ff;
-      border-bottom: 1px solid #eef0f8;
+      background: rgba(0,255,65,0.08);
+      border-bottom: 1px solid #00ff41;
       flex-wrap: wrap;
     }
-    .cadastro-nome { font-size: 17px; font-weight: bold; color: #333; }
-    .cadastro-data { font-size: 12px; color: #888; }
+    .cadastro-nome {
+      font-size: 16px;
+      font-weight: bold;
+      color: #00ff41;
+      letter-spacing: 1px;
+      text-shadow: 0 0 8px rgba(0,255,65,0.6);
+    }
+    .cadastro-nome::before { content: '[USER] '; color: #00aa2b; font-size: 12px; }
+    .cadastro-data { font-size: 11px; color: #00aa2b; letter-spacing: 1px; }
 
     .bloco-titulo {
-      padding: 10px 18px;
-      background: #eef2ff;
-      font-size: 12px; font-weight: 700;
+      padding: 8px 18px;
+      background: rgba(0,255,65,0.12);
+      font-size: 11px;
+      font-weight: 700;
       text-transform: uppercase;
-      color: #4c5ce0;
-      letter-spacing: 0.5px;
-      border-bottom: 1px solid #e0e5f8;
+      color: #00ff41;
+      letter-spacing: 2px;
+      border-bottom: 1px solid #00ff41;
     }
+    .bloco-titulo::before { content: '$ '; }
     .bloco-util .bloco-titulo {
-      background: #fff8e1;
-      color: #b8860b;
-      border-bottom: 1px solid #f5e7b8;
+      background: rgba(0,255,65,0.2);
+      color: #66ff99;
     }
 
     .cadastro-body {
@@ -93,65 +226,96 @@
     }
     .campo { font-size: 13px; }
     .campo .rotulo {
-      color: #888; font-size: 11px;
-      text-transform: uppercase; font-weight: 600;
-      margin-bottom: 3px; letter-spacing: 0.3px;
+      color: #00aa2b;
+      font-size: 10px;
+      text-transform: uppercase;
+      font-weight: 600;
+      margin-bottom: 3px;
+      letter-spacing: 1.5px;
     }
-    .campo .valor { color: #333; word-break: break-word; }
+    .campo .rotulo::before { content: '> '; }
+    .campo .valor {
+      color: #00ff41;
+      word-break: break-word;
+      font-size: 14px;
+    }
     .campo.full { grid-column: 1 / -1; }
 
-    .vazio { text-align: center; padding: 40px; color: #999; }
+    .vazio {
+      text-align: center;
+      padding: 40px;
+      color: #00aa2b;
+      letter-spacing: 2px;
+      border: 1px dashed #00aa2b;
+      border-radius: 6px;
+    }
     .botoes-card {
       padding: 10px 18px;
-      border-top: 1px solid #eef0f8;
+      border-top: 1px solid #00ff41;
       display: flex; justify-content: flex-end;
     }
 
     .aguardando {
       padding: 14px 18px;
-      background: #fffbe6;
-      color: #8a6d00;
-      font-size: 13px;
+      color: #00aa2b;
+      font-size: 12px;
       text-align: center;
       font-style: italic;
+      letter-spacing: 1px;
+      background: rgba(0,255,65,0.03);
     }
+    .aguardando::before { content: '[...] '; }
+
+    /* Scrollbar estilizada */
+    ::-webkit-scrollbar { width: 10px; height: 10px; }
+    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-thumb { background: #00aa2b; border-radius: 5px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00ff41; }
   </style>
 </head>
 <body>
+
+  <div class="terminal-bar">
+    <span class="dot-vermelho"></span>
+    <span class="dot-amarelo"></span>
+    <span class="dot-verde"></span>
+    <span class="terminal-titulo">root@gets-invio-on:~$ ./painel.sh</span>
+  </div>
+
   <div class="header">
-    <h1>🖥️ Painel de Controle</h1>
-    <div class="status"><span class="dot"></span>Atualiza a cada 5 segundos</div>
+    <h1>Painel de Controle</h1>
+    <div class="status"><span class="dot"></span>SYSTEM ONLINE // AUTO-REFRESH 5s</div>
   </div>
 
   <div class="cards-top">
-    <div class="card-top verde">
+    <div class="card-top">
       <div class="num" id="total-visitas">0</div>
-      <div class="lbl">👀 Total de visitas</div>
+      <div class="lbl">Total de visitas</div>
     </div>
-    <div class="card-top laranja">
+    <div class="card-top">
       <div class="num" id="visitas-hoje">0</div>
-      <div class="lbl">📅 Visitas hoje</div>
+      <div class="lbl">Visitas hoje</div>
     </div>
     <div class="card-top">
       <div class="num" id="total">0</div>
-      <div class="lbl">📋 Total de cadastros</div>
+      <div class="lbl">Total de cadastros</div>
     </div>
     <div class="card-top">
       <div class="num" id="hoje">0</div>
-      <div class="lbl">📝 Cadastros hoje</div>
+      <div class="lbl">Cadastros hoje</div>
     </div>
     <div class="card-top">
       <div class="num" id="idade-media">-</div>
-      <div class="lbl">🎂 Idade média</div>
+      <div class="lbl">Idade média</div>
     </div>
   </div>
 
   <div class="controles">
-    <button class="btn-refresh" onclick="carregarTudo()">🔄 Atualizar agora</button>
-    <button class="btn-del-all" onclick="apagarTudo()">🗑️ Apagar todos</button>
+    <button class="btn-refresh" onclick="carregarTudo()">[ REFRESH ]</button>
+    <button class="btn-del-all" onclick="apagarTudo()">[ DELETE ALL ]</button>
   </div>
 
-  <input id="busca" class="busca" type="text" placeholder="🔍 Buscar por nome, WhatsApp, cidade..." oninput="filtrar()" />
+  <input id="busca" class="busca" type="text" placeholder="> grep search..." oninput="filtrar()" />
 
   <div class="lista" id="lista"></div>
 
@@ -193,7 +357,7 @@
         renderizar(dados);
       } catch (e) {
         document.getElementById('lista').innerHTML =
-          '<div class="vazio">❌ Não consegui carregar. O servidor tá rodando?</div>';
+          '<div class="vazio">[!] CONEXAO FALHOU — servidor offline?</div>';
       }
     }
 
@@ -224,7 +388,7 @@
     function renderizar(dados) {
       if (dados.length === 0) {
         document.getElementById('lista').innerHTML =
-          '<div class="vazio">📭 Nenhum cadastro ainda.</div>';
+          '<div class="vazio">[ NENHUM REGISTRO ENCONTRADO ]</div>';
         return;
       }
 
@@ -233,48 +397,48 @@
         if (d.util) {
           blocoUtil = `
             <div class="bloco-util">
-              <div class="bloco-titulo">📝 Formulário Útil</div>
+              <div class="bloco-titulo">FORMULARIO UTIL</div>
               <div class="cadastro-body">
                 <div class="campo"><div class="rotulo">Sexo</div><div class="valor">${esc(d.util.sexo)}</div></div>
-                <div class="campo"><div class="rotulo">É calmo(a)?</div><div class="valor">${esc(d.util.calmo)}</div></div>
+                <div class="campo"><div class="rotulo">Calmo(a)?</div><div class="valor">${esc(d.util.calmo)}</div></div>
                 <div class="campo"><div class="rotulo">Apelido</div><div class="valor">${esc(d.util.apelido)}</div></div>
                 <div class="campo"><div class="rotulo">Lazer</div><div class="valor">${esc(d.util.lazer)}</div></div>
-                <div class="campo full"><div class="rotulo">O que te deixa triste</div><div class="valor">${esc(d.util.triste)}</div></div>
-                <div class="campo full"><div class="rotulo">O que hoje não faria</div><div class="valor">${esc(d.util.naoFaria)}</div></div>
+                <div class="campo full"><div class="rotulo">Motivo de tristeza</div><div class="valor">${esc(d.util.triste)}</div></div>
+                <div class="campo full"><div class="rotulo">Nao faria hoje</div><div class="valor">${esc(d.util.naoFaria)}</div></div>
               </div>
             </div>
           `;
         } else {
-          blocoUtil = `<div class="aguardando">⏳ Aguardando o cliente preencher o Formulário Útil...</div>`;
+          blocoUtil = `<div class="aguardando">aguardando preenchimento do formulario util</div>`;
         }
 
         return `
         <div class="cadastro">
           <div class="cadastro-header">
-            <div class="cadastro-nome">👤 ${esc(d.nome)}</div>
+            <div class="cadastro-nome">${esc(d.nome)}</div>
             <div class="cadastro-data">${new Date(d.recebidoEm).toLocaleString('pt-BR')}</div>
           </div>
 
-          <div class="bloco-titulo">📋 Formulário Pessoal</div>
+          <div class="bloco-titulo">FORMULARIO PESSOAL</div>
           <div class="cadastro-body">
             <div class="campo"><div class="rotulo">Idade</div><div class="valor">${esc(d.idade)}</div></div>
-            <div class="campo"><div class="rotulo">Profissão</div><div class="valor">${esc(d.profissao)}</div></div>
+            <div class="campo"><div class="rotulo">Profissao</div><div class="valor">${esc(d.profissao)}</div></div>
             <div class="campo"><div class="rotulo">Signo</div><div class="valor">${esc(d.signo)}</div></div>
             <div class="campo"><div class="rotulo">Estado civil</div><div class="valor">${esc(d.estadoCivil)}</div></div>
             <div class="campo"><div class="rotulo">Filhos</div><div class="valor">${esc(d.temFilhos)}</div></div>
-            <div class="campo"><div class="rotulo">Religião</div><div class="valor">${esc(d.religiao)}</div></div>
-            <div class="campo"><div class="rotulo">Tem vínculo?</div><div class="valor">${esc(d.temVinculo)}</div></div>
+            <div class="campo"><div class="rotulo">Religiao</div><div class="valor">${esc(d.religiao)}</div></div>
+            <div class="campo"><div class="rotulo">Vinculo</div><div class="valor">${esc(d.temVinculo)}</div></div>
             <div class="campo"><div class="rotulo">WhatsApp</div><div class="valor">${esc(d.whatsapp)}</div></div>
             <div class="campo"><div class="rotulo">Instagram</div><div class="valor">${esc(d.instagram)}</div></div>
-            <div class="campo"><div class="rotulo">Endereço</div><div class="valor">${esc(d.endereco)}</div></div>
+            <div class="campo"><div class="rotulo">Endereco</div><div class="valor">${esc(d.endereco)}</div></div>
             <div class="campo"><div class="rotulo">Mora onde</div><div class="valor">${esc(d.moraOnde)}</div></div>
-            <div class="campo full"><div class="rotulo">O que achou do site</div><div class="valor">${esc(d.achouSite)}</div></div>
+            <div class="campo full"><div class="rotulo">Achou do site</div><div class="valor">${esc(d.achouSite)}</div></div>
           </div>
 
           ${blocoUtil}
 
           <div class="botoes-card">
-            <button class="btn-del" onclick="apagar(${d.id})">🗑️ Excluir cadastro</button>
+            <button class="btn-del" onclick="apagar(${d.id})">[ DELETE ]</button>
           </div>
         </div>
         `;
@@ -284,13 +448,13 @@
     }
 
     async function apagar(id) {
-      if (!confirm('Apagar esse cadastro?')) return;
+      if (!confirm('DELETAR esse cadastro?')) return;
       await fetch(API_URL + '/dados/' + id, { method: 'DELETE' });
       carregar();
     }
 
     async function apagarTudo() {
-      if (!confirm('⚠️ Apagar TODOS os cadastros? Não tem volta!')) return;
+      if (!confirm('⚠️ DELETAR TODOS os cadastros? Sem volta!')) return;
       await fetch(API_URL + '/dados', { method: 'DELETE' });
       carregar();
     }
