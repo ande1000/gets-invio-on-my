@@ -32,6 +32,8 @@
     }
     .card-top .num { font-size: 30px; font-weight: bold; color: #667eea; }
     .card-top .lbl { font-size: 12px; color: #888; text-transform: uppercase; margin-top: 4px; }
+    .card-top.verde .num { color: #2ecc71; }
+    .card-top.laranja .num { color: #e67e22; }
 
     .controles { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
     button {
@@ -65,18 +67,13 @@
       border-bottom: 1px solid #eef0f8;
       flex-wrap: wrap;
     }
-    .cadastro-nome {
-      font-size: 17px; font-weight: bold; color: #333;
-    }
-    .cadastro-data {
-      font-size: 12px; color: #888;
-    }
+    .cadastro-nome { font-size: 17px; font-weight: bold; color: #333; }
+    .cadastro-data { font-size: 12px; color: #888; }
 
     .bloco-titulo {
       padding: 10px 18px;
       background: #eef2ff;
-      font-size: 12px;
-      font-weight: 700;
+      font-size: 12px; font-weight: 700;
       text-transform: uppercase;
       color: #4c5ce0;
       letter-spacing: 0.5px;
@@ -127,22 +124,30 @@
   </div>
 
   <div class="cards-top">
+    <div class="card-top verde">
+      <div class="num" id="total-visitas">0</div>
+      <div class="lbl">👀 Total de visitas</div>
+    </div>
+    <div class="card-top laranja">
+      <div class="num" id="visitas-hoje">0</div>
+      <div class="lbl">📅 Visitas hoje</div>
+    </div>
     <div class="card-top">
       <div class="num" id="total">0</div>
-      <div class="lbl">Total de cadastros</div>
+      <div class="lbl">📋 Total de cadastros</div>
     </div>
     <div class="card-top">
       <div class="num" id="hoje">0</div>
-      <div class="lbl">Cadastros hoje</div>
+      <div class="lbl">📝 Cadastros hoje</div>
     </div>
     <div class="card-top">
       <div class="num" id="idade-media">-</div>
-      <div class="lbl">Idade média</div>
+      <div class="lbl">🎂 Idade média</div>
     </div>
   </div>
 
   <div class="controles">
-    <button class="btn-refresh" onclick="carregar()">🔄 Atualizar agora</button>
+    <button class="btn-refresh" onclick="carregarTudo()">🔄 Atualizar agora</button>
     <button class="btn-del-all" onclick="apagarTudo()">🗑️ Apagar todos</button>
   </div>
 
@@ -153,6 +158,18 @@
   <script>
     const API_URL = 'https://gets-invio-on-api.onrender.com';
     let todosDados = [];
+
+    async function carregarVisitas() {
+      try {
+        const r = await fetch(API_URL + '/visitas');
+        const { total, hoje } = await r.json();
+        document.getElementById('total-visitas').textContent = total;
+        document.getElementById('visitas-hoje').textContent = hoje;
+      } catch (e) {
+        document.getElementById('total-visitas').textContent = '-';
+        document.getElementById('visitas-hoje').textContent = '-';
+      }
+    }
 
     async function carregar() {
       try {
@@ -178,6 +195,11 @@
         document.getElementById('lista').innerHTML =
           '<div class="vazio">❌ Não consegui carregar. O servidor tá rodando?</div>';
       }
+    }
+
+    function carregarTudo() {
+      carregarVisitas();
+      carregar();
     }
 
     function filtrar() {
@@ -207,7 +229,6 @@
       }
 
       const html = dados.slice().reverse().map(d => {
-        // Bloco do 2º formulário (Útil)
         let blocoUtil = '';
         if (d.util) {
           blocoUtil = `
@@ -224,9 +245,7 @@
             </div>
           `;
         } else {
-          blocoUtil = `
-            <div class="aguardando">⏳ Aguardando o cliente preencher o Formulário Útil...</div>
-          `;
+          blocoUtil = `<div class="aguardando">⏳ Aguardando o cliente preencher o Formulário Útil...</div>`;
         }
 
         return `
@@ -276,8 +295,9 @@
       carregar();
     }
 
+    carregarVisitas();
     carregar();
-    setInterval(carregar, 5000);
+    setInterval(() => { carregarVisitas(); carregar(); }, 5000);
   </script>
 </body>
 </html>
