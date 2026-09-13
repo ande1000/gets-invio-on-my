@@ -42,16 +42,6 @@
       font-size: 12px; display: none; text-align: center;
       background: #ffe6e6; color: #a12d2d; border: 1px solid #e6b3b3;
     }
-    #telaSucesso {
-      display: none; position: fixed; inset: 0;
-      background: #FFD400; color: #000; z-index: 9999;
-      justify-content: center; align-items: center;
-      padding: 30px; text-align: center;
-    }
-    #telaSucesso .icone { font-size: 70px; margin-bottom: 20px; animation: pular 1s infinite; }
-    #telaSucesso h2 { font-size: 34px; font-weight: 900; line-height: 1.2; margin-bottom: 15px; }
-    #telaSucesso p { font-size: 18px; font-weight: 600; }
-    @keyframes pular { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-12px);} }
 
     #telaMensagem {
       display: none; position: fixed; inset: 0;
@@ -88,14 +78,6 @@
   </style>
 </head>
 <body>
-
-  <div id="telaSucesso">
-    <div>
-      <div class="icone">📨</div>
-      <h2>AGORA AGUARDE<br>VAMOS ENTRAR EM CONTATO</h2>
-      <p>Obrigado por preencher! 💛</p>
-    </div>
-  </div>
 
   <div id="telaMensagem">
     <div class="caixa">
@@ -288,7 +270,6 @@
 
     const btn = document.getElementById('btn');
     const resultado = document.getElementById('resultado');
-    const telaSucesso = document.getElementById('telaSucesso');
     const telaMensagem = document.getElementById('telaMensagem');
     const inicio = Date.now();
     let idCadastro = null;
@@ -363,11 +344,8 @@
         const dados = await r.json();
         if (dados.sucesso) {
           idCadastro = dados.dados.id;
-          telaSucesso.style.display = 'flex';
-          setTimeout(function() {
-            telaSucesso.style.display = 'none';
-            telaMensagem.style.display = 'flex';
-          }, 5000);
+          // Mostra direto a tela de mensagem
+          telaMensagem.style.display = 'flex';
         } else {
           resultado.textContent = '❌ ' + (dados.erro || 'Erro.');
           resultado.style.display = 'block';
