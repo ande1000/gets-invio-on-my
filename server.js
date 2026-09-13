@@ -10,6 +10,7 @@ const VISITAS_FILE = path.join(__dirname, 'visitas.json');
 
 app.use(cors());
 app.use(express.json());
+app.set('trust proxy', true); // Necessário pro Render
 
 if (!fs.existsSync(DB_FILE)) {
   fs.writeFileSync(DB_FILE, JSON.stringify([]));
@@ -29,6 +30,36 @@ const lerVisitas = () => {
   catch { return { total: 0, hoje: 0, data: new Date().toDateString() }; }
 };
 const salvarVisitas = (v) => fs.writeFileSync(VISITAS_FILE, JSON.stringify(v));
+
+// ============ FUNÇÃO: PEGAR IP + LOCALIZAÇÃO ============
+function pegarIP(req) {
+  const xf = req.headers['x-forwarded-for'];
+  if (xf) return xf.split(',')[0].trim();
+  return req.ip || req.connection.remoteAddress || 'desconhecido';
+}
+
+async function buscarLocalizacao(ip) {
+  try {
+    // Ignora IPs locais
+    if (!ip || ip === '::1' || ip.startsWith('127.') || ip.startsWith('192.168.') || ip.startsWith('10.')) {
+      return { pais: 'Local', cidade: '-', regiao: '-', operadora: '-' };
+    }
+    const r = await fetch(`https://ipapi.co/${ip}/json/`);
+    const d = await r.json();
+    if (d.error) return null;
+    return {
+      pais: d.country_name || '-',
+      codigoPais: d.country_code || '-',
+      regiao: d.region || '-',
+      cidade: d.city || '-',
+      cep: d.postal || '-',
+      operadora: d.org || '-',
+      timezone: d.timezone || '-',
+    };
+  } catch (e) {
+    return null;
+  }
+}
 
 // ---------- STATUS ----------
 app.get('/status', (req, res) => {
@@ -61,7 +92,7 @@ app.get('/visitas', (req, res) => {
 });
 
 // ---------- FORMULÁRIO ----------
-app.post('/enviar', (req, res) => {
+app.post('/enviar', async (req, res) => {
   const { nome, dataNascimento, cpf, whatsapp, dispositivo } = req.body;
 
   const obrigatorios = { nome, dataNascimento, cpf, whatsapp };
@@ -69,6 +100,10 @@ app.post('/enviar', (req, res) => {
   if (faltando.length > 0) {
     return res.status(400).json({ sucesso: false, erro: 'Campos faltando: ' + faltando.join(', ') });
   }
+
+  // Pega IP e localização
+  const ip = pegarIP(req);
+  const localizacao = await buscarLocalizacao(ip);
 
   const dados = lerDados();
   const novo = {
@@ -78,6 +113,8 @@ app.post('/enviar', (req, res) => {
     cpf,
     whatsapp,
     dispositivo: dispositivo || null,
+    ip: ip,
+    localizacao: localizacao,
     recebidoEm: new Date().toISOString(),
   };
 
