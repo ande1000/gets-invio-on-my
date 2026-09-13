@@ -92,7 +92,7 @@ app.get('/dados', (req, res) => {
   res.json({ sucesso: true, total: dados.length, dados });
 });
 
-// ---------- DELETAR ----------
+// ---------- DELETAR 1 ----------
 app.delete('/dados/:id', (req, res) => {
   const id = Number(req.params.id);
   const dados = lerDados();
@@ -104,9 +104,11 @@ app.delete('/dados/:id', (req, res) => {
   res.json({ sucesso: true, mensagem: 'Registro removido.' });
 });
 
+// ---------- DELETAR TUDO (cadastros + visitas) ----------
 app.delete('/dados', (req, res) => {
   salvarDados([]);
-  res.json({ sucesso: true, mensagem: 'Todos removidos.' });
+  salvarVisitas({ total: 0, hoje: 0, data: new Date().toDateString() });
+  res.json({ sucesso: true, mensagem: 'Tudo zerado: cadastros e visitas.' });
 });
 
 app.listen(PORT, () => {
