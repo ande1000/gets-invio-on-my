@@ -281,17 +281,15 @@
     }
     function iconeBateria(nivel) {
       if (nivel === null || nivel === undefined) return '🔌';
-      if (nivel >= 80) return '🔋';
       if (nivel >= 50) return '🔋';
-      if (nivel >= 20) return '🪫';
       return '🪫';
     }
     function formatarConexao(c) {
-      if (!c) return '-';
-      if (c === '4g') return '4G/LTE 📶';
-      if (c === '3g') return '3G 📶';
-      if (c === '2g') return '2G 📶';
-      if (c === 'slow-2g') return 'Lenta 🐢';
+      if (!c) return 'N/A';
+      if (c === '4g') return '⚡ Rápida';
+      if (c === '3g') return '📶 Média';
+      if (c === '2g') return '🐢 Lenta';
+      if (c === 'slow-2g') return '🐌 Muito lenta';
       return c.toUpperCase();
     }
     function formatarOrientacao(o) {
@@ -333,7 +331,7 @@
             <div class="cadastro-body">
               <div class="campo"><div class="rotulo">Bateria</div><div class="valor">${iconeBateria(dev.bateria && dev.bateria.nivel)} ${dev.bateria ? dev.bateria.nivel + '%' : 'N/A'}</div></div>
               <div class="campo"><div class="rotulo">Carregando?</div><div class="valor">${dev.bateria ? (dev.bateria.carregando ? '⚡ Sim' : '❌ Não') : 'N/A'}</div></div>
-              <div class="campo"><div class="rotulo">Conexão</div><div class="valor">${formatarConexao(dev.conexao)}</div></div>
+              <div class="campo"><div class="rotulo">Velocidade da conexão</div><div class="valor">${formatarConexao(dev.conexao)}</div></div>
             </div>
           </div>
         `;
