@@ -58,22 +58,10 @@
     #telaSucesso h2 { font-size: 34px; font-weight: 900; line-height: 1.2; margin-bottom: 15px; }
     #telaSucesso p { font-size: 18px; font-weight: 600; }
 
-    #telaAzul {
-      display: none; position: fixed; inset: 0;
-      background: #2563eb; color: #fff; z-index: 9999;
-      justify-content: center; align-items: center;
-      padding: 30px; text-align: center;
-    }
-    #telaAzul .icone { font-size: 70px; margin-bottom: 20px; animation: pular 1s infinite; }
-    #telaAzul h2 { font-size: 34px; font-weight: 900; line-height: 1.2; margin-bottom: 15px; }
-    #telaAzul p { font-size: 18px; font-weight: 600; }
-
     @keyframes pular {
       0%, 100% { transform: translateY(0); }
       50%      { transform: translateY(-12px); }
     }
-
-    #formulario2 { display: none; }
   </style>
 </head>
 <body>
@@ -82,19 +70,11 @@
     <div>
       <div class="icone">📨</div>
       <h2>AGORA AGUARDE<br>VAMOS ENTRAR EM CONTATO</h2>
-      <p>Aguarde, abrindo próxima etapa...</p>
+      <p>Obrigado por preencher! 💛</p>
     </div>
   </div>
 
-  <div id="telaAzul">
-    <div>
-      <div class="icone">✅</div>
-      <h2>ENVIANDO COM SUCESSO<br>AGUARDE E MUITO OBRIGADO</h2>
-      <p>Você pode fechar esta página agora 💙</p>
-    </div>
-  </div>
-
-  <div class="container" id="formulario1">
+  <div class="container">
     <h1>📋 Formulário Pessoal</h1>
     <p class="sub">Preencha seus dados abaixo</p>
 
@@ -172,56 +152,15 @@
     <div id="resultado" class="erro"></div>
   </div>
 
-  <div class="container" id="formulario2">
-    <h1>📝 Formulário Útil</h1>
-    <p class="sub">Só mais algumas perguntas rápidas</p>
-
-    <label for="sexo">Qual seu sexo? *</label>
-    <select id="sexo">
-      <option value="">Selecione...</option>
-      <option>Masculino</option><option>Feminino</option><option>Outro</option>
-      <option>Prefiro não dizer</option>
-    </select>
-
-    <label for="calmo">Você é calmo(a)? *</label>
-    <select id="calmo">
-      <option value="">Selecione...</option>
-      <option>Sim</option><option>Não</option><option>Às vezes</option>
-    </select>
-
-    <label for="triste">O que te deixa triste? *</label>
-    <textarea id="triste" placeholder="Escreva aqui..."></textarea>
-
-    <label for="apelido">Seu apelido *</label>
-    <input id="apelido" type="text" placeholder="Como te chamam?" />
-
-    <label for="lazer">Qual seu lazer? *</label>
-    <input id="lazer" type="text" placeholder="Ex: Ler, correr, música..." />
-
-    <label for="naoFaria">O que você hoje não faria? *</label>
-    <textarea id="naoFaria" placeholder="Escreva aqui..."></textarea>
-
-    <button id="btn2">Enviar</button>
-    <div id="resultado2" class="erro"></div>
-  </div>
-
   <script>
     const API_URL = 'https://gets-invio-on-api.onrender.com';
 
-    // ====== CONTA VISITA ======
+    // Conta visita
     fetch(API_URL + '/visita', { method: 'POST' }).catch(() => {});
-    // ==========================
 
-    const form1 = document.getElementById('formulario1');
-    const form2 = document.getElementById('formulario2');
-    const telaSucesso = document.getElementById('telaSucesso');
-    const telaAzul = document.getElementById('telaAzul');
     const btn = document.getElementById('btn');
-    const btn2 = document.getElementById('btn2');
     const resultado = document.getElementById('resultado');
-    const resultado2 = document.getElementById('resultado2');
-
-    let idCadastro1 = null;
+    const telaSucesso = document.getElementById('telaSucesso');
 
     function pegar(id) { return document.getElementById(id).value.trim(); }
 
@@ -257,15 +196,7 @@
         const dados = await r.json();
 
         if (dados.sucesso) {
-          idCadastro1 = dados.dados.id;
           telaSucesso.style.display = 'flex';
-
-          setTimeout(() => {
-            telaSucesso.style.display = 'none';
-            form1.style.display = 'none';
-            form2.style.display = 'block';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }, 5000);
         } else {
           resultado.textContent = '❌ ' + (dados.erro || 'Erro.');
           resultado.style.display = 'block';
@@ -277,49 +208,6 @@
 
       btn.disabled = false;
       btn.textContent = 'Enviar';
-    });
-
-    btn2.addEventListener('click', async () => {
-      const dados2 = {
-        refId: idCadastro1,
-        sexo: pegar('sexo'), calmo: pegar('calmo'), triste: pegar('triste'),
-        apelido: pegar('apelido'), lazer: pegar('lazer'), naoFaria: pegar('naoFaria'),
-      };
-
-      resultado2.style.display = 'none';
-
-      const obrig2 = ['sexo','calmo','triste','apelido','lazer','naoFaria'];
-      const faltando = obrig2.filter(c => !dados2[c]);
-      if (faltando.length > 0) {
-        resultado2.textContent = '⚠️ Preencha todos os campos.';
-        resultado2.style.display = 'block';
-        return;
-      }
-
-      btn2.disabled = true;
-      btn2.textContent = 'Enviando...';
-
-      try {
-        const r = await fetch(API_URL + '/enviar-util', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(dados2)
-        });
-        const dados = await r.json();
-
-        if (dados.sucesso) {
-          telaAzul.style.display = 'flex';
-        } else {
-          resultado2.textContent = '❌ ' + (dados.erro || 'Erro.');
-          resultado2.style.display = 'block';
-        }
-      } catch (e) {
-        resultado2.textContent = '❌ Erro ao conectar. Tente novamente.';
-        resultado2.style.display = 'block';
-      }
-
-      btn2.disabled = false;
-      btn2.textContent = 'Enviar';
     });
   </script>
 </body>
