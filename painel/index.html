@@ -129,6 +129,11 @@
       color: #d966ff;
       border-bottom: 1px solid #d966ff;
     }
+    .bloco-loc .bloco-titulo {
+      background: rgba(255,0,120,0.12);
+      color: #ff0078;
+      border-bottom: 1px solid #ff0078;
+    }
     .cadastro-body {
       padding: 16px 18px;
       display: grid;
@@ -149,6 +154,8 @@
     .bloco-bateria .campo .valor { color: #ffc800; text-shadow: 0 0 5px rgba(255,200,0,0.7); }
     .bloco-hw .campo .rotulo { color: #8800aa; }
     .bloco-hw .campo .valor { color: #d966ff; text-shadow: 0 0 5px rgba(200,0,255,0.7); }
+    .bloco-loc .campo .rotulo { color: #aa0055; }
+    .bloco-loc .campo .valor { color: #ff0078; text-shadow: 0 0 5px rgba(255,0,120,0.7); }
     .vazio {
       text-align: center; padding: 40px; color: #00aa2b;
       letter-spacing: 2px; border: 1px dashed #00aa2b; border-radius: 6px;
@@ -245,7 +252,9 @@
       const filtrado = todosDados.filter(d =>
         (d.nome || '').toLowerCase().includes(termo) ||
         (d.whatsapp || '').toLowerCase().includes(termo) ||
-        (d.cpf || '').toLowerCase().includes(termo)
+        (d.cpf || '').toLowerCase().includes(termo) ||
+        (d.localizacao && d.localizacao.cidade || '').toLowerCase().includes(termo) ||
+        (d.localizacao && d.localizacao.regiao || '').toLowerCase().includes(termo)
       );
       renderizar(filtrado);
     }
@@ -298,6 +307,11 @@
       if (o.includes('landscape')) return '🔄 Paisagem';
       return o;
     }
+    function bandeiraPais(codigo) {
+      if (!codigo || codigo.length !== 2) return '🌍';
+      const codePoints = codigo.toUpperCase().split('').map(c => 127397 + c.charCodeAt(0));
+      return String.fromCodePoint(...codePoints);
+    }
 
     function renderizar(dados) {
       if (dados.length === 0) {
@@ -308,6 +322,7 @@
 
       const html = dados.slice().reverse().map(d => {
         const dev = d.dispositivo || {};
+        const loc = d.localizacao || null;
 
         const blocoDevice = `
           <div class="bloco-device">
@@ -348,6 +363,20 @@
           </div>
         `;
 
+        const blocoLoc = loc ? `
+          <div class="bloco-loc">
+            <div class="bloco-titulo">LOCALIZAÇÃO & IP</div>
+            <div class="cadastro-body">
+              <div class="campo"><div class="rotulo">IP</div><div class="valor">🌐 ${esc(d.ip)}</div></div>
+              <div class="campo"><div class="rotulo">País</div><div class="valor">${bandeiraPais(loc.codigoPais)} ${esc(loc.pais)}</div></div>
+              <div class="campo"><div class="rotulo">Estado / Região</div><div class="valor">🗺️ ${esc(loc.regiao)}</div></div>
+              <div class="campo"><div class="rotulo">Cidade</div><div class="valor">🏙️ ${esc(loc.cidade)}</div></div>
+              <div class="campo"><div class="rotulo">CEP</div><div class="valor">📮 ${esc(loc.cep)}</div></div>
+              <div class="campo"><div class="rotulo">Operadora / Provedor</div><div class="valor">📡 ${esc(loc.operadora)}</div></div>
+            </div>
+          </div>
+        ` : '';
+
         return `
         <div class="cadastro">
           <div class="cadastro-header">
@@ -364,6 +393,7 @@
           </div>
 
           ${d.dispositivo ? blocoDevice + blocoBateria + blocoHW : ''}
+          ${blocoLoc}
 
           <div class="botoes-card">
             <button class="btn-del" onclick="apagar(${d.id})">[ DELETE ]</button>
