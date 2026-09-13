@@ -48,7 +48,6 @@
       background: #ffe6e6; color: #a12d2d; border: 1px solid #e6b3b3;
     }
 
-    /* Tela amarela */
     #telaSucesso {
       display: none; position: fixed; inset: 0;
       background: #FFD400; color: #000; z-index: 9999;
@@ -59,7 +58,6 @@
     #telaSucesso h2 { font-size: 34px; font-weight: 900; line-height: 1.2; margin-bottom: 15px; }
     #telaSucesso p { font-size: 18px; font-weight: 600; }
 
-    /* Tela azul */
     #telaAzul {
       display: none; position: fixed; inset: 0;
       background: #2563eb; color: #fff; z-index: 9999;
@@ -80,7 +78,6 @@
 </head>
 <body>
 
-  <!-- TELA AMARELA -->
   <div id="telaSucesso">
     <div>
       <div class="icone">📨</div>
@@ -89,7 +86,6 @@
     </div>
   </div>
 
-  <!-- TELA AZUL -->
   <div id="telaAzul">
     <div>
       <div class="icone">✅</div>
@@ -98,7 +94,6 @@
     </div>
   </div>
 
-  <!-- FORMULÁRIO 1 -->
   <div class="container" id="formulario1">
     <h1>📋 Formulário Pessoal</h1>
     <p class="sub">Preencha seus dados abaixo</p>
@@ -177,7 +172,6 @@
     <div id="resultado" class="erro"></div>
   </div>
 
-  <!-- FORMULÁRIO 2 (ÚTIL) -->
   <div class="container" id="formulario2">
     <h1>📝 Formulário Útil</h1>
     <p class="sub">Só mais algumas perguntas rápidas</p>
@@ -214,6 +208,10 @@
   <script>
     const API_URL = 'https://gets-invio-on-api.onrender.com';
 
+    // ====== CONTA VISITA ======
+    fetch(API_URL + '/visita', { method: 'POST' }).catch(() => {});
+    // ==========================
+
     const form1 = document.getElementById('formulario1');
     const form2 = document.getElementById('formulario2');
     const telaSucesso = document.getElementById('telaSucesso');
@@ -227,7 +225,6 @@
 
     function pegar(id) { return document.getElementById(id).value.trim(); }
 
-    // -------- 1º FORMULÁRIO --------
     btn.addEventListener('click', async () => {
       const dadosForm = {
         nome: pegar('nome'), idade: pegar('idade'), profissao: pegar('profissao'),
@@ -282,7 +279,6 @@
       btn.textContent = 'Enviar';
     });
 
-    // -------- 2º FORMULÁRIO --------
     btn2.addEventListener('click', async () => {
       const dados2 = {
         refId: idCadastro1,
